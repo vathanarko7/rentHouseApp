@@ -1,0 +1,270 @@
+from playwright.sync_api import sync_playwright
+from rooms.invoice_i18n import INVOICE_LANGUAGES
+
+# from PIL import Image, ImageDraw, ImageFont
+from datetime import date
+from dateutil.relativedelta import relativedelta
+from rentHouseApp import settings
+import os
+from rooms.utils import normalize_to_month_start
+
+
+# -------- KHMER VERSION IMAGE --------
+def generate_invoice_image(
+    bill,
+    water_current,
+    water_previous,
+    elec_current,
+    elec_previous,
+    water_usage,
+    elec_usage,
+    unit_price,
+    language="kh",
+    font_path=settings.DEFAULT_KH_FONT_PATH,
+):
+    """
+    Generate a Khmer invoice image using headless Chromium (Playwright)
+    """
+    # -------- Language Setup --------
+    lang = INVOICE_LANGUAGES.get(language, INVOICE_LANGUAGES["kh"])
+    T = lang["texts"]
+
+    # Prepare HTML template
+    period_start = (
+        normalize_to_month_start(bill.month) - relativedelta(months=1)
+    ).strftime("%d/%m/%Y")
+    period_end = normalize_to_month_start(bill.month).strftime("%d/%m/%Y")
+    invoice_date = date.today().strftime("%d/%m/%Y")
+    client_name = (
+        bill.room.renter.client_profile.user.get_full_name()
+        or bill.room.renter.client_profile.user.username
+    )
+    sex = bill.room.renter.client_profile.get_sex_display()
+    room_number = bill.room.room_number
+    id_number = bill.room.renter.client_profile.id_card_number
+    phone = bill.room.renter.client_profile.phone
+
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+    <meta charset="utf-8">
+    <style>
+        @font-face {{
+            font-family: 'InvoiceFont';
+            src: url("file:///{font_path}");
+        }}
+        body {{
+            font-family: 'InvoiceFont', {lang["font_fallback"]};
+            font-size: 16px;
+            margin: 40px;
+            color: #000;
+        }}
+        .center {{
+            text-align: center;
+        }}
+        .right {{
+            text-align: right;
+        }}
+        .left {{
+            text-align: left;
+        }}
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+        }}
+        td, th {{
+            padding: 4px;
+            vertical-align: middle;
+        }}
+        .border th, .border td {{
+            border: 1px solid #000;
+        }}
+        .title {{
+            font-size: 28px;
+            font-weight: bold;
+            color: #00205B;
+        }}
+        .small {{
+            font-size: 14px;
+        }}
+        .header {{
+            font-size: 16px;
+            font-weight: bold;
+            background-color: #00205B;
+            color: white;
+        }}
+        .total, .owner {{
+            font-weight: bold;
+            font-size: 18px;
+            color: #00205B;
+        }}
+        .signature {{
+            height: 80px;
+        }}
+    </style>
+    </head>
+
+    <body>
+    <div class="center title">{T["invoice"]}</div>
+    <br>
+    <table>
+        <colgroup>
+            <col style="width:10%">
+            <col style="width:60%">
+            <col style="width:15%">
+            <col style="width:15%">
+        </colgroup>
+        <tr>
+            <td>{T["from_date"]}</td>
+            <td>{period_start}</td>
+            <td class="right">{T["invoice_date"]}</td>
+            <td>{invoice_date}</td>
+        </tr>
+        <tr>
+            <td>{T["to_date"]}</td>
+            <td>{period_end}</td>
+            <td class="right">Tel :</td>
+            <td>092 46 68 18</td>
+        </tr>
+        <tr>
+            <td colspan="3"></td>
+            <td>070 46 68 18</td>
+        </tr>
+        <tr>
+            <td colspan="3"></td>
+            <td>088 932 32 59</td>
+        </tr>
+    </table>
+
+    <br><br>
+
+    <table>
+        <colgroup>
+            <col style="width:15%">
+            <col style="width:25%">
+            <col style="width:10%">
+            <col style="width:25%">
+            <col style="width:10%">
+            <col style="width:15%">
+        </colgroup>
+        <tr>
+            <td>{T["tenant_name"]}</td><td>{client_name}</td>
+            <td>{T["sex"]}</td><td>{sex}</td>
+            <td>{T["identifier"]}</td><td>{bill.month.strftime("%Y%m")}-{room_number}</td>
+        </tr>
+        <tr>
+            <td>{T["id_card"]}</td><td>{id_number or ""}</td>
+            <td>{T["phone"]}</td><td>{phone or ""}</td>
+            <td>{T["room"]}</td><td>{room_number}</td>
+        </tr>
+    </table>
+
+        <br>
+
+    <table class="border">
+        <colgroup>
+            <col style="width:25%">
+            <col style="width:15%">
+            <col style="width:15%">
+            <col style="width:15%">
+            <col style="width:15%">
+            <col style="width:15%">
+        </colgroup>
+        <tr class="header">
+            <th class="left">{T["desc"]}</th>
+            <th class="right">{T["prev"]}</th>
+            <th class="right">{T["curr"]}</th>
+            <th class="right">{T["qty"]}</th>
+            <th class="right">{T["unit_price"]}</th>
+            <th class="right">{T["total_price"]}</th>
+        </tr>
+
+        <tr>
+            <td>{T["room_fee"]}</td>
+            <td></td><td></td>
+            <td class="right">1</td>
+            <td class="right">{bill.room.price}$</td>
+            <td class="right">{bill.room.price}$</td>
+        </tr>
+
+        <tr>
+            <td>{T["water"]}</td>
+            <td class="right">{water_previous.meter_value:04}</td>
+            <td class="right">{water_current.meter_value:04}</td>
+            <td class="right">{water_usage:04}</td>
+            <td class="right">{unit_price.water_unit_price:,.0f}៛</td>
+            <td class="right">{bill.water_cost:,.0f}៛</td>
+        </tr>
+
+        <tr>
+            <td>{T["electricity"]}</td>
+            <td class="right">{elec_previous.meter_value:05}</td>
+            <td class="right">{elec_current.meter_value:05}</td>
+            <td class="right">{elec_usage:05}</td>
+            <td class="right">{unit_price.electricity_unit_price:,.0f}៛</td>
+            <td class="right">{bill.electricity_cost:,.0f}៛</td>
+        </tr>
+    </table>
+
+    <table>
+        <colgroup>
+            <col style="width:25%">
+            <col style="width:15%">
+            <col style="width:15%">
+            <col style="width:15%">
+            <col style="width:15%">
+            <col style="width:15%">
+        </colgroup>
+        <tr>
+            <td colspan="4" style="font-style: italic;">{T["note"]}</td>
+            <td class="right total">{T["total"]}</td>
+            <td class="right total">{bill.total/unit_price.exchange_rate:,.2f}$</td>
+        </tr>
+
+        <tr>
+            <td colspan="4"></td>
+            <td class="right total">{T["total_khr"]}</td>
+            <td class="right total">{bill.total:,.0f}៛</td>
+        </tr>
+    </table>
+
+    <br>
+
+    <table>
+    <tr class="signature">
+        <td class="center">{T["payer_sig"]}</td>
+        <td></td>
+        <td class="center">{T["receiver_sig"]}</td>
+    </tr>
+    <tr>
+        <td></td><td></td>
+        <td class="center owner">គ្រូឌី</td>
+    </tr>
+    </table>
+
+    </body>
+    </html>
+    """
+    # -------- Create invoices directory --------
+    invoices_dir = os.path.join(
+        settings.MEDIA_ROOT, "invoices/images", bill.month.strftime("%Y_%m")
+    )
+    os.makedirs(invoices_dir, exist_ok=True)
+    # filename and filepath
+    suffix = lang["suffix"]
+    filename = (
+        f"invoice_room_{room_number}_" f"{bill.month.strftime('%Y_%m')}_{suffix}.png"
+    )
+    filepath = os.path.join(invoices_dir, filename)
+
+    # ---------- Render HTML in headless Chromium ----------
+    with sync_playwright() as p:
+        browser = p.chromium.launch()
+        page = browser.new_page()
+        page.set_content(html_content, wait_until="networkidle")
+        # Take screenshot of full page
+        page.screenshot(path=filepath, full_page=True)
+        browser.close()
+
+    return filename
