@@ -1,6 +1,6 @@
 INVOICE_LANGUAGES = {
     "kh": {
-        "suffix": "khmer",
+        "suffix": "kh",
         "font": "KhmerOS",
         "font_fallback": "sans-serif",
         "texts": {
@@ -33,7 +33,7 @@ INVOICE_LANGUAGES = {
         },
     },
     "en": {
-        "suffix": "english",
+        "suffix": "en",
         "font": "Arial",
         "font_fallback": "sans-serif",
         "texts": {
@@ -66,7 +66,7 @@ INVOICE_LANGUAGES = {
         },
     },
     "fr": {
-        "suffix": "french",
+        "suffix": "fr",
         "font": "Arial",
         "font_fallback": "sans-serif",
         "texts": {

@@ -38,7 +38,7 @@ class Command(BaseCommand):
                         f"✔ Room {room.room_number}: Bill generated successfully."
                     )
                 )
-                img_invoice = generate_invoice_for_bill(bill)
+                img_invoice = generate_invoice_for_bill(bill, lang="kh")
                 self.stdout.write(f"  🖼️  Invoice (Image): {img_invoice}")
             except Exception as e:
                 error_count += 1

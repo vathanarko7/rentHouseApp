@@ -69,7 +69,7 @@ def calculate_monthly_bill(room, month):
 
 
 # ---------- PDF INVOICE GENERATION ----------
-def generate_invoice_for_bill(bill):
+def generate_invoice_for_bill(bill, lang="kh"):
     unit_price = UnitPrice.objects.get(date=bill.month)
 
     water_current = Water.objects.get(room=bill.room, date=bill.month)
@@ -102,7 +102,7 @@ def generate_invoice_for_bill(bill):
         water_usage=water_usage,
         elec_usage=elec_usage,
         unit_price=unit_price,
-        language="kh",
+        language=lang,
     )
 
     return image_invoice

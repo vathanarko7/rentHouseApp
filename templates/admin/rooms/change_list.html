@@ -1,0 +1,301 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools %}
+{{ block.super }}
+{% endblock %}
+
+{% block search %}
+{{ block.super }}
+<style>
+  #changelist-search .search-clear-btn {
+    margin-left: 6px;
+  }
+</style>
+<script>
+  (function () {
+    var form = document.getElementById("changelist-search");
+    if (!form) return;
+    var input = form.querySelector('input[name="q"]');
+    if (!input || !input.value) return;
+
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "button search-clear-btn";
+    btn.textContent = "Clear";
+    btn.addEventListener("click", function () {
+      input.value = "";
+      form.submit();
+    });
+
+    input.insertAdjacentElement("afterend", btn);
+  })();
+</script>
+{% endblock %}
+
+{% block content %}
+{% if generate_invoice_url and rooms %}
+<div style="margin: 12px 0 16px 0;">
+  <div class="object-tools" style="margin-bottom: 8px; float: none; text-align: left;">
+    <button
+      type="button"
+      class="button"
+      data-action="{{ generate_invoice_url }}"
+      data-title="Generate Monthly Bills"
+      data-submit="Generate"
+    >
+      Generate Monthly Bills
+    </button>
+    <button
+      type="button"
+      class="button"
+      data-action="{{ generate_download_url }}"
+      data-title="Generate & Download Bills"
+      data-submit="Generate & Download"
+    >
+      Generate & Download Bills
+    </button>
+    <button
+      type="button"
+      class="button"
+      data-action="{{ bulk_download_url }}"
+      data-title="Bulk Download Bills"
+      data-submit="Download ZIP"
+    >
+      Bulk Download Bills
+    </button>
+  </div>
+
+  <style>
+    :root {
+      --invoice-card-bg: var(--body-bg, #fbfcfd);
+      --invoice-card-border: var(--border-color, #e1e4e8);
+      --invoice-muted: var(--body-quiet-color, #6b7280);
+      --invoice-field-border: var(--border-color, #cbd5e1);
+      --invoice-panel-bg: var(--body-bg, #ffffff);
+      --invoice-panel-border: var(--border-color, #e5e7eb);
+      --invoice-hover: var(--hairline-color, #f3f6fb);
+      --invoice-text: var(--body-fg, #111827);
+      --invoice-primary: var(--primary, #16a34a);
+      --invoice-primary-border: var(--primary, #12823b);
+      --invoice-primary-hover: var(--primary, #12823b);
+      --invoice-selected: var(--primary, #2c6fbb);
+      --invoice-selected-border: var(--primary, #1f5b9c);
+    }
+
+    .object-tools .button.is-selected {
+      background: var(--invoice-selected);
+      border-color: var(--invoice-selected-border);
+      color: #fff;
+    }
+
+    .invoice-card {
+      border: 1px solid var(--invoice-card-border);
+      border-radius: 10px;
+      padding: 16px;
+      background: var(--invoice-card-bg);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+      max-width: 860px;
+      color: var(--invoice-text);
+    }
+
+    .invoice-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+
+    .invoice-subtitle {
+      color: var(--invoice-muted);
+      font-size: 13px;
+      margin: 0;
+    }
+
+    .invoice-field {
+      margin: 12px 0 8px 0;
+    }
+
+    .invoice-field label {
+      display: inline-block;
+      margin-bottom: 6px;
+      color: var(--invoice-text);
+    }
+
+    .month-input {
+      padding: 6px 10px;
+      border: 1px solid var(--invoice-field-border);
+      border-radius: 6px;
+      font-size: 14px;
+      background: var(--invoice-panel-bg);
+      color: var(--invoice-text);
+    }
+
+    .rooms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 6px 12px;
+      margin-top: 8px;
+      max-height: 240px;
+      overflow: auto;
+      padding: 8px;
+      border: 1px solid var(--invoice-panel-border);
+      border-radius: 8px;
+      background: var(--invoice-panel-bg);
+    }
+
+    .room-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 6px;
+      border-radius: 6px;
+    }
+
+    .room-option:hover {
+      background: var(--invoice-hover);
+    }
+
+    .btn-generate {
+      background: var(--invoice-primary);
+      border: 1px solid var(--invoice-primary-border);
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    .btn-generate:hover {
+      background: var(--invoice-primary-hover);
+    }
+
+    .btn-clear {
+      background: #f97316;
+      border: 1px solid #ea580c;
+      color: #fff;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+    }
+
+    .btn-clear:hover {
+      background: #ea580c;
+    }
+
+    .btn-clear:disabled {
+      background: var(--border-color, #cbd5e1);
+      border-color: var(--border-color, #cbd5e1);
+      color: var(--body-quiet-color, #6b7280);
+      cursor: not-allowed;
+    }
+  </style>
+
+  <p id="invoice-action-note" style="margin: 4px 0 10px 0; color: #5a5a5a;">
+    Select a billing action to show the form.
+  </p>
+
+  <div id="invoice-form-wrapper" style="display: none;">
+    <div class="invoice-card">
+      <div class="invoice-header">
+        <h2 id="invoice-form-title" style="margin: 0;">Generate Monthly Bills</h2>
+        <p class="invoice-subtitle">Pick a month and rooms, then run the action.</p>
+      </div>
+    <form method="post" id="invoice-form" action="">
+      {% csrf_token %}
+
+      <div class="invoice-field">
+        <label><strong>Month:</strong></label><br />
+        <input type="month" name="month" class="month-input" required />
+      </div>
+
+      <h3>Rooms</h3>
+      <p class="invoice-subtitle"><em>(Leave unchecked = all rooms)</em></p>
+
+      <div class="rooms-grid">
+        {% for room in rooms %}
+        <label class="room-option">
+          <input type="checkbox" name="rooms" value="{{ room.id }}" />
+          {{ room.room_number }}
+        </label>
+        {% endfor %}
+      </div>
+
+      <br />
+      <button class="btn-generate" id="invoice-form-submit">Submit</button>
+      <button type="reset" class="btn-clear" id="invoice-form-clear" disabled>Clear</button>
+    </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var buttons = document.querySelectorAll(".object-tools [data-action]");
+    var formWrapper = document.getElementById("invoice-form-wrapper");
+    var form = document.getElementById("invoice-form");
+    var title = document.getElementById("invoice-form-title");
+    var submit = document.getElementById("invoice-form-submit");
+    var note = document.getElementById("invoice-action-note");
+    var clearBtn = document.getElementById("invoice-form-clear");
+
+    if (!buttons.length || !form || !title || !submit || !formWrapper || !note || !clearBtn) return;
+
+    function setActive(button) {
+      buttons.forEach(function (btn) {
+        btn.setAttribute("aria-pressed", "false");
+        btn.classList.remove("is-selected");
+      });
+      button.setAttribute("aria-pressed", "true");
+      button.classList.add("is-selected");
+      form.setAttribute("action", button.getAttribute("data-action"));
+      title.textContent = button.getAttribute("data-title");
+      submit.textContent = button.getAttribute("data-submit");
+      note.textContent = "Selected action: " + button.getAttribute("data-title");
+      formWrapper.style.display = "block";
+    }
+
+    function updateClearState() {
+      clearBtn.disabled = !form || !form.checkValidity() || form.pristine;
+    }
+
+    form.addEventListener("input", function () {
+      form.pristine = false;
+      clearBtn.disabled = false;
+    });
+
+    form.addEventListener("change", function () {
+      form.pristine = false;
+      clearBtn.disabled = false;
+    });
+
+    form.addEventListener("reset", function () {
+      setTimeout(function () {
+        form.pristine = true;
+        clearBtn.disabled = true;
+      }, 0);
+    });
+
+    buttons.forEach(function (button) {
+      button.addEventListener("click", function () {
+        setActive(button);
+        form.pristine = true;
+        clearBtn.disabled = true;
+      });
+    });
+  })();
+</script>
+
+<script>
+  (function () {
+    var messages = document.querySelectorAll(".messagelist li");
+    if (!messages.length) return;
+    setTimeout(function () {
+      messages.forEach(function (msg) {
+        msg.style.display = "none";
+      });
+    }, 5000);
+  })();
+</script>
+{% endif %}
+{{ block.super }}
+{% endblock %}

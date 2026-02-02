@@ -18,6 +18,9 @@ class Room(models.Model):
     def __str__(self):
         return f"Room {self.room_number}"
 
+    class Meta:
+        verbose_name_plural = "Rooms"
+
 
 # Utility Water meter readings
 class Water(models.Model):
@@ -31,6 +34,7 @@ class Water(models.Model):
 
     class Meta:
         unique_together = ("room", "date")
+        verbose_name_plural = "Water Readings"
         ordering = ["date"]
 
     def __str__(self):
@@ -52,6 +56,8 @@ class Electricity(models.Model):
     class Meta:
         unique_together = ("room", "date")
         ordering = ["date"]
+        verbose_name_plural = "Water Readings"
+        verbose_name_plural = "Electricity Readings"
 
     def __str__(self):
         return f"Electricity of room {self.room.room_number} - {self.date.strftime('%Y-%m')}"
@@ -79,6 +85,7 @@ class UnitPrice(models.Model):
 
     class Meta:
         unique_together = ("date",)
+        verbose_name_plural = "Utility Rates"
 
     def __str__(self):
         return f"UnitPrice of {self.date.strftime('%Y-%m')}"
@@ -111,6 +118,10 @@ class ClientProfile(models.Model):
         if self.exit_date and self.exit_date <= self.enter_date:
             raise ValidationError("Exit date cannot be before enter date")
 
+    class Meta:
+        verbose_name = "Tenant"
+        verbose_name_plural = "Tenants"
+
 
 # Monthly bill for a room
 class MonthlyBill(models.Model):
@@ -127,6 +138,7 @@ class MonthlyBill(models.Model):
 
     class Meta:
         unique_together = ("room", "month")
+        verbose_name_plural = "Monthly Bills"
 
     def __str__(self):
         return f"Bill {self.room.room_number} {self.month.strftime('%Y-%m')}"

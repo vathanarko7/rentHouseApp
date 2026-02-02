@@ -1,0 +1,34 @@
+{% comment %} {% extends "admin/base_site.html" %} {% load static %} {% block
+content %}
+
+<p>
+  <a href="{{ request.META.HTTP_REFERER|default:'..' }}" class="button"
+    >← Back</a
+  >
+</p>
+
+<h1>Generate Monthly Bills</h1>
+
+<form method="post">
+  {% csrf_token %}
+
+  <p>
+    <label><strong>Month:</strong></label
+    ><br />
+    <input type="month" name="month" required />
+  </p>
+
+  <h3>Rooms</h3>
+  <p><em>(Leave unchecked = all rooms)</em></p>
+
+  {% for room in rooms %}
+  <label>
+    <input type="checkbox" name="rooms" value="{{ room.id }}" />
+    {{ room.room_number }} </label
+  ><br />
+  {% endfor %}
+
+  <br />
+  <button class="default">Generate</button>
+</form>
+{% endblock %} {% endcomment %}
