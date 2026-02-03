@@ -1,0 +1,17 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ site_title|default:_("Django site admin") }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}">{{ site_header|default:_("Django administration") }}</a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div style="float: right; margin: 10px 0;">
+  {% include "includes/language_switcher.html" %}
+</div>
+{{ block.super }}
+{% endblock %}

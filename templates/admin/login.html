@@ -1,0 +1,9 @@
+{% extends "admin/login.html" %}
+{% load i18n %}
+
+{% block content %}
+<div style="margin: 10px 0 16px; text-align: center;">
+  {% include "includes/language_switcher.html" %}
+</div>
+{{ block.super }}
+{% endblock %}

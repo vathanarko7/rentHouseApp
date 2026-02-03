@@ -1,6 +1,8 @@
 from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from types import MethodType
+from django.contrib.auth.models import User
+from django import forms
 from rooms.models import ClientProfile, MonthlyBill, Room, UnitPrice, Water, Electricity
 from django.utils.html import format_html
 from rooms.views import (
@@ -19,17 +21,168 @@ admin.site.index_title = "Welcome to Rent House Admin Portal"
 # admin.site.register(MonthlyBill)
 
 
+class ClientProfileAdminForm(forms.ModelForm):
+    username = forms.CharField(max_length=150, required=True)
+    first_name = forms.CharField(max_length=150, required=False)
+    last_name = forms.CharField(max_length=150, required=False)
+    email = forms.EmailField(required=False)
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(render_value=False),
+        help_text="Leave blank to set an unusable password.",
+    )
+
+    class Meta:
+        model = ClientProfile
+        fields = ("sex", "phone", "id_card_number", "enter_date", "exit_date")
+        field_order = (
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "sex",
+            "phone",
+            "id_card_number",
+            "enter_date",
+            "exit_date",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            user = self.instance.user
+            if user:
+                self.initial.update(
+                    {
+                        "username": user.username,
+                        "first_name": user.first_name,
+                        "last_name": user.last_name,
+                        "email": user.email,
+                    }
+                )
+            for name in ("username", "first_name", "last_name", "email", "password"):
+                self.fields[name].required = False
+                self.fields[name].disabled = True
+
+    def clean_username(self):
+        username = self.cleaned_data.get("username")
+        if not username:
+            return username
+        if User.objects.filter(username=username).exists():
+            raise forms.ValidationError("Username already exists.")
+        return username
+
+    def clean_email(self):
+        email = self.cleaned_data.get("email")
+        if not email:
+            return email
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Email already exists.")
+        return email
+
+
 @admin.register(ClientProfile)
 class ClientProfileAdmin(admin.ModelAdmin):
+    form = ClientProfileAdminForm
+    fieldsets = (
+        (
+            "Account Info",
+            {
+                "fields": (
+                    "username",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "password",
+                )
+            },
+        ),
+        (
+            "Profile Info",
+            {
+                "classes": ("collapse",),
+                "fields": (
+                    "sex",
+                    "phone",
+                    "id_card_number",
+                    "enter_date",
+                    "exit_date",
+                ),
+            },
+        ),
+    )
     list_display = (
         "user",
         "sex",
+        "email",
         "phone",
         "id_card_number",
         "enter_date",
         "exit_date",
     )
     search_fields = ("user__username", "phone", "id_card_number")
+
+    def email(self, obj):
+        user = obj.user
+        return user.email if user else ""
+
+    email.short_description = "Email"
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        return qs.filter(
+            user__is_active=True,
+            user__is_staff=False,
+            user__is_superuser=False,
+        )
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "user":
+            kwargs["queryset"] = User.objects.filter(
+                is_active=True,
+                is_staff=False,
+                is_superuser=False,
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        if not change and not obj.user_id:
+            username = form.cleaned_data.get("username")
+            first_name = form.cleaned_data.get("first_name", "")
+            last_name = form.cleaned_data.get("last_name", "")
+            email = form.cleaned_data.get("email", "")
+            password = form.cleaned_data.get("password", "")
+
+            user = User(
+                username=username,
+                first_name=first_name,
+                last_name=last_name,
+                email=email,
+                is_active=True,
+                is_staff=False,
+                is_superuser=False,
+            )
+            if password:
+                user.set_password(password)
+            else:
+                user.set_unusable_password()
+            user.save()
+            obj.user = user
+
+            existing_profile = ClientProfile.objects.filter(user=user).first()
+            if existing_profile and existing_profile.pk != obj.pk:
+                existing_profile.sex = form.cleaned_data.get("sex")
+                existing_profile.phone = form.cleaned_data.get("phone")
+                existing_profile.id_card_number = form.cleaned_data.get(
+                    "id_card_number"
+                )
+                existing_profile.enter_date = form.cleaned_data.get("enter_date")
+                existing_profile.exit_date = form.cleaned_data.get("exit_date")
+                existing_profile.save()
+                return
+
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Room)
@@ -54,6 +207,15 @@ class RoomAdmin(admin.ModelAdmin):
         return "-"
 
     renter_name.short_description = "Renter"
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "renter":
+            kwargs["queryset"] = User.objects.filter(
+                is_active=True,
+                is_staff=False,
+                is_superuser=False,
+            )
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class MonthlyBillMonthFilter(SimpleListFilter):
