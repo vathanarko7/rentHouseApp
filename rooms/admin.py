@@ -7,9 +7,10 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.template.response import TemplateResponse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
+from django.utils.formats import date_format
 from django.shortcuts import redirect
 from django import forms
-from rooms.models import ClientProfile, MonthlyBill, Room, UnitPrice, Water, Electricity
+from rooms.models import ClientProfile, MonthlyBill, Room, UnitPrice, Water, Electricity, RoomHistory
 from django.utils.html import format_html
 from rooms.views import (
     download_invoice,
@@ -24,8 +25,10 @@ from django.core.exceptions import PermissionDenied
 admin.site.site_header = "Rent House Administration"
 admin.site.site_title = "Rent House Admin Portal"
 admin.site.index_title = "Welcome to Rent House Admin Portal"
+admin.ModelAdmin.save_on_top = True
 # admin.site.register(Room)
 # admin.site.register(MonthlyBill)
+
 
 def _is_tenant(user):
     return (
@@ -230,8 +233,29 @@ class ClientProfileAdmin(admin.ModelAdmin):
             user.save()
 
 
+class RoomHistoryInline(admin.TabularInline):
+    model = RoomHistory
+    extra = 0
+    can_delete = False
+    readonly_fields = ("renter", "start_date", "end_date")
+    classes = ("collapse",)
+
+    def has_view_permission(self, request, obj=None):
+        return request.user.is_active and (request.user.is_staff or request.user.is_superuser)
+
+    def has_add_permission(self, request, obj=None):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
+    inlines = (RoomHistoryInline,)
     list_display = ("room_number", "renter_name", "price")
     search_fields = (
         "room_number",
@@ -240,6 +264,59 @@ class RoomAdmin(admin.ModelAdmin):
         "renter__last_name",
     )
     ordering = ("room_number",)
+    fieldsets = (
+        (
+            "Modification de room",
+            {
+                "fields": ("room_number", "price", "renter"),
+            },
+        ),
+    )
+
+    class Media:
+        js = ("admin/rooms/room_form_order.js",)
+
+    def save_model(self, request, obj, form, change):
+        previous_renter = None
+        if change:
+            try:
+                previous_renter = Room.objects.get(pk=obj.pk).renter
+            except Room.DoesNotExist:
+                previous_renter = None
+        super().save_model(request, obj, form, change)
+
+        if previous_renter and previous_renter != obj.renter:
+            prev_profile = getattr(previous_renter, "client_profile", None)
+            start_date = getattr(prev_profile, "enter_date", None)
+            end_date = getattr(prev_profile, "exit_date", None)
+            existing_open = RoomHistory.objects.filter(
+                room=obj, renter=previous_renter, end_date__isnull=True
+            ).first()
+            if existing_open:
+                existing_open.end_date = end_date or existing_open.end_date
+                existing_open.save()
+            elif start_date:
+                RoomHistory.objects.create(
+                    room=obj,
+                    renter=previous_renter,
+                    start_date=start_date,
+                    end_date=end_date,
+                )
+
+        if obj.renter:
+            current_profile = getattr(obj.renter, "client_profile", None)
+            start_date = getattr(current_profile, "enter_date", None)
+            if start_date:
+                existing_open = RoomHistory.objects.filter(
+                    room=obj, renter=obj.renter, end_date__isnull=True
+                ).first()
+                if not existing_open:
+                    RoomHistory.objects.create(
+                        room=obj,
+                        renter=obj.renter,
+                        start_date=start_date,
+                        end_date=None,
+                    )
 
     def renter_name(self, obj):
         renter = obj.renter
@@ -276,6 +353,63 @@ class RoomAdmin(admin.ModelAdmin):
                 is_superuser=False,
             )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        try:
+            room = Room.objects.get(pk=object_id)
+        except Room.DoesNotExist:
+            return super().change_view(request, object_id, form_url, extra_context)
+
+        elec_readings = (
+            Electricity.objects.filter(room=room)
+            .order_by("date")
+            .values_list("date", "meter_value")
+        )
+        water_readings = (
+            Water.objects.filter(room=room)
+            .order_by("date")
+            .values_list("date", "meter_value")
+        )
+
+        label_dates = sorted(
+            {d for d, _ in elec_readings}.union({d for d, _ in water_readings})
+        )
+        labels = [d.strftime("%Y-%m-%d") for d in label_dates]
+
+        elec_map = {d: v for d, v in elec_readings}
+        water_map = {d: v for d, v in water_readings}
+
+        elec_values = [elec_map.get(d) for d in label_dates]
+        water_values = [water_map.get(d) for d in label_dates]
+
+        extra_context["electricity_chart_labels"] = labels
+        extra_context["electricity_chart_datasets"] = [
+            {
+                "label": _("Electricity (kWh)"),
+                "data": elec_values,
+                "borderColor": "#2563eb",
+                "backgroundColor": "rgba(37, 99, 235, 0.12)",
+                "fill": True,
+                "tension": 0.25,
+                "yAxisID": "y",
+            },
+            {
+                "label": _("Water (m³)"),
+                "data": water_values,
+                "borderColor": "#0ea5e9",
+                "backgroundColor": "rgba(14, 165, 233, 0.10)",
+                "fill": True,
+                "tension": 0.25,
+                "yAxisID": "y",
+            },
+        ]
+        extra_context["electricity_chart_texts"] = {
+            "axis_readings": _("Readings"),
+            "tooltip_electricity": _("Electricity"),
+            "tooltip_water": _("Water"),
+        }
+        return super().change_view(request, object_id, form_url, extra_context)
 
 
 class MonthlyBillMonthFilter(SimpleListFilter):
@@ -319,13 +453,18 @@ class ReadingMonthFilter(SimpleListFilter):
 @admin.register(UnitPrice)
 class UnitPriceAdmin(admin.ModelAdmin):
     list_display = (
-        "date",
+        "month_year",
         "water_unit_price",
         "electricity_unit_price",
         "exchange_rate",
     )
     list_filter = (ReadingMonthFilter,)
     ordering = ("-date",)
+
+    def month_year(self, obj):
+        return date_format(obj.date, "F Y")
+
+    month_year.short_description = "Month"
 
     def has_module_permission(self, request):
         return not _is_tenant(request.user)
@@ -345,10 +484,15 @@ class UnitPriceAdmin(admin.ModelAdmin):
 
 @admin.register(Water)
 class WaterAdmin(admin.ModelAdmin):
-    list_display = ("date", "room", "meter_value")
+    list_display = ("month_year", "room", "meter_value")
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
+
+    def month_year(self, obj):
+        return date_format(obj.date, "F Y")
+
+    month_year.short_description = "Month"
 
     def get_list_filter(self, request):
         if _is_tenant(request.user):
@@ -356,7 +500,9 @@ class WaterAdmin(admin.ModelAdmin):
         return self.list_filter
 
     def has_module_permission(self, request):
-        return True if _is_tenant(request.user) else super().has_module_permission(request)
+        return (
+            True if _is_tenant(request.user) else super().has_module_permission(request)
+        )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -383,10 +529,15 @@ class WaterAdmin(admin.ModelAdmin):
 
 @admin.register(Electricity)
 class ElectricityAdmin(admin.ModelAdmin):
-    list_display = ("date", "room", "meter_value")
+    list_display = ("month_year", "room", "meter_value")
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
+
+    def month_year(self, obj):
+        return date_format(obj.date, "F Y")
+
+    month_year.short_description = "Month"
 
     def get_list_filter(self, request):
         if _is_tenant(request.user):
@@ -394,7 +545,9 @@ class ElectricityAdmin(admin.ModelAdmin):
         return self.list_filter
 
     def has_module_permission(self, request):
-        return True if _is_tenant(request.user) else super().has_module_permission(request)
+        return (
+            True if _is_tenant(request.user) else super().has_module_permission(request)
+        )
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
@@ -421,7 +574,7 @@ class ElectricityAdmin(admin.ModelAdmin):
 
 @admin.register(MonthlyBill)
 class MonthlyBillAdmin(admin.ModelAdmin):
-    list_display = ("id", "month", "room", "renter", "total", "invoice_actions")
+    list_display = ("id", "month_year", "room", "renter", "total", "invoice_actions")
     list_filter = ("room", MonthlyBillMonthFilter)
     search_fields = (
         "room__room_number",
@@ -433,7 +586,9 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     list_per_page = 25
 
     def has_module_permission(self, request):
-        return True if _is_tenant(request.user) else super().has_module_permission(request)
+        return (
+            True if _is_tenant(request.user) else super().has_module_permission(request)
+        )
 
     def get_list_filter(self, request):
         if _is_tenant(request.user):
@@ -469,6 +624,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return "-"
 
     renter.short_description = "Renter"
+
+    def month_year(self, obj):
+        return date_format(obj.month, "F Y")
+
+    month_year.short_description = "Month"
 
     def get_urls(self):
         urls = super().get_urls()
@@ -614,7 +774,9 @@ def _custom_admin_login(self, request, extra_context=None):
         "title": _("Log in"),
         "form": form,
         "app_path": request.get_full_path(),
-        "username": request.user.get_username() if request.user.is_authenticated else "",
+        "username": (
+            request.user.get_username() if request.user.is_authenticated else ""
+        ),
         "next": redirect_to,
     }
     if extra_context:

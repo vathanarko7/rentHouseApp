@@ -1,0 +1,72 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+{% load i18n %}
+
+{% block content %}
+{{ block.super }}
+
+<details style="margin-top: 24px;" open>
+  <summary style="font-size: 16px; font-weight: 600; cursor: pointer;">
+    {% translate "Utility Readings" %}
+  </summary>
+  <div style="margin-top: 12px;">
+    <canvas id="electricity-chart" height="120"></canvas>
+  </div>
+</details>
+
+
+{{ electricity_chart_labels|json_script:"electricity-chart-labels" }}
+{{ electricity_chart_datasets|json_script:"electricity-chart-datasets" }}
+{{ electricity_chart_texts|json_script:"electricity-chart-texts" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    var labelsEl = document.getElementById("electricity-chart-labels");
+    var datasetsEl = document.getElementById("electricity-chart-datasets");
+    if (!labelsEl || !datasetsEl) return;
+
+    var labels = JSON.parse(labelsEl.textContent || "[]");
+    var datasets = JSON.parse(datasetsEl.textContent || "[]");
+    var textsEl = document.getElementById("electricity-chart-texts");
+    var ctx = document.getElementById("electricity-chart");
+    if (!ctx) return;
+    var texts = textsEl ? JSON.parse(textsEl.textContent || "{}") : {};
+
+    new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: datasets,
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: true },
+        },
+        scales: {
+          x: { ticks: { maxRotation: 0, autoSkip: true } },
+          y: { beginAtZero: true, title: { display: true, text: texts.axis_readings || "Readings" } },
+        },
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: function (context) {
+                var label = context.dataset.label || "";
+                var value = context.parsed.y;
+                if (label.includes("Electricity (kWh)")) {
+                  return (texts.tooltip_electricity || "Electricity") + ": " + value + " kWh";
+                }
+                if (label.includes("Water (m³)")) {
+                  return (texts.tooltip_water || "Water") + ": " + value + " m³";
+                }
+                return label + ": " + value;
+              },
+            },
+          },
+        },
+      },
+    });
+  })();
+</script>
+{% endblock %}

@@ -7,3 +7,11 @@
 </div>
 {{ block.super }}
 {% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+  <a href="{% url 'admin:index' %}">
+    {% translate "Rental App" %}
+  </a>
+</h1>
+{% endblock %}

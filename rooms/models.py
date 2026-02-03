@@ -22,6 +22,23 @@ class Room(models.Model):
         verbose_name_plural = "Rooms"
 
 
+class RoomHistory(models.Model):
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="history")
+    renter = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="room_history"
+    )
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-start_date"]
+        verbose_name_plural = "Room History"
+
+    def __str__(self):
+        renter_name = self.renter.get_full_name() if self.renter else "Unknown"
+        return f"{self.room.room_number} - {renter_name}"
+
+
 # Utility Water meter readings
 class Water(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="waters")
