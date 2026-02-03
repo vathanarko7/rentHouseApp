@@ -2,6 +2,12 @@ from django.contrib import admin
 from django.contrib.admin import SimpleListFilter
 from types import MethodType
 from django.contrib.auth.models import User
+from django.contrib.auth import login as auth_login
+from django.contrib.auth.forms import AuthenticationForm
+from django.template.response import TemplateResponse
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext_lazy as _
+from django.shortcuts import redirect
 from django import forms
 from rooms.models import ClientProfile, MonthlyBill, Room, UnitPrice, Water, Electricity
 from django.utils.html import format_html
@@ -12,6 +18,7 @@ from rooms.views import (
     bulk_download_view,
 )
 from django.urls import reverse, path
+from django.core.exceptions import PermissionDenied
 
 # Register your models here.
 admin.site.site_header = "Rent House Administration"
@@ -19,6 +26,14 @@ admin.site.site_title = "Rent House Admin Portal"
 admin.site.index_title = "Welcome to Rent House Admin Portal"
 # admin.site.register(Room)
 # admin.site.register(MonthlyBill)
+
+def _is_tenant(user):
+    return (
+        user.is_active
+        and not user.is_staff
+        and not user.is_superuser
+        and getattr(user, "client_profile", None) is not None
+    )
 
 
 class ClientProfileAdminForm(forms.ModelForm):
@@ -63,13 +78,15 @@ class ClientProfileAdminForm(forms.ModelForm):
                 )
             for name in ("username", "first_name", "last_name", "email", "password"):
                 self.fields[name].required = False
-                self.fields[name].disabled = True
 
     def clean_username(self):
         username = self.cleaned_data.get("username")
         if not username:
             return username
-        if User.objects.filter(username=username).exists():
+        qs = User.objects.filter(username=username)
+        if self.instance and self.instance.pk and self.instance.user_id:
+            qs = qs.exclude(pk=self.instance.user_id)
+        if qs.exists():
             raise forms.ValidationError("Username already exists.")
         return username
 
@@ -77,7 +94,10 @@ class ClientProfileAdminForm(forms.ModelForm):
         email = self.cleaned_data.get("email")
         if not email:
             return email
-        if User.objects.filter(email=email).exists():
+        qs = User.objects.filter(email=email)
+        if self.instance and self.instance.pk and self.instance.user_id:
+            qs = qs.exclude(pk=self.instance.user_id)
+        if qs.exists():
             raise forms.ValidationError("Email already exists.")
         return email
 
@@ -122,6 +142,21 @@ class ClientProfileAdmin(admin.ModelAdmin):
         "exit_date",
     )
     search_fields = ("user__username", "phone", "id_card_number")
+
+    def has_module_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_add_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
 
     def email(self, obj):
         user = obj.user
@@ -183,6 +218,16 @@ class ClientProfileAdmin(admin.ModelAdmin):
                 return
 
         super().save_model(request, obj, form, change)
+        if change and obj.user_id:
+            user = obj.user
+            user.username = form.cleaned_data.get("username") or user.username
+            user.first_name = form.cleaned_data.get("first_name", "") or ""
+            user.last_name = form.cleaned_data.get("last_name", "") or ""
+            user.email = form.cleaned_data.get("email", "") or ""
+            password = form.cleaned_data.get("password")
+            if password:
+                user.set_password(password)
+            user.save()
 
 
 @admin.register(Room)
@@ -208,6 +253,21 @@ class RoomAdmin(admin.ModelAdmin):
 
     renter_name.short_description = "Renter"
 
+    def has_module_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_add_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "renter":
             kwargs["queryset"] = User.objects.filter(
@@ -223,7 +283,7 @@ class MonthlyBillMonthFilter(SimpleListFilter):
     parameter_name = "month"
 
     def lookups(self, request, model_admin):
-        months = MonthlyBill.objects.dates("month", "month", order="DESC")
+        months = model_admin.get_queryset(request).dates("month", "month", order="DESC")
         return [(d.strftime("%Y-%m"), d.strftime("%Y-%m")) for d in months]
 
     def queryset(self, request, queryset):
@@ -242,7 +302,7 @@ class ReadingMonthFilter(SimpleListFilter):
     parameter_name = "month"
 
     def lookups(self, request, model_admin):
-        months = model_admin.model.objects.dates("date", "month", order="DESC")
+        months = model_admin.get_queryset(request).dates("date", "month", order="DESC")
         return [(d.strftime("%Y-%m"), d.strftime("%Y-%m")) for d in months]
 
     def queryset(self, request, queryset):
@@ -267,6 +327,21 @@ class UnitPriceAdmin(admin.ModelAdmin):
     list_filter = (ReadingMonthFilter,)
     ordering = ("-date",)
 
+    def has_module_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_view_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_add_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
 
 @admin.register(Water)
 class WaterAdmin(admin.ModelAdmin):
@@ -275,6 +350,36 @@ class WaterAdmin(admin.ModelAdmin):
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
 
+    def get_list_filter(self, request):
+        if _is_tenant(request.user):
+            return (ReadingMonthFilter,)
+        return self.list_filter
+
+    def has_module_permission(self, request):
+        return True if _is_tenant(request.user) else super().has_module_permission(request)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if _is_tenant(request.user):
+            return qs.filter(room__renter=request.user)
+        return qs
+
+    def has_view_permission(self, request, obj=None):
+        if not _is_tenant(request.user):
+            return True
+        if obj is None:
+            return True
+        return obj.room.renter_id == request.user.id
+
+    def has_add_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
 
 @admin.register(Electricity)
 class ElectricityAdmin(admin.ModelAdmin):
@@ -282,6 +387,36 @@ class ElectricityAdmin(admin.ModelAdmin):
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
+
+    def get_list_filter(self, request):
+        if _is_tenant(request.user):
+            return (ReadingMonthFilter,)
+        return self.list_filter
+
+    def has_module_permission(self, request):
+        return True if _is_tenant(request.user) else super().has_module_permission(request)
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if _is_tenant(request.user):
+            return qs.filter(room__renter=request.user)
+        return qs
+
+    def has_view_permission(self, request, obj=None):
+        if not _is_tenant(request.user):
+            return True
+        if obj is None:
+            return True
+        return obj.room.renter_id == request.user.id
+
+    def has_add_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
 
 
 @admin.register(MonthlyBill)
@@ -296,6 +431,36 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     )
     ordering = ("-month", "room__room_number")
     list_per_page = 25
+
+    def has_module_permission(self, request):
+        return True if _is_tenant(request.user) else super().has_module_permission(request)
+
+    def get_list_filter(self, request):
+        if _is_tenant(request.user):
+            return (MonthlyBillMonthFilter,)
+        return self.list_filter
+
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        if _is_tenant(request.user):
+            return qs.filter(room__renter=request.user)
+        return qs
+
+    def has_view_permission(self, request, obj=None):
+        if not _is_tenant(request.user):
+            return True
+        if obj is None:
+            return True
+        return obj.room.renter_id == request.user.id
+
+    def has_add_permission(self, request):
+        return not _is_tenant(request.user)
+
+    def has_change_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
+
+    def has_delete_permission(self, request, obj=None):
+        return not _is_tenant(request.user)
 
     def renter(self, obj):
         renter = obj.room.renter
@@ -345,14 +510,15 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
-        extra_context.update(
-            {
-                "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
-                "generate_download_url": reverse("admin:rooms_generate_download"),
-                "bulk_download_url": reverse("admin:rooms_bulk_download"),
-                "rooms": Room.objects.all(),
-            }
-        )
+        if not _is_tenant(request.user):
+            extra_context.update(
+                {
+                    "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
+                    "generate_download_url": reverse("admin:rooms_generate_download"),
+                    "bulk_download_url": reverse("admin:rooms_bulk_download"),
+                    "rooms": Room.objects.all(),
+                }
+            )
         return super().changelist_view(request, extra_context)
 
 
@@ -364,6 +530,7 @@ def _custom_get_app_list(self, request, app_label=None):
         if app.get("app_label") != "rooms":
             continue
         models = app.get("models", [])
+        models = [m for m in models if any(m.get("perms", {}).values())]
         by_name = {m.get("object_name"): m for m in models}
         if "MonthlyBill" in by_name:
             monthly_bill_model = by_name.get("MonthlyBill")
@@ -394,7 +561,65 @@ def _custom_get_app_list(self, request, app_label=None):
         }
         app_list.append(invoice_app)
 
+    app_list = [app for app in app_list if app.get("models")]
     return app_list
 
 
 admin.site.get_app_list = MethodType(_custom_get_app_list, admin.site)
+
+
+def _custom_has_permission(self, request):
+    user = request.user
+    return user.is_active and (user.is_staff or user.is_superuser or _is_tenant(user))
+
+
+admin.site.has_permission = MethodType(_custom_has_permission, admin.site)
+
+
+class TenantAdminAuthenticationForm(AuthenticationForm):
+    def confirm_login_allowed(self, user):
+        if not user.is_active:
+            raise forms.ValidationError(
+                _("This account is inactive."),
+                code="inactive",
+            )
+        if user.is_staff or user.is_superuser or _is_tenant(user):
+            return
+        raise forms.ValidationError(
+            _("This account does not have access to the admin site."),
+            code="no_admin_access",
+        )
+
+
+def _custom_admin_login(self, request, extra_context=None):
+    redirect_to = request.POST.get("next", request.GET.get("next", ""))
+    if request.method == "POST":
+        form = TenantAdminAuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            auth_login(request, form.get_user())
+            if _is_tenant(request.user):
+                return redirect("admin:rooms_monthlybill_changelist")
+            if not url_has_allowed_host_and_scheme(
+                url=redirect_to,
+                allowed_hosts={request.get_host()},
+                require_https=request.is_secure(),
+            ):
+                redirect_to = reverse("admin:index")
+            return redirect(redirect_to or "admin:index")
+    else:
+        form = TenantAdminAuthenticationForm(request)
+
+    context = {
+        **self.each_context(request),
+        "title": _("Log in"),
+        "form": form,
+        "app_path": request.get_full_path(),
+        "username": request.user.get_username() if request.user.is_authenticated else "",
+        "next": redirect_to,
+    }
+    if extra_context:
+        context.update(extra_context)
+    return TemplateResponse(request, "admin/login.html", context)
+
+
+admin.site.login = MethodType(_custom_admin_login, admin.site)

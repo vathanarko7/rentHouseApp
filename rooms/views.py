@@ -1,4 +1,4 @@
-from django.http import FileResponse, Http404, HttpResponse
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from datetime import date
@@ -20,6 +20,13 @@ def download_invoice(request, bill_id, lang):
         raise Http404("Invalid language")
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if (
+        request.user.is_active
+        and not request.user.is_staff
+        and not request.user.is_superuser
+        and bill.room.renter_id != request.user.id
+    ):
+        raise Http404("Not found")
     filename = generate_invoice_for_bill(bill, lang=lang)
 
     invoices_dir = os.path.join(
@@ -37,6 +44,8 @@ def download_invoice(request, bill_id, lang):
 
 # View to generate invoices for selected rooms and month
 def generate_invoices_view(request):
+    if request.user.is_active and not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden("Not allowed")
     if request.method == "POST":
         month = request.POST.get("month")
         room_ids = request.POST.getlist("rooms")
@@ -83,6 +92,8 @@ def generate_invoices_view(request):
 
 # View to generate and download all invoices as ZIP
 def generate_and_download_view(request):
+    if request.user.is_active and not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden("Not allowed")
     if request.method == "POST":
         month = request.POST.get("month")
         room_ids = request.POST.getlist("rooms")
@@ -148,6 +159,8 @@ def generate_and_download_view(request):
 
 # View to bulk download existing invoice images
 def bulk_download_view(request):
+    if request.user.is_active and not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden("Not allowed")
     if request.method == "POST":
         month = request.POST.get("month")
         room_ids = request.POST.getlist("rooms")

@@ -5,7 +5,13 @@
 
 {% block branding %}
 <h1 id="site-name">
-  <a href="{% url 'admin:index' %}">{{ site_header|default:_("Django administration") }}</a>
+  <a href="{% url 'admin:index' %}">
+    {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
+      {% translate "Tenant Dashboard" %}
+    {% else %}
+      {{ site_header|default:_("Django administration") }}
+    {% endif %}
+  </a>
 </h1>
 {% endblock %}
 
@@ -14,4 +20,18 @@
   {% include "includes/language_switcher.html" %}
 </div>
 {{ block.super }}
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  @media (max-width: 1024px) {
+    .nav-sidebar {
+      display: block;
+    }
+    .nav-sidebar-toggle {
+      display: inline-block;
+    }
+  }
+</style>
 {% endblock %}

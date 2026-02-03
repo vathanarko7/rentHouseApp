@@ -119,6 +119,7 @@ USE_TZ = True
 LANGUAGES = [
     ("en", "English"),
     ("fr", "Français"),
+    ("km", "Khmer"),
 ]
 
 LOCALE_PATHS = [
