@@ -153,6 +153,9 @@ DEFAULT_CURRENCY = "USD"  # Base currency for rents
 TARGET_CURRENCY = "KHR"  # Currency to convert rents into
 EXCHANGE_RATE_API_URL = "https://api.exchangerate-api.com/v4/latest/"
 EXCHANGE_RATE_API_KEY = ""  # If required by the API provider
+# Telegram settings
+TELEGRAM_BOT_TOKEN = "8217798129:AAFTRD2XE5lwxdV7-mJIwoPzDxd3j8YcCFU"
+TELEGRAM_TEST_MESSAGE_TEMPLATE = "សួស្តីពីបន្ទប់ជួលគ្រូឌី​ {room_number}."
 # # PDF generation settings
 # PDF_PAGE_SIZE = "A4"
 # PDF_FONT = "Helvetica"

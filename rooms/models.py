@@ -123,6 +123,7 @@ class ClientProfile(models.Model):
     sex = models.CharField(max_length=1, choices=SEX_CHOICES, blank=True)
 
     phone = models.CharField(max_length=20, null=True, blank=True)
+    telegram_chat_id = models.CharField(max_length=64, null=True, blank=True)
     id_card_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
 
     enter_date = models.DateField(null=True, blank=True, help_text="Move-in date")
@@ -142,6 +143,12 @@ class ClientProfile(models.Model):
 
 # Monthly bill for a room
 class MonthlyBill(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Draft"
+        ISSUED = "issued", "Issued"
+        SENT = "sent", "Sent"
+        PAID = "paid", "Paid"
+
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="bills")
 
     month = models.DateField()
@@ -150,6 +157,9 @@ class MonthlyBill(models.Model):
     water_cost = models.DecimalField(max_digits=12, decimal_places=2)
     electricity_cost = models.DecimalField(max_digits=12, decimal_places=2)
     total = models.DecimalField(max_digits=14, decimal_places=2)
+    status = models.CharField(
+        max_length=10, choices=Status.choices, default=Status.DRAFT
+    )
 
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -159,3 +169,18 @@ class MonthlyBill(models.Model):
 
     def __str__(self):
         return f"Bill {self.room.room_number} {self.month.strftime('%Y-%m')}"
+
+    def clean(self):
+        if not self.pk:
+            return
+        current = MonthlyBill.objects.filter(pk=self.pk).values_list("status", flat=True).first()
+        if not current:
+            return
+        order = {
+            self.Status.DRAFT: 0,
+            self.Status.ISSUED: 1,
+            self.Status.SENT: 2,
+            self.Status.PAID: 3,
+        }
+        if order.get(self.status, 0) < order.get(current, 0):
+            raise ValidationError("Status cannot move backward.")

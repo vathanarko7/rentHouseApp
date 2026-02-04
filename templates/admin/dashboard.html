@@ -1,0 +1,127 @@
+{% extends "admin/base_site.html" %}
+{% load i18n log %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<h1>{% translate "Reports & Dashboard" %}</h1>
+
+{% if is_tenant %}
+<p>{% translate "Showing your room data only." %}</p>
+{% else %}
+<p>{% translate "Showing all rooms (global view)." %}</p>
+{% endif %}
+
+<div style="margin-top: 16px;">
+  <h2>{% translate "Income per Month" %}</h2>
+  <canvas id="income-chart" height="120"></canvas>
+</div>
+
+<div style="margin-top: 24px;">
+  <h2>{% translate "Water / Electricity Trends" %}</h2>
+  <canvas id="usage-chart" height="140"></canvas>
+</div>
+
+{{ income_labels|json_script:"income-labels" }}
+{{ income_values|json_script:"income-values" }}
+{{ water_labels|json_script:"water-labels" }}
+{{ water_values|json_script:"water-values" }}
+{{ elec_labels|json_script:"elec-labels" }}
+{{ elec_values|json_script:"elec-values" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    var incomeLabels = JSON.parse(document.getElementById("income-labels").textContent || "[]");
+    var incomeValues = JSON.parse(document.getElementById("income-values").textContent || "[]");
+    var waterLabels = JSON.parse(document.getElementById("water-labels").textContent || "[]");
+    var waterValues = JSON.parse(document.getElementById("water-values").textContent || "[]");
+    var elecLabels = JSON.parse(document.getElementById("elec-labels").textContent || "[]");
+    var elecValues = JSON.parse(document.getElementById("elec-values").textContent || "[]");
+
+    var incomeCtx = document.getElementById("income-chart");
+    if (incomeCtx) {
+      new Chart(incomeCtx, {
+        type: "line",
+        data: {
+          labels: incomeLabels,
+          datasets: [
+            {
+              label: "Income",
+              data: incomeValues,
+              borderColor: "#16a34a",
+              backgroundColor: "rgba(22, 163, 74, 0.15)",
+              fill: true,
+              tension: 0.25,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+
+    var usageCtx = document.getElementById("usage-chart");
+    if (usageCtx) {
+      new Chart(usageCtx, {
+        type: "line",
+        data: {
+          labels: waterLabels.length ? waterLabels : elecLabels,
+          datasets: [
+            {
+              label: "Water (m³)",
+              data: waterValues,
+              borderColor: "#0ea5e9",
+              backgroundColor: "rgba(14, 165, 233, 0.10)",
+              fill: true,
+              tension: 0.25,
+            },
+            {
+              label: "Electricity (kWh)",
+              data: elecValues,
+              borderColor: "#2563eb",
+              backgroundColor: "rgba(37, 99, 235, 0.12)",
+              fill: true,
+              tension: 0.25,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: { beginAtZero: true },
+          },
+        },
+      });
+    }
+  })();
+</script>
+{% endblock %}
+
+{% block sidebar %}
+<div class="module">
+  <h2>{% translate "Recent actions" %}</h2>
+  {% get_admin_log 10 as admin_log for_user user %}
+  {% if admin_log %}
+    <ul class="actionlist">
+      {% for entry in admin_log %}
+        <li class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
+          {% if entry.is_deletion or not entry.get_admin_url %}
+            {{ entry.object_repr }}
+          {% else %}
+            <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+          {% endif %}
+          <br>
+          <span class="mini quiet">{{ entry.content_type.name|capfirst }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="quiet">{% translate "None available" %}</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,11 +1,5 @@
-{% extends "admin/change_list.html" %}
-
-{% block object-tools %}
-{{ block.super }}
-{% endblock %}
-
-{% block search %}
-{{ block.super }}
+{% extends "admin/change_list.html" %} {% block object-tools %} {{ block.super
+}} {% endblock %} {% block search %} {{ block.super }}
 <style>
   #changelist-search .search-clear-btn {
     margin-left: 6px;
@@ -30,39 +24,37 @@
     input.insertAdjacentElement("afterend", btn);
   })();
 </script>
-{% endblock %}
-
-{% block content %}
-{% if generate_invoice_url and rooms %}
-<div style="margin: 12px 0 16px 0;">
-  <div class="object-tools" style="margin-bottom: 8px; float: none; text-align: left;">
-    <button
-      type="button"
-      class="button"
-      data-action="{{ generate_invoice_url }}"
-      data-title="Generate Monthly Bills"
-      data-submit="Generate"
-    >
-      Generate Monthly Bills
-    </button>
-    <button
-      type="button"
-      class="button"
-      data-action="{{ generate_download_url }}"
-      data-title="Generate & Download Bills"
-      data-submit="Generate & Download"
-    >
-      Generate & Download Bills
-    </button>
-    <button
-      type="button"
-      class="button"
-      data-action="{{ bulk_download_url }}"
-      data-title="Bulk Download Bills"
-      data-submit="Download ZIP"
-    >
-      Bulk Download Bills
-    </button>
+{% endblock %} {% block content %} {% if generate_invoice_url and rooms %}
+<div style="margin: 12px 0 16px 0">
+  <div
+    class="object-tools"
+    style="margin-bottom: 8px; float: none; display: flex; gap: 8px; align-items: center; justify-content: space-between;"
+  >
+    <div style="display:flex; gap:8px; align-items:center;">
+      <button
+        type="button"
+        class="button"
+        data-action="{{ generate_invoice_url }}"
+        data-title="Generate Monthly Bills"
+        data-submit="Generate"
+      >
+        Generate Monthly Bills
+      </button>
+      <button
+        type="button"
+        class="button"
+        data-action="{{ bulk_download_url }}"
+        data-title="Bulk Download Bills"
+        data-submit="Download ZIP"
+      >
+        Bulk Download Bills
+      </button>
+    </div>
+    {% if telegram_test_url %}
+    <div>
+      <a class="button" href="{{ telegram_test_url }}">Test Telegram</a>
+    </div>
+    {% endif %}
   </div>
 
   <style>
@@ -190,43 +182,51 @@
     }
   </style>
 
-  <p id="invoice-action-note" style="margin: 4px 0 10px 0; color: #5a5a5a;">
+  <p id="invoice-action-note" style="margin: 4px 0 10px 0; color: #5a5a5a">
     Select a billing action to show the form.
   </p>
 
-  <div id="invoice-form-wrapper" style="display: none;">
+  <div id="invoice-form-wrapper" style="display: none">
     <div class="invoice-card">
       <div class="invoice-header">
-        <h2 id="invoice-form-title" style="margin: 0;">Generate Monthly Bills</h2>
-        <p class="invoice-subtitle">Pick a month and rooms, then run the action.</p>
+        <h2 id="invoice-form-title" style="margin: 0">
+          Generate Monthly Bills
+        </h2>
+        <p class="invoice-subtitle">
+          Pick a month and rooms, then run the action.
+        </p>
       </div>
-    <form method="post" id="invoice-form" action="">
-      {% csrf_token %}
+      <form method="post" id="invoice-form" action="">
+        {% csrf_token %}
 
-      <div class="invoice-field">
-        <label><strong>Month:</strong></label><br />
-        <input type="month" name="month" class="month-input" required />
-      </div>
+        <div class="invoice-field">
+          <label><strong>Month:</strong></label
+          ><br />
+          <input type="month" name="month" class="month-input" required />
+        </div>
 
-      <h3>Rooms</h3>
-      <p class="invoice-subtitle"><em>(Leave unchecked = all rooms)</em></p>
+        <h3>Rooms</h3>
+        <p class="invoice-subtitle"><em>(Leave unchecked = all rooms)</em></p>
 
-      <div class="rooms-grid">
-        {% for room in rooms %}
-        <label class="room-option">
-          <input type="checkbox" name="rooms" value="{{ room.id }}" />
-          {{ room.room_number }}
-        </label>
-        {% endfor %}
-      </div>
+        <div class="rooms-grid">
+          {% for room in rooms %}
+          <label class="room-option">
+            <input type="checkbox" name="rooms" value="{{ room.id }}" />
+            {{ room.room_number }}
+          </label>
+          {% endfor %}
+        </div>
 
-      <br />
-      <button class="btn-generate" id="invoice-form-submit">Submit</button>
-      <button type="reset" class="btn-clear" id="invoice-form-clear" disabled>Clear</button>
-    </form>
+        <br />
+        <button class="btn-generate" id="invoice-form-submit">Submit</button>
+        <button type="reset" class="btn-clear" id="invoice-form-clear" disabled>
+          Clear
+        </button>
+      </form>
     </div>
   </div>
 </div>
+
 
 <script>
   (function () {
@@ -238,7 +238,16 @@
     var note = document.getElementById("invoice-action-note");
     var clearBtn = document.getElementById("invoice-form-clear");
 
-    if (!buttons.length || !form || !title || !submit || !formWrapper || !note || !clearBtn) return;
+    if (
+      !buttons.length ||
+      !form ||
+      !title ||
+      !submit ||
+      !formWrapper ||
+      !note ||
+      !clearBtn
+    )
+      return;
 
     function setActive(button) {
       buttons.forEach(function (btn) {
@@ -250,7 +259,8 @@
       form.setAttribute("action", button.getAttribute("data-action"));
       title.textContent = button.getAttribute("data-title");
       submit.textContent = button.getAttribute("data-submit");
-      note.textContent = "Selected action: " + button.getAttribute("data-title");
+      note.textContent =
+        "Selected action: " + button.getAttribute("data-title");
       formWrapper.style.display = "block";
     }
 
@@ -285,17 +295,156 @@
   })();
 </script>
 
+{% endif %} {{ block.super }}
+
+<div id="invoice-preview-modal" style="display: none">
+  <div class="preview-backdrop"></div>
+  <div class="preview-panel">
+    <button type="button" class="preview-close">Close</button>
+    <img id="invoice-preview-image" alt="Invoice Preview" />
+  </div>
+</div>
+
+<style>
+  #invoice-preview-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+  }
+  #invoice-preview-modal .preview-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+  }
+  #invoice-preview-modal .preview-panel {
+    position: relative;
+    margin: 5vh auto;
+    width: min(900px, 90vw);
+    background: var(--body-bg, #fff);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 90vh;
+    overflow: auto;
+  }
+  #invoice-preview-modal img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  #invoice-preview-modal .preview-close {
+    float: right;
+    margin-bottom: 8px;
+  }
+
+  .preview-btn {
+    background: linear-gradient(180deg, #3b82f6, #2563eb);
+    border: 1px solid #1d4ed8;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(37, 99, 235, 0.35);
+  }
+  .preview-btn:hover {
+    background: linear-gradient(180deg, #2563eb, #1d4ed8);
+  }
+
+  .regen-btn {
+    background: #f59e0b;
+    border-color: #d97706;
+    color: #fff;
+    font-weight: 600;
+    padding: 4px 10px;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+  }
+  .regen-btn:hover {
+    background: #d97706;
+  }
+
+  .send-btn {
+    background: linear-gradient(180deg, #a855f7, #8b5cf6);
+    border: 1px solid #7c3aed;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(139, 92, 246, 0.35);
+  }
+  .send-btn:hover {
+    background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+  }
+
+  .download-btn {
+    background: linear-gradient(180deg, #34d399, #10b981);
+    border: 1px solid #059669;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(16, 185, 129, 0.35);
+  }
+  .download-btn:hover {
+    background: linear-gradient(180deg, #10b981, #059669);
+  }
+</style>
+
 <script>
   (function () {
-    var messages = document.querySelectorAll(".messagelist li");
-    if (!messages.length) return;
-    setTimeout(function () {
-      messages.forEach(function (msg) {
-        msg.style.display = "none";
-      });
-    }, 5000);
+    var modal = document.getElementById("invoice-preview-modal");
+    if (!modal) return;
+    var img = document.getElementById("invoice-preview-image");
+    var closeBtn = modal.querySelector(".preview-close");
+    var backdrop = modal.querySelector(".preview-backdrop");
+
+    function close() {
+      modal.style.display = "none";
+      if (img) img.src = "";
+    }
+
+    function open(url) {
+      if (!url || !img) return;
+      img.src = url;
+      modal.style.display = "block";
+    }
+
+    document.addEventListener("click", function (e) {
+      var btn = e.target.closest(".preview-invoice-btn");
+      if (btn) {
+        e.preventDefault();
+        open(btn.getAttribute("data-preview-url"));
+      }
+    });
+
+    if (closeBtn) closeBtn.addEventListener("click", close);
+    if (backdrop) backdrop.addEventListener("click", close);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") close();
+    });
   })();
 </script>
-{% endif %}
-{{ block.super }}
 {% endblock %}
+  .btn-sm {
+    padding: 4px 10px;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  .btn-lg {
+    padding: 8px 16px;
+    font-size: 14px;
+    line-height: 1.3;
+  }

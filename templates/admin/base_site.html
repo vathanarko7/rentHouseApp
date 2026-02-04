@@ -33,5 +33,74 @@
       display: inline-block;
     }
   }
+  .messagelist li {
+    position: relative;
+    padding-right: 28px;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+  }
+  .messagelist li.is-fading {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  .messagelist .msg-close {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: transparent;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+  }
+  .messagelist .msg-close:hover {
+    opacity: 1;
+  }
 </style>
+{% endblock %}
+
+{% block extrabody %}
+{{ block.super }}
+<script>
+  (function () {
+    function attachCloseButtons(messages) {
+      messages.forEach(function (msg) {
+        if (msg.querySelector(".msg-close")) return;
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "msg-close";
+        btn.setAttribute("aria-label", "Close");
+        btn.textContent = "×";
+        btn.addEventListener("click", function () {
+          msg.classList.add("is-fading");
+          setTimeout(function () {
+            msg.style.display = "none";
+          }, 400);
+        });
+        msg.appendChild(btn);
+      });
+    }
+
+    function hideMessages() {
+      var messages = document.querySelectorAll(".messagelist li");
+      if (!messages.length) return;
+      attachCloseButtons(messages);
+      setTimeout(function () {
+        messages.forEach(function (msg) {
+          msg.classList.add("is-fading");
+          setTimeout(function () {
+            msg.style.display = "none";
+          }, 400);
+        });
+      }, 5000);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", hideMessages);
+    } else {
+      hideMessages();
+    }
+  })();
+</script>
 {% endblock %}

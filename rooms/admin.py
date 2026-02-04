@@ -15,10 +15,16 @@ from django.utils.html import format_html
 from rooms.views import (
     download_invoice,
     generate_invoices_view,
-    generate_and_download_view,
     bulk_download_view,
+    regenerate_invoice_view,
+    preview_invoice,
+    send_invoice_telegram_view,
+    test_telegram_connection_view,
+    test_clientprofile_telegram_view,
 )
-from django.urls import reverse, path
+from django.urls import reverse, path, re_path
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
 from django.core.exceptions import PermissionDenied
 
 # Register your models here.
@@ -52,7 +58,14 @@ class ClientProfileAdminForm(forms.ModelForm):
 
     class Meta:
         model = ClientProfile
-        fields = ("sex", "phone", "id_card_number", "enter_date", "exit_date")
+        fields = (
+            "sex",
+            "phone",
+            "telegram_chat_id",
+            "id_card_number",
+            "enter_date",
+            "exit_date",
+        )
         field_order = (
             "username",
             "first_name",
@@ -61,6 +74,7 @@ class ClientProfileAdminForm(forms.ModelForm):
             "password",
             "sex",
             "phone",
+            "telegram_chat_id",
             "id_card_number",
             "enter_date",
             "exit_date",
@@ -128,6 +142,7 @@ class ClientProfileAdmin(admin.ModelAdmin):
                 "fields": (
                     "sex",
                     "phone",
+                    "telegram_chat_id",
                     "id_card_number",
                     "enter_date",
                     "exit_date",
@@ -140,6 +155,7 @@ class ClientProfileAdmin(admin.ModelAdmin):
         "sex",
         "email",
         "phone",
+        "telegram_test_action",
         "id_card_number",
         "enter_date",
         "exit_date",
@@ -167,7 +183,27 @@ class ClientProfileAdmin(admin.ModelAdmin):
 
     email.short_description = "Email"
 
+    def telegram_test_action(self, obj):
+        request = getattr(self, "_request", None)
+        if not request:
+            return "-"
+        if not (request.user.is_staff or request.user.is_superuser):
+            return "-"
+        chat_id = getattr(obj, "telegram_chat_id", None)
+        if not chat_id:
+            return format_html(
+                '<span style="color: var(--body-quiet-color, #6b7280);">{}</span>',
+                "No chat ID",
+            )
+        return format_html(
+            '<a class="button" href="{}">Test Chat</a>',
+            reverse("admin:rooms_clientprofile_test_telegram", args=[obj.id]),
+        )
+
+    telegram_test_action.short_description = "Telegram"
+
     def get_queryset(self, request):
+        self._request = request
         qs = super().get_queryset(request)
         return qs.filter(
             user__is_active=True,
@@ -183,6 +219,17 @@ class ClientProfileAdmin(admin.ModelAdmin):
                 is_superuser=False,
             )
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path(
+                "<int:profile_id>/telegram/test/",
+                self.admin_site.admin_view(test_clientprofile_telegram_view),
+                name="rooms_clientprofile_test_telegram",
+            ),
+        ]
+        return custom_urls + urls
 
     def save_model(self, request, obj, form, change):
         if not change and not obj.user_id:
@@ -574,8 +621,16 @@ class ElectricityAdmin(admin.ModelAdmin):
 
 @admin.register(MonthlyBill)
 class MonthlyBillAdmin(admin.ModelAdmin):
-    list_display = ("id", "month_year", "room", "renter", "total", "invoice_actions")
-    list_filter = ("room", MonthlyBillMonthFilter)
+    list_display = (
+        "id",
+        "month_year",
+        "room",
+        "renter",
+        "status_badge",
+        "total",
+        "invoice_actions",
+    )
+    list_filter = ("room", "status", MonthlyBillMonthFilter)
     search_fields = (
         "room__room_number",
         "room__renter__username",
@@ -596,9 +651,17 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return self.list_filter
 
     def get_queryset(self, request):
+        self._request = request
         qs = super().get_queryset(request)
         if _is_tenant(request.user):
-            return qs.filter(room__renter=request.user)
+            return qs.filter(
+                room__renter=request.user,
+                status__in=[
+                    MonthlyBill.Status.ISSUED,
+                    MonthlyBill.Status.SENT,
+                    MonthlyBill.Status.PAID,
+                ],
+            )
         return qs
 
     def has_view_permission(self, request, obj=None):
@@ -625,6 +688,30 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     renter.short_description = "Renter"
 
+    def status_badge(self, obj):
+        color_map = {
+            MonthlyBill.Status.DRAFT: "#f59e0b",
+            MonthlyBill.Status.ISSUED: "#3b82f6",
+            MonthlyBill.Status.SENT: "#8b5cf6",
+            MonthlyBill.Status.PAID: "#10b981",
+        }
+        label_map = {
+            MonthlyBill.Status.DRAFT: "Draft",
+            MonthlyBill.Status.ISSUED: "Issued",
+            MonthlyBill.Status.SENT: "Sent",
+            MonthlyBill.Status.PAID: "Paid",
+        }
+        color = color_map.get(obj.status, "#6b7280")
+        label = label_map.get(obj.status, obj.status)
+        return format_html(
+            '<span style="padding:2px 8px;border-radius:10px;'
+            'background:{};color:#fff;font-size:12px;">{}</span>',
+            color,
+            label,
+        )
+
+    status_badge.short_description = "Status"
+
     def month_year(self, obj):
         return date_format(obj.month, "F Y")
 
@@ -634,7 +721,27 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         urls = super().get_urls()
         custom_urls = [
             path(
-                "<int:bill_id>/invoice/<str:lang>/",
+                "<int:bill_id>/invoice/regenerate/",
+                self.admin_site.admin_view(regenerate_invoice_view),
+                name="rooms_monthlybill_regenerate_invoice",
+            ),
+            path(
+                "<int:bill_id>/invoice/send-telegram/",
+                self.admin_site.admin_view(send_invoice_telegram_view),
+                name="rooms_monthlybill_send_invoice_telegram",
+            ),
+            path(
+                "telegram/test/",
+                self.admin_site.admin_view(test_telegram_connection_view),
+                name="rooms_monthlybill_test_telegram",
+            ),
+            path(
+                "<int:bill_id>/invoice/preview/",
+                self.admin_site.admin_view(preview_invoice),
+                name="rooms_monthlybill_preview_invoice",
+            ),
+            re_path(
+                r"^(?P<bill_id>\d+)/invoice/(?P<lang>kh|en|fr)/$",
                 self.admin_site.admin_view(download_invoice),
                 name="rooms_monthlybill_download_invoice",
             ),
@@ -642,11 +749,6 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 "generate-invoices/",
                 self.admin_site.admin_view(generate_invoices_view),
                 name="rooms_generate_invoices",
-            ),
-            path(
-                "generate-download/",
-                self.admin_site.admin_view(generate_and_download_view),
-                name="rooms_generate_download",
             ),
             path(
                 "bulk-download/",
@@ -657,13 +759,44 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def invoice_actions(self, obj):
-        return format_html(
-            '<a class="button" href="{}">KH</a> '
-            '<a class="button" href="{}">EN</a> '
-            '<a class="button" href="{}">FR</a>',
+        req = getattr(self, "_request", None)
+        is_tenant = _is_tenant(req.user) if req else False
+        regen_link = ""
+        if not is_tenant and obj.status == MonthlyBill.Status.DRAFT:
+            regen_link = format_html(
+                '<a class="button regen-btn btn-sm" href="{}">Re-generate</a> ',
+                reverse("admin:rooms_monthlybill_regenerate_invoice", args=[obj.id]),
+            )
+        send_link = ""
+        if not is_tenant and obj.status == MonthlyBill.Status.ISSUED:
+            send_link = format_html(
+                '<a class="button send-btn btn-sm" href="{}">Send</a> ',
+                reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
+            )
+        test_link = ""
+        show_preview = True
+        if is_tenant and obj.status not in (MonthlyBill.Status.ISSUED, MonthlyBill.Status.PAID):
+            show_preview = False
+        if not show_preview and not regen_link:
+            return "-"
+        preview_btn = ""
+        if show_preview:
+            preview_btn = format_html(
+                '<button class="button preview-invoice-btn preview-btn btn-sm" '
+                'data-preview-url="{}" type="button">Preview</button>',
+                reverse("admin:rooms_monthlybill_preview_invoice", args=[obj.id]),
+            )
+        download_btn = format_html(
+            ' <a class="button download-btn btn-sm" href="{}">Download</a>',
             reverse("admin:rooms_monthlybill_download_invoice", args=[obj.id, "kh"]),
-            reverse("admin:rooms_monthlybill_download_invoice", args=[obj.id, "en"]),
-            reverse("admin:rooms_monthlybill_download_invoice", args=[obj.id, "fr"]),
+        )
+        return format_html(
+            "{}{}{}{}{}",
+            regen_link,
+            send_link,
+            test_link,
+            preview_btn,
+            download_btn,
         )
 
     invoice_actions.short_description = "Invoice"
@@ -674,8 +807,8 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             extra_context.update(
                 {
                     "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
-                    "generate_download_url": reverse("admin:rooms_generate_download"),
                     "bulk_download_url": reverse("admin:rooms_bulk_download"),
+                    "telegram_test_url": reverse("admin:rooms_monthlybill_test_telegram"),
                     "rooms": Room.objects.all(),
                 }
             )
@@ -685,6 +818,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 def _custom_get_app_list(self, request, app_label=None):
     app_list = admin.AdminSite.get_app_list(self, request, app_label=app_label)
     monthly_bill_model = None
+    dashboard_app = None
 
     for app in app_list:
         if app.get("app_label") != "rooms":
@@ -702,6 +836,7 @@ def _custom_get_app_list(self, request, app_label=None):
             "Water",
             "UnitPrice",
         ]
+        dashboard_model = None
         ordered = [by_name[name] for name in order if name in by_name]
         for model in models:
             name = model.get("object_name")
@@ -710,6 +845,20 @@ def _custom_get_app_list(self, request, app_label=None):
             if name not in order:
                 ordered.append(model)
         app["models"] = ordered
+        dashboard_app = {
+            "name": "Reports & Dashboard",
+            "app_label": "dashboard",
+            "app_url": reverse("admin:dashboard"),
+            "has_module_perms": True,
+            "models": [
+                {
+                    "name": "Reports & Dashboard",
+                    "object_name": "Dashboard",
+                    "admin_url": reverse("admin:dashboard"),
+                    "perms": {"view": True, "add": False, "change": False, "delete": False},
+                }
+            ],
+        }
 
     if monthly_bill_model:
         invoice_app = {
@@ -720,6 +869,9 @@ def _custom_get_app_list(self, request, app_label=None):
             "models": [monthly_bill_model],
         }
         app_list.append(invoice_app)
+
+    if dashboard_app:
+        app_list.insert(0, dashboard_app)
 
     app_list = [app for app in app_list if app.get("models")]
     return app_list
@@ -757,8 +909,7 @@ def _custom_admin_login(self, request, extra_context=None):
         form = TenantAdminAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             auth_login(request, form.get_user())
-            if _is_tenant(request.user):
-                return redirect("admin:rooms_monthlybill_changelist")
+            return redirect("admin:dashboard")
             if not url_has_allowed_host_and_scheme(
                 url=redirect_to,
                 allowed_hosts={request.get_host()},
@@ -785,3 +936,72 @@ def _custom_admin_login(self, request, extra_context=None):
 
 
 admin.site.login = MethodType(_custom_admin_login, admin.site)
+
+
+def dashboard_view(request):
+    if not request.user.is_active:
+        raise PermissionDenied
+
+    is_tenant = _is_tenant(request.user)
+
+    bills = MonthlyBill.objects.all()
+    waters = Water.objects.all()
+    electrics = Electricity.objects.all()
+
+    if is_tenant:
+        bills = bills.filter(room__renter=request.user)
+        waters = waters.filter(room__renter=request.user)
+        electrics = electrics.filter(room__renter=request.user)
+
+    income_by_month = (
+        bills.annotate(m=TruncMonth("month"))
+        .values("m")
+        .annotate(total=Sum("total"))
+        .order_by("m")
+    )
+    water_by_month = (
+        waters.annotate(m=TruncMonth("date"))
+        .values("m")
+        .annotate(total=Sum("meter_value"))
+        .order_by("m")
+    )
+    elec_by_month = (
+        electrics.annotate(m=TruncMonth("date"))
+        .values("m")
+        .annotate(total=Sum("meter_value"))
+        .order_by("m")
+    )
+
+    def build_series(qs):
+        labels = []
+        values = []
+        for row in qs:
+            if not row["m"]:
+                continue
+            labels.append(row["m"].strftime("%B %Y"))
+            values.append(float(row["total"] or 0))
+        return labels, values
+
+    income_labels, income_values = build_series(income_by_month)
+    water_labels, water_values = build_series(water_by_month)
+    elec_labels, elec_values = build_series(elec_by_month)
+
+    context = {
+        **admin.site.each_context(request),
+        "title": "Reports & Dashboard",
+        "is_tenant": is_tenant,
+        "income_labels": income_labels,
+        "income_values": income_values,
+        "water_labels": water_labels,
+        "water_values": water_values,
+        "elec_labels": elec_labels,
+        "elec_values": elec_values,
+    }
+    return TemplateResponse(request, "admin/dashboard.html", context)
+
+
+admin.site.get_urls = MethodType(
+    lambda self: [path("dashboard/", self.admin_view(dashboard_view), name="dashboard")]
+    + admin.AdminSite.get_urls(self),
+    admin.site,
+)
