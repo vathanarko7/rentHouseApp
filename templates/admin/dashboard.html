@@ -22,6 +22,33 @@
   <canvas id="usage-chart" height="140"></canvas>
 </div>
 
+<div style="margin-top: 24px;">
+  <h2>{% translate "Recent actions" %}</h2>
+  {% get_admin_log 10 as admin_log for_user user %}
+  {% if not admin_log %}
+    <p class="quiet">{% translate "None available" %}</p>
+  {% else %}
+    <table class="actionlist" style="width:100%; border-collapse:collapse;">
+      <tbody>
+        {% for entry in admin_log %}
+          <tr class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
+            <td style="padding:6px 8px;">
+              {% if entry.is_deletion or not entry.get_admin_url %}
+                {{ entry.object_repr }}
+              {% else %}
+                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+              {% endif %}
+            </td>
+            <td class="mini quiet" style="padding:6px 8px; text-align:right;">
+              {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% endif %}
+</div>
+
 {{ income_labels|json_script:"income-labels" }}
 {{ income_values|json_script:"income-values" }}
 {{ water_labels|json_script:"water-labels" }}
@@ -100,28 +127,4 @@
     }
   })();
 </script>
-{% endblock %}
-
-{% block sidebar %}
-<div class="module">
-  <h2>{% translate "Recent actions" %}</h2>
-  {% get_admin_log 10 as admin_log for_user user %}
-  {% if admin_log %}
-    <ul class="actionlist">
-      {% for entry in admin_log %}
-        <li class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
-          {% if entry.is_deletion or not entry.get_admin_url %}
-            {{ entry.object_repr }}
-          {% else %}
-            <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
-          {% endif %}
-          <br>
-          <span class="mini quiet">{{ entry.content_type.name|capfirst }}</span>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <p class="quiet">{% translate "None available" %}</p>
-  {% endif %}
-</div>
 {% endblock %}

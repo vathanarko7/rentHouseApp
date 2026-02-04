@@ -1,5 +1,9 @@
-{% extends "admin/change_list.html" %} {% block object-tools %} {{ block.super
-}} {% endblock %} {% block search %} {{ block.super }}
+{% extends "admin/change_list.html" %}
+{% block object-tools %}
+{{ block.super }}
+{% endblock %}
+{% block search %}
+{{ block.super }}
 <style>
   #changelist-search .search-clear-btn {
     margin-left: 6px;
@@ -22,6 +26,33 @@
     });
 
     input.insertAdjacentElement("afterend", btn);
+  })();
+</script>
+
+<script>
+  (function () {
+    var btn = document.getElementById("bulk-send-telegram-btn");
+    if (!btn) return;
+    btn.addEventListener("click", function () {
+      var form = document.getElementById("changelist-form");
+      if (!form) return;
+      var actionSelect = form.querySelector('select[name="action"]');
+      if (!actionSelect) return;
+      var anyChecked = form.querySelectorAll('input.action-select:checked').length > 0;
+      if (!anyChecked) {
+        alert("Select at least one invoice first.");
+        return;
+      }
+      if (window.openConfirmModal) {
+        window.openConfirmModal("Send selected invoices via Telegram?", function () {
+          actionSelect.value = "bulk_send_telegram";
+          form.submit();
+        });
+      } else {
+        actionSelect.value = "bulk_send_telegram";
+        form.submit();
+      }
+    });
   })();
 </script>
 {% endblock %} {% block content %} {% if generate_invoice_url and rooms %}
@@ -50,11 +81,14 @@
         Bulk Download Bills
       </button>
     </div>
-    {% if telegram_test_url %}
-    <div>
+    <div style="display:flex; gap:8px; align-items:center;">
+      {% if telegram_test_url %}
       <a class="button" href="{{ telegram_test_url }}">Test Telegram</a>
+      {% endif %}
+      <button type="button" class="button" id="bulk-send-telegram-btn">
+        Bulk Send via Telegram
+      </button>
     </div>
-    {% endif %}
   </div>
 
   <style>
@@ -122,6 +156,68 @@
       background: var(--invoice-panel-bg);
       color: var(--invoice-text);
     }
+    .month-picker {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .month-picker-btn {
+      padding: 6px 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .month-picker-icon {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    .month-popover {
+      position: relative;
+      display: inline-block;
+    }
+    .month-popover-panel {
+      position: absolute;
+      top: 38px;
+      left: 0;
+      z-index: 2000;
+      background: var(--body-bg, #fff);
+      border: 1px solid var(--border-color, #ddd);
+      border-radius: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      padding: 10px;
+      width: 240px;
+      display: none;
+    }
+    .month-popover-panel.is-open {
+      display: block;
+    }
+    .month-popover-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .month-popover-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .month-popover-grid button {
+      padding: 6px 4px;
+      border: 1px solid var(--border-color, #e5e7eb);
+      border-radius: 6px;
+      background: var(--body-bg, #fff);
+      cursor: pointer;
+    }
+    .month-popover-grid button:hover {
+      background: var(--hairline-color, #f3f6fb);
+    }
 
     .rooms-grid {
       display: grid;
@@ -180,6 +276,18 @@
       color: var(--body-quiet-color, #6b7280);
       cursor: not-allowed;
     }
+    .btn-close {
+      background: var(--button-bg, #6b7280);
+      border: 1px solid var(--button-border, #4b5563);
+      color: var(--button-fg, #fff);
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 8px;
+      margin-left: 6px;
+    }
+    .btn-close:hover {
+      background: var(--button-hover-bg, #4b5563);
+    }
   </style>
 
   <p id="invoice-action-note" style="margin: 4px 0 10px 0; color: #5a5a5a">
@@ -202,7 +310,36 @@
         <div class="invoice-field">
           <label><strong>Month:</strong></label
           ><br />
-          <input type="month" name="month" class="month-input" required />
+          <div class="month-picker">
+            <input type="month" name="month" class="month-input" required />
+            <div class="month-popover">
+              <button type="button" class="button month-picker-btn" aria-label="Pick month">
+                <svg class="month-picker-icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M7 2v3M17 2v3M3 8h18M5 6h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"></path>
+                </svg>
+              </button>
+              <div class="month-popover-panel" aria-hidden="true">
+                <div class="month-popover-header">
+                  <select class="month-year-select" aria-label="Year"></select>
+                  <button type="button" class="button month-popover-close">Close</button>
+                </div>
+                <div class="month-popover-grid">
+                  <button type="button" data-month="01">Jan</button>
+                  <button type="button" data-month="02">Feb</button>
+                  <button type="button" data-month="03">Mar</button>
+                  <button type="button" data-month="04">Apr</button>
+                  <button type="button" data-month="05">May</button>
+                  <button type="button" data-month="06">Jun</button>
+                  <button type="button" data-month="07">Jul</button>
+                  <button type="button" data-month="08">Aug</button>
+                  <button type="button" data-month="09">Sep</button>
+                  <button type="button" data-month="10">Oct</button>
+                  <button type="button" data-month="11">Nov</button>
+                  <button type="button" data-month="12">Dec</button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <h3>Rooms</h3>
@@ -222,6 +359,9 @@
         <button type="reset" class="btn-clear" id="invoice-form-clear" disabled>
           Clear
         </button>
+        <button type="button" class="btn-close" id="invoice-form-close" style="float:right;">
+          Close
+        </button>
       </form>
     </div>
   </div>
@@ -237,6 +377,7 @@
     var submit = document.getElementById("invoice-form-submit");
     var note = document.getElementById("invoice-action-note");
     var clearBtn = document.getElementById("invoice-form-clear");
+    var closeBtn = document.getElementById("invoice-form-close");
 
     if (
       !buttons.length ||
@@ -245,7 +386,8 @@
       !submit ||
       !formWrapper ||
       !note ||
-      !clearBtn
+      !clearBtn ||
+      !closeBtn
     )
       return;
 
@@ -285,6 +427,54 @@
       }, 0);
     });
 
+    var monthInput = form.querySelector('input[name="month"]');
+    var monthPickBtn = form.querySelector(".month-picker-btn");
+    var monthPopover = form.querySelector(".month-popover-panel");
+    var monthClose = form.querySelector(".month-popover-close");
+    var yearSelect = form.querySelector(".month-year-select");
+    var monthButtons = form.querySelectorAll(".month-popover-grid button[data-month]");
+
+    if (yearSelect) {
+      var now = new Date();
+      var currentYear = now.getFullYear();
+      for (var y = currentYear + 2; y >= currentYear - 5; y--) {
+        var opt = document.createElement("option");
+        opt.value = String(y);
+        opt.textContent = String(y);
+        yearSelect.appendChild(opt);
+      }
+      yearSelect.value = String(currentYear);
+    }
+
+    function openMonthPopover() {
+      if (!monthPopover) return;
+      monthPopover.classList.add("is-open");
+      monthPopover.setAttribute("aria-hidden", "false");
+    }
+    function closeMonthPopover() {
+      if (!monthPopover) return;
+      monthPopover.classList.remove("is-open");
+      monthPopover.setAttribute("aria-hidden", "true");
+    }
+
+    if (monthPickBtn) {
+      monthPickBtn.addEventListener("click", function () {
+        openMonthPopover();
+      });
+    }
+    if (monthClose) {
+      monthClose.addEventListener("click", closeMonthPopover);
+    }
+
+    monthButtons.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        if (!monthInput || !yearSelect) return;
+        monthInput.value = yearSelect.value + "-" + btn.getAttribute("data-month");
+        monthInput.dispatchEvent(new Event("input", { bubbles: true }));
+        closeMonthPopover();
+      });
+    });
+
     buttons.forEach(function (button) {
       button.addEventListener("click", function () {
         setActive(button);
@@ -292,10 +482,25 @@
         clearBtn.disabled = true;
       });
     });
+
+    closeBtn.addEventListener("click", function () {
+      if (form) {
+        form.reset();
+        form.pristine = true;
+        clearBtn.disabled = true;
+      }
+      formWrapper.style.display = "none";
+      note.textContent = "Select a billing action to show the form.";
+      buttons.forEach(function (btn) {
+        btn.setAttribute("aria-pressed", "false");
+        btn.classList.remove("is-selected");
+      });
+    });
   })();
 </script>
 
-{% endif %} {{ block.super }}
+{% endif %}
+{{ block.super }}
 
 <div id="invoice-preview-modal" style="display: none">
   <div class="preview-backdrop"></div>
@@ -400,6 +605,38 @@
   }
   .download-btn:hover {
     background: linear-gradient(180deg, #10b981, #059669);
+  }
+  .issue-btn {
+    background: linear-gradient(180deg, #f97316, #f59e0b);
+    border: 1px solid #d97706;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(245, 158, 11, 0.35);
+  }
+  .issue-btn:hover {
+    background: linear-gradient(180deg, #f59e0b, #d97706);
+  }
+  .paid-btn {
+    background: linear-gradient(180deg, #22c55e, #16a34a);
+    border: 1px solid #15803d;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-align: center;
+    box-sizing: border-box;
+    box-shadow: 0 1px 2px rgba(22, 163, 74, 0.35);
+  }
+  .paid-btn:hover {
+    background: linear-gradient(180deg, #16a34a, #15803d);
   }
 </style>
 

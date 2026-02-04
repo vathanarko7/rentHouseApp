@@ -14,6 +14,7 @@ from zipfile import ZipFile
 from .models import MonthlyBill, Room, ClientProfile, UnitPrice
 from django.utils.formats import date_format
 from django.utils.translation import override
+from django.utils import timezone
 from .services import calculate_monthly_bill, generate_invoice_for_bill
 import json
 import mimetypes
@@ -41,7 +42,6 @@ def download_invoice(request, bill_id, lang):
         and not request.user.is_superuser
         and bill.status
         not in (
-            MonthlyBill.Status.ISSUED,
             MonthlyBill.Status.SENT,
             MonthlyBill.Status.PAID,
         )
@@ -77,7 +77,6 @@ def preview_invoice(request, bill_id):
         and not request.user.is_superuser
         and bill.status
         not in (
-            MonthlyBill.Status.ISSUED,
             MonthlyBill.Status.SENT,
             MonthlyBill.Status.PAID,
         )
@@ -115,7 +114,39 @@ def regenerate_invoice_view(request, bill_id):
         generate_invoice_for_bill(bill=bill, lang=lang)
 
     messages.success(request, "Invoice re-generated successfully.")
-    return redirect("..")
+    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+
+
+def issue_invoice_view(request, bill_id):
+    if request.user.is_active and not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden("Not allowed")
+
+    bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if bill.status != MonthlyBill.Status.DRAFT:
+        messages.error(request, "Invoice can only be issued from Draft status.")
+        return redirect(reverse("admin:rooms_monthlybill_changelist"))
+
+    bill.status = MonthlyBill.Status.ISSUED
+    bill.issued_at = timezone.now()
+    bill.save(update_fields=["status", "issued_at"])
+    messages.success(request, "Invoice issued successfully.")
+    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+
+
+def mark_paid_view(request, bill_id):
+    if request.user.is_active and not request.user.is_staff and not request.user.is_superuser:
+        return HttpResponseForbidden("Not allowed")
+
+    bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if bill.status != MonthlyBill.Status.SENT:
+        messages.error(request, "Invoice can only be marked Paid after it is Sent.")
+        return redirect(reverse("admin:rooms_monthlybill_changelist"))
+
+    bill.status = MonthlyBill.Status.PAID
+    bill.paid_at = timezone.now()
+    bill.save(update_fields=["status", "paid_at"])
+    messages.success(request, "Invoice marked as Paid.")
+    return redirect(reverse("admin:rooms_monthlybill_changelist"))
 
 
 def _post_multipart(url, fields, files, timeout=15):
@@ -167,8 +198,8 @@ def send_invoice_telegram_view(request, bill_id):
         return HttpResponseForbidden("Not allowed")
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
-    if bill.status != MonthlyBill.Status.ISSUED:
-        messages.error(request, "Invoice can only be sent when status is Issued.")
+    if bill.status not in (MonthlyBill.Status.ISSUED, MonthlyBill.Status.SENT):
+        messages.error(request, "Invoice can only be sent when status is Issued or Sent.")
         return redirect("..")
 
     renter = bill.room.renter
@@ -222,7 +253,8 @@ def send_invoice_telegram_view(request, bill_id):
         return redirect("..")
 
     bill.status = MonthlyBill.Status.SENT
-    bill.save(update_fields=["status"])
+    bill.sent_at = timezone.now()
+    bill.save(update_fields=["status", "sent_at"])
     messages.success(request, "Invoice sent via Telegram.")
     return redirect(reverse("admin:rooms_monthlybill_changelist"))
 

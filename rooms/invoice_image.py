@@ -44,6 +44,11 @@ def generate_invoice_image(
     id_number = bill.room.renter.client_profile.id_card_number
     phone = bill.room.renter.client_profile.phone
 
+    font_url = str(font_path).replace("\\", "/")
+    # A4 landscape at 96 DPI
+    a4_width = 1123
+    a4_height = 794
+
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -52,12 +57,23 @@ def generate_invoice_image(
     <style>
         @font-face {{
             font-family: 'InvoiceFont';
-            src: url("file:///{font_path}");
+            src: url("file:///{font_url}");
+        }}
+        @page {{
+            size: A4 landscape;
+            margin: 0;
+        }}
+        html, body {{
+            width: {a4_width}px;
+            height: {a4_height}px;
+            margin: 0;
+            padding: 0;
         }}
         body {{
             font-family: 'InvoiceFont', {lang["font_fallback"]};
             font-size: 16px;
-            margin: 40px;
+            padding: 40px;
+            box-sizing: border-box;
             color: #000;
         }}
         .center {{
@@ -141,8 +157,8 @@ def generate_invoice_image(
 
     <table>
         <colgroup>
-            <col style="width:15%">
-            <col style="width:25%">
+            <col style="width:17%">
+            <col style="width:23%">
             <col style="width:10%">
             <col style="width:25%">
             <col style="width:10%">
@@ -261,10 +277,16 @@ def generate_invoice_image(
     # ---------- Render HTML in headless Chromium ----------
     with sync_playwright() as p:
         browser = p.chromium.launch()
-        page = browser.new_page()
+        page = browser.new_page(
+            viewport={"width": a4_width, "height": a4_height},
+            device_scale_factor=1,
+        )
         page.set_content(html_content, wait_until="networkidle")
-        # Take screenshot of full page
-        page.screenshot(path=filepath, full_page=True)
+        # Take screenshot at exact A4 size
+        page.screenshot(
+            path=filepath,
+            clip={"x": 0, "y": 0, "width": a4_width, "height": a4_height},
+        )
         browser.close()
 
     return filename

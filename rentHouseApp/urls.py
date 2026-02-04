@@ -17,8 +17,12 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.shortcuts import redirect
+from rooms.admin import dashboard_view
 
 urlpatterns = [
+    path("", lambda request: redirect("admin:dashboard"), name="root"),
+    path("tenant/dashboard/", dashboard_view, name="tenant_dashboard"),
     path("i18n/", include("django.conf.urls.i18n")),
     path("admin/", admin.site.urls),
 ]

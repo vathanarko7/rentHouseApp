@@ -22,6 +22,17 @@
 {{ block.super }}
 {% endblock %}
 
+{% block userlinks %}
+  {% if user.has_usable_password %}
+    <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
+  {% endif %}
+  <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+    {% csrf_token %}
+    <button type="submit">{% translate 'Log out' %}</button>
+  </form>
+  {% include "admin/color_theme_toggle.html" %}
+{% endblock %}
+
 {% block extrastyle %}
 {{ block.super }}
 <style>
@@ -58,11 +69,62 @@
   .messagelist .msg-close:hover {
     opacity: 1;
   }
+  #header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+  }
+  .confirm-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    display: none;
+  }
+  .confirm-modal.is-open {
+    display: block;
+  }
+  .confirm-modal__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+  .confirm-modal__panel {
+    position: relative;
+    margin: 20vh auto 0;
+    width: min(420px, 92vw);
+    background: var(--body-bg, #fff);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 10px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+  }
+  .confirm-modal__title {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+  }
+  .confirm-modal__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 14px;
+  }
 </style>
 {% endblock %}
 
 {% block extrabody %}
 {{ block.super }}
+<div class="confirm-modal" id="confirm-modal" aria-hidden="true">
+  <div class="confirm-modal__backdrop"></div>
+  <div class="confirm-modal__panel" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+    <h3 class="confirm-modal__title" id="confirm-modal-title">Confirm</h3>
+    <p id="confirm-modal-message"></p>
+    <div class="confirm-modal__actions">
+      <button type="button" class="button" id="confirm-modal-cancel">Cancel</button>
+      <button type="button" class="button default" id="confirm-modal-ok">OK</button>
+    </div>
+  </div>
+</div>
 <script>
   (function () {
     function attachCloseButtons(messages) {
@@ -101,6 +163,56 @@
     } else {
       hideMessages();
     }
+  })();
+</script>
+<script>
+  (function () {
+    var modal = document.getElementById("confirm-modal");
+    if (!modal) return;
+    var message = document.getElementById("confirm-modal-message");
+    var okBtn = document.getElementById("confirm-modal-ok");
+    var cancelBtn = document.getElementById("confirm-modal-cancel");
+    var backdrop = modal.querySelector(".confirm-modal__backdrop");
+    var resolveFn = null;
+
+    function openConfirm(text, onConfirm) {
+      message.textContent = text || "Are you sure?";
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      resolveFn = onConfirm;
+      okBtn.focus();
+    }
+
+    function closeConfirm() {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      resolveFn = null;
+    }
+
+    okBtn.addEventListener("click", function () {
+      var cb = resolveFn;
+      closeConfirm();
+      if (cb) cb(true);
+    });
+    cancelBtn.addEventListener("click", function () {
+      closeConfirm();
+    });
+    if (backdrop) backdrop.addEventListener("click", closeConfirm);
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") closeConfirm();
+    });
+
+    document.addEventListener("click", function (e) {
+      var trigger = e.target.closest("[data-confirm-message]");
+      if (!trigger) return;
+      e.preventDefault();
+      var msg = trigger.getAttribute("data-confirm-message");
+      openConfirm(msg, function () {
+        window.location.href = trigger.getAttribute("href");
+      });
+    });
+
+    window.openConfirmModal = openConfirm;
   })();
 </script>
 {% endblock %}

@@ -1,4 +1,5 @@
-from django.contrib import admin
+from django.contrib import admin, messages
+from django.contrib.admin import helpers
 from django.contrib.admin import SimpleListFilter
 from types import MethodType
 from django.contrib.auth.models import User
@@ -9,19 +10,34 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.utils.formats import date_format
 from django.shortcuts import redirect
+from django.conf import settings
+from django.utils import timezone
+import os
 from django import forms
-from rooms.models import ClientProfile, MonthlyBill, Room, UnitPrice, Water, Electricity, RoomHistory
+from rooms.models import (
+    ClientProfile,
+    MonthlyBill,
+    Room,
+    UnitPrice,
+    Water,
+    Electricity,
+    RoomHistory,
+)
 from django.utils.html import format_html
 from rooms.views import (
     download_invoice,
     generate_invoices_view,
     bulk_download_view,
     regenerate_invoice_view,
+    issue_invoice_view,
+    mark_paid_view,
     preview_invoice,
     send_invoice_telegram_view,
     test_telegram_connection_view,
     test_clientprofile_telegram_view,
+    _post_multipart,
 )
+from rooms.services import generate_invoice_for_bill
 from django.urls import reverse, path, re_path
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
@@ -172,10 +188,57 @@ class ClientProfileAdmin(admin.ModelAdmin):
         return not _is_tenant(request.user)
 
     def has_change_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if obj is None:
+            return True
+        return obj.status == MonthlyBill.Status.DRAFT
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
+        if obj and obj.status != MonthlyBill.Status.DRAFT:
+            messages.error(request, "This bill is locked and cannot be edited.")
+            return redirect("admin:rooms_monthlybill_changelist")
+        return super().change_view(request, object_id, form_url, extra_context)
 
     def has_delete_permission(self, request, obj=None):
         return not _is_tenant(request.user)
+
+    def get_actions(self, request):
+        actions = super().get_actions(request)
+        if "delete_selected" in actions:
+            del actions["delete_selected"]
+        return actions
+
+    def delete_queryset(self, request, queryset):
+        paid_qs = queryset.filter(status=MonthlyBill.Status.PAID)
+        if paid_qs.exists():
+            self.message_user(
+                request,
+                "Paid invoices cannot be deleted.",
+                level=messages.ERROR,
+            )
+            queryset = queryset.exclude(status=MonthlyBill.Status.PAID)
+        super().delete_queryset(request, queryset)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.status != MonthlyBill.Status.DRAFT:
+            return [field.name for field in obj._meta.fields]
+        return super().get_readonly_fields(request, obj)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.status != MonthlyBill.Status.DRAFT:
+            return [field.name for field in obj._meta.fields]
+        return super().get_readonly_fields(request, obj)
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+        if request.user.is_staff and not request.user.is_superuser:
+            raise PermissionDenied
+        return super().save_model(request, obj, form, change)
 
     def email(self, obj):
         user = obj.user
@@ -288,7 +351,9 @@ class RoomHistoryInline(admin.TabularInline):
     classes = ("collapse",)
 
     def has_view_permission(self, request, obj=None):
-        return request.user.is_active and (request.user.is_staff or request.user.is_superuser)
+        return request.user.is_active and (
+            request.user.is_staff or request.user.is_superuser
+        )
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -535,16 +600,32 @@ class WaterAdmin(admin.ModelAdmin):
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
+    list_display_links = ("room",)
 
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
 
     month_year.short_description = "Month"
 
+    def room_name(self, obj):
+        return obj.room.room_number
+
+    room_name.short_description = "Room"
+
     def get_list_filter(self, request):
         if _is_tenant(request.user):
             return (ReadingMonthFilter,)
         return self.list_filter
+
+    def get_list_display(self, request):
+        if _is_tenant(request.user):
+            return ("month_year", "room_name", "meter_value")
+        return self.list_display
+
+    def get_list_display_links(self, request, list_display):
+        if _is_tenant(request.user):
+            return None
+        return self.list_display_links
 
     def has_module_permission(self, request):
         return (
@@ -580,16 +661,32 @@ class ElectricityAdmin(admin.ModelAdmin):
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
+    list_display_links = ("room",)
 
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
 
     month_year.short_description = "Month"
 
+    def room_name(self, obj):
+        return obj.room.room_number
+
+    room_name.short_description = "Room"
+
     def get_list_filter(self, request):
         if _is_tenant(request.user):
             return (ReadingMonthFilter,)
         return self.list_filter
+
+    def get_list_display(self, request):
+        if _is_tenant(request.user):
+            return ("month_year", "room_name", "meter_value")
+        return self.list_display
+
+    def get_list_display_links(self, request, list_display):
+        if _is_tenant(request.user):
+            return None
+        return self.list_display_links
 
     def has_module_permission(self, request):
         return (
@@ -622,15 +719,16 @@ class ElectricityAdmin(admin.ModelAdmin):
 @admin.register(MonthlyBill)
 class MonthlyBillAdmin(admin.ModelAdmin):
     list_display = (
-        "id",
         "month_year",
         "room",
         "renter",
         "status_badge",
+        "status_date",
         "total",
         "invoice_actions",
+        "row_actions",
     )
-    list_filter = ("room", "status", MonthlyBillMonthFilter)
+    list_filter = (MonthlyBillMonthFilter, "room", "status")
     search_fields = (
         "room__room_number",
         "room__renter__username",
@@ -639,6 +737,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     )
     ordering = ("-month", "room__room_number")
     list_per_page = 25
+    actions = ["bulk_send_telegram"]
 
     def has_module_permission(self, request):
         return (
@@ -650,6 +749,24 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             return (MonthlyBillMonthFilter,)
         return self.list_filter
 
+    def get_list_display(self, request):
+        if _is_tenant(request.user):
+            return (
+                "month_year",
+                "room_name",
+                "renter",
+                "status_badge",
+                "status_date",
+                "total",
+                "row_actions",
+            )
+        return self.list_display
+
+    def get_list_display_links(self, request, list_display):
+        if _is_tenant(request.user):
+            return None
+        return super().get_list_display_links(request, list_display)
+
     def get_queryset(self, request):
         self._request = request
         qs = super().get_queryset(request)
@@ -657,12 +774,97 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             return qs.filter(
                 room__renter=request.user,
                 status__in=[
-                    MonthlyBill.Status.ISSUED,
                     MonthlyBill.Status.SENT,
                     MonthlyBill.Status.PAID,
                 ],
             )
         return qs
+
+    def bulk_send_telegram(self, request, queryset):
+        if _is_tenant(request.user):
+            self.message_user(request, "Not allowed.", level=messages.ERROR)
+            return
+
+        if "post" not in request.POST:
+            if not queryset.exists():
+                self.message_user(
+                    request, "Select at least one invoice.", level=messages.ERROR
+                )
+                return
+            context = {
+                **self.admin_site.each_context(request),
+                "title": "Confirm bulk send",
+                "action_name": "bulk_send_telegram",
+                "queryset": queryset,
+                "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
+            }
+            return TemplateResponse(
+                request,
+                "admin/rooms/monthlybill/bulk_send_confirm.html",
+                context,
+            )
+
+        token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+        if not token:
+            self.message_user(
+                request, "Telegram bot token is not configured.", level=messages.ERROR
+            )
+            return
+
+        sent_count = 0
+        skipped = 0
+        for bill in queryset:
+            if bill.status != MonthlyBill.Status.ISSUED:
+                skipped += 1
+                continue
+            renter = bill.room.renter
+            chat_id = None
+            if renter:
+                chat_id = getattr(
+                    getattr(renter, "client_profile", None), "telegram_chat_id", None
+                )
+            if not chat_id:
+                skipped += 1
+                continue
+
+            filename = generate_invoice_for_bill(bill=bill, lang="kh")
+            invoices_dir = os.path.join(
+                settings.MEDIA_ROOT, "invoices", "images", bill.month.strftime("%Y_%m")
+            )
+            filepath = os.path.join(invoices_dir, filename)
+            if not os.path.exists(filepath):
+                skipped += 1
+                continue
+
+            url = f"https://api.telegram.org/bot{token}/sendPhoto"
+            try:
+                resp = _post_multipart(
+                    url,
+                    {"chat_id": chat_id},
+                    {"photo": filepath},
+                )
+                if not resp.get("ok"):
+                    skipped += 1
+                    continue
+            except Exception:
+                skipped += 1
+                continue
+
+            bill.status = MonthlyBill.Status.SENT
+            bill.sent_at = timezone.now()
+            bill.save(update_fields=["status", "sent_at"])
+            sent_count += 1
+
+        if sent_count:
+            self.message_user(
+                request, f"Sent {sent_count} invoice(s).", level=messages.SUCCESS
+            )
+        if skipped:
+            self.message_user(
+                request, f"Skipped {skipped} invoice(s).", level=messages.WARNING
+            )
+
+    bulk_send_telegram.short_description = "Send via Telegram"
 
     def has_view_permission(self, request, obj=None):
         if not _is_tenant(request.user):
@@ -672,10 +874,18 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return obj.room.renter_id == request.user.id
 
     def has_add_permission(self, request):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        return request.user.is_superuser
 
     def has_change_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if not request.user.is_superuser:
+            return False
+        if obj is None:
+            return True
+        return obj.status == MonthlyBill.Status.DRAFT
 
     def has_delete_permission(self, request, obj=None):
         return not _is_tenant(request.user)
@@ -687,6 +897,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return "-"
 
     renter.short_description = "Renter"
+
+    def room_name(self, obj):
+        return obj.room.room_number
+
+    room_name.short_description = "Room"
 
     def status_badge(self, obj):
         color_map = {
@@ -712,6 +927,17 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     status_badge.short_description = "Status"
 
+    def status_date(self, obj):
+        if obj.status == MonthlyBill.Status.ISSUED and obj.issued_at:
+            return date_format(obj.issued_at, "SHORT_DATETIME_FORMAT")
+        if obj.status == MonthlyBill.Status.SENT and obj.sent_at:
+            return date_format(obj.sent_at, "SHORT_DATETIME_FORMAT")
+        if obj.status == MonthlyBill.Status.PAID and obj.paid_at:
+            return date_format(obj.paid_at, "SHORT_DATETIME_FORMAT")
+        return ""
+
+    status_date.short_description = "Status date"
+
     def month_year(self, obj):
         return date_format(obj.month, "F Y")
 
@@ -724,6 +950,16 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 "<int:bill_id>/invoice/regenerate/",
                 self.admin_site.admin_view(regenerate_invoice_view),
                 name="rooms_monthlybill_regenerate_invoice",
+            ),
+            path(
+                "<int:bill_id>/issue/",
+                self.admin_site.admin_view(issue_invoice_view),
+                name="rooms_monthlybill_issue",
+            ),
+            path(
+                "<int:bill_id>/mark-paid/",
+                self.admin_site.admin_view(mark_paid_view),
+                name="rooms_monthlybill_mark_paid",
             ),
             path(
                 "<int:bill_id>/invoice/send-telegram/",
@@ -767,39 +1003,80 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 '<a class="button regen-btn btn-sm" href="{}">Re-generate</a> ',
                 reverse("admin:rooms_monthlybill_regenerate_invoice", args=[obj.id]),
             )
+        issue_link = ""
+        if not is_tenant and obj.status == MonthlyBill.Status.DRAFT:
+            issue_confirm = _("Issue this invoice? It will be locked.")
+            issue_link = format_html(
+                '<a class="button issue-btn btn-sm" href="{}" '
+                'data-confirm-message="{}">Issue</a> ',
+                reverse("admin:rooms_monthlybill_issue", args=[obj.id]),
+                issue_confirm,
+            )
         send_link = ""
         if not is_tenant and obj.status == MonthlyBill.Status.ISSUED:
+            send_confirm = _("Send this invoice to the tenant?")
             send_link = format_html(
-                '<a class="button send-btn btn-sm" href="{}">Send</a> ',
+                '<a class="button send-btn btn-sm" href="{}" '
+                'data-confirm-message="{}">Send</a> ',
                 reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
+                send_confirm,
+            )
+        resend_link = ""
+        if not is_tenant and obj.status == MonthlyBill.Status.SENT:
+            resend_confirm = _("Re-send this invoice to the tenant?")
+            resend_link = format_html(
+                '<a class="button send-btn btn-sm" href="{}" '
+                'data-confirm-message="{}">Re-send</a> ',
+                reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
+                resend_confirm,
+            )
+        paid_link = ""
+        if not is_tenant and obj.status == MonthlyBill.Status.SENT:
+            paid_confirm = _("Mark this invoice as paid?")
+            paid_link = format_html(
+                '<a class="button paid-btn btn-sm" href="{}" '
+                'data-confirm-message="{}">Mark Paid</a> ',
+                reverse("admin:rooms_monthlybill_mark_paid", args=[obj.id]),
+                paid_confirm,
             )
         test_link = ""
-        show_preview = True
-        if is_tenant and obj.status not in (MonthlyBill.Status.ISSUED, MonthlyBill.Status.PAID):
-            show_preview = False
-        if not show_preview and not regen_link:
+        if not (regen_link or issue_link or send_link or resend_link or paid_link or test_link):
             return "-"
-        preview_btn = ""
-        if show_preview:
-            preview_btn = format_html(
-                '<button class="button preview-invoice-btn preview-btn btn-sm" '
-                'data-preview-url="{}" type="button">Preview</button>',
-                reverse("admin:rooms_monthlybill_preview_invoice", args=[obj.id]),
-            )
+        return format_html(
+            "{}{}{}{}{}{}",
+            regen_link,
+            issue_link,
+            send_link,
+            resend_link,
+            paid_link,
+            test_link,
+        )
+
+    invoice_actions.short_description = "Invoice"
+
+    def row_actions(self, obj):
+        req = getattr(self, "_request", None)
+        is_tenant = _is_tenant(req.user) if req else False
+        show_preview = True
+        if is_tenant and obj.status not in (
+            MonthlyBill.Status.PAID,
+            MonthlyBill.Status.SENT,
+        ):
+            show_preview = False
+        if not show_preview:
+            return "-"
+        preview_btn = format_html(
+            '<button class="button preview-invoice-btn preview-btn btn-sm" '
+            'data-preview-url="{}" type="button">Preview</button>',
+            reverse("admin:rooms_monthlybill_preview_invoice", args=[obj.id]),
+        )
         download_btn = format_html(
             ' <a class="button download-btn btn-sm" href="{}">Download</a>',
             reverse("admin:rooms_monthlybill_download_invoice", args=[obj.id, "kh"]),
         )
-        return format_html(
-            "{}{}{}{}{}",
-            regen_link,
-            send_link,
-            test_link,
-            preview_btn,
-            download_btn,
-        )
+        return format_html("{}{}", preview_btn, download_btn)
 
-    invoice_actions.short_description = "Invoice"
+    row_actions.short_description = "Actions"
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -808,7 +1085,9 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 {
                     "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
                     "bulk_download_url": reverse("admin:rooms_bulk_download"),
-                    "telegram_test_url": reverse("admin:rooms_monthlybill_test_telegram"),
+                    "telegram_test_url": reverse(
+                        "admin:rooms_monthlybill_test_telegram"
+                    ),
                     "rooms": Room.objects.all(),
                 }
             )
@@ -855,7 +1134,12 @@ def _custom_get_app_list(self, request, app_label=None):
                     "name": "Reports & Dashboard",
                     "object_name": "Dashboard",
                     "admin_url": reverse("admin:dashboard"),
-                    "perms": {"view": True, "add": False, "change": False, "delete": False},
+                    "perms": {
+                        "view": True,
+                        "add": False,
+                        "change": False,
+                        "delete": False,
+                    },
                 }
             ],
         }
@@ -908,7 +1192,10 @@ def _custom_admin_login(self, request, extra_context=None):
     if request.method == "POST":
         form = TenantAdminAuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            auth_login(request, form.get_user())
+            user = form.get_user()
+            auth_login(request, user)
+            if _is_tenant(user):
+                return redirect("tenant_dashboard")
             return redirect("admin:dashboard")
             if not url_has_allowed_host_and_scheme(
                 url=redirect_to,

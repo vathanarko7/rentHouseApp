@@ -160,6 +160,9 @@ class MonthlyBill(models.Model):
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.DRAFT
     )
+    issued_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 
