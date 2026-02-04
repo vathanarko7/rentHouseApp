@@ -204,6 +204,16 @@ class ClientProfileAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return not _is_tenant(request.user)
 
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.status != MonthlyBill.Status.DRAFT:
+            return [
+                "room_cost",
+                "water_cost",
+                "electricity_cost",
+                "total",
+            ]
+        return super().get_readonly_fields(request, obj)
+
     def get_actions(self, request):
         actions = super().get_actions(request)
         if "delete_selected" in actions:
