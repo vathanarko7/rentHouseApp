@@ -6,6 +6,9 @@ from datetime import date
 from dateutil.relativedelta import relativedelta
 from rentHouseApp import settings
 import os
+import tempfile
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 from rooms.utils import normalize_to_month_start
 
 
@@ -262,19 +265,22 @@ def generate_invoice_image(
     </body>
     </html>
     """
-    # -------- Create invoices directory --------
-    invoices_dir = os.path.join(
-        settings.MEDIA_ROOT, "invoices/images", bill.month.strftime("%Y_%m")
-    )
-    os.makedirs(invoices_dir, exist_ok=True)
-    # filename and filepath
+    # filename and storage path
     suffix = lang["suffix"]
     filename = (
         f"invoice_room_{room_number}_" f"{bill.month.strftime('%Y_%m')}_{suffix}.png"
     )
-    filepath = os.path.join(invoices_dir, filename)
+    storage_path = os.path.join(
+        "invoices",
+        "images",
+        bill.month.strftime("%Y_%m"),
+        filename,
+    ).replace("\\", "/")
 
     # ---------- Render HTML in headless Chromium ----------
+    tmp_file = tempfile.NamedTemporaryFile(suffix=".png", delete=False)
+    tmp_path = tmp_file.name
+    tmp_file.close()
     with sync_playwright() as p:
         browser = p.chromium.launch()
         page = browser.new_page(
@@ -284,9 +290,13 @@ def generate_invoice_image(
         page.set_content(html_content, wait_until="networkidle")
         # Take screenshot at exact A4 size
         page.screenshot(
-            path=filepath,
+            path=tmp_path,
             clip={"x": 0, "y": 0, "width": a4_width, "height": a4_height},
         )
         browser.close()
+
+    with open(tmp_path, "rb") as f:
+        default_storage.save(storage_path, ContentFile(f.read()))
+    os.unlink(tmp_path)
 
     return filename

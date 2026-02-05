@@ -5,6 +5,7 @@ from datetime import date
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 import os
 
 from django.urls import reverse
@@ -22,6 +23,12 @@ import uuid
 import urllib.request
 import urllib.error
 import urllib.parse
+
+
+def _invoice_storage_path(bill, filename):
+    return (
+        f"invoices/images/{bill.month.strftime('%Y_%m')}/{filename}".replace("\\", "/")
+    )
 
 
 def download_invoice(request, bill_id, lang):
@@ -49,15 +56,14 @@ def download_invoice(request, bill_id, lang):
         raise Http404("Not found")
     filename = generate_invoice_for_bill(bill, lang=lang)
 
-    invoices_dir = os.path.join(
-        settings.MEDIA_ROOT, "invoices", "images", bill.month.strftime("%Y_%m")
-    )
-    filepath = os.path.join(invoices_dir, filename)
+    storage_path = _invoice_storage_path(bill, filename)
+    if not default_storage.exists(storage_path):
+        raise Http404("Invoice file not found")
 
     return FileResponse(
-        open(filepath, "rb"),
+        default_storage.open(storage_path, "rb"),
         as_attachment=True,
-        filename=filepath.split("/")[-1],
+        filename=filename,
         content_type="image/png",
     )
 
@@ -84,15 +90,14 @@ def preview_invoice(request, bill_id):
         raise Http404("Not found")
 
     filename = generate_invoice_for_bill(bill, lang="kh")
-    invoices_dir = os.path.join(
-        settings.MEDIA_ROOT, "invoices", "images", bill.month.strftime("%Y_%m")
-    )
-    filepath = os.path.join(invoices_dir, filename)
+    storage_path = _invoice_storage_path(bill, filename)
+    if not default_storage.exists(storage_path):
+        raise Http404("Invoice file not found")
 
     return FileResponse(
-        open(filepath, "rb"),
+        default_storage.open(storage_path, "rb"),
         as_attachment=False,
-        filename=filepath.split("/")[-1],
+        filename=filename,
         content_type="image/png",
     )
 
@@ -159,11 +164,14 @@ def _post_multipart(url, fields, files, timeout=15):
         body.extend(str(value).encode())
         body.extend(b"\r\n")
 
-    for name, filepath in files.items():
-        filename = os.path.basename(filepath)
+    for name, file_value in files.items():
+        if isinstance(file_value, tuple):
+            filename, file_data = file_value
+        else:
+            filename = os.path.basename(file_value)
+            with open(file_value, "rb") as f:
+                file_data = f.read()
         ctype = mimetypes.guess_type(filename)[0] or "application/octet-stream"
-        with open(filepath, "rb") as f:
-            file_data = f.read()
         body.extend(f"--{boundary}\r\n".encode())
         body.extend(
             f'Content-Disposition: form-data; name="{name}"; filename="{filename}"\r\n'.encode()
@@ -218,13 +226,13 @@ def send_invoice_telegram_view(request, bill_id):
         return redirect("..")
 
     filename = generate_invoice_for_bill(bill=bill, lang="kh")
-    invoices_dir = os.path.join(
-        settings.MEDIA_ROOT, "invoices", "images", bill.month.strftime("%Y_%m")
-    )
-    filepath = os.path.join(invoices_dir, filename)
-    if not os.path.exists(filepath):
+    storage_path = _invoice_storage_path(bill, filename)
+    if not default_storage.exists(storage_path):
         messages.error(request, "Invoice file not found.")
         return redirect("..")
+
+    with default_storage.open(storage_path, "rb") as f:
+        invoice_bytes = f.read()
 
     url = f"https://api.telegram.org/bot{token}/sendPhoto"
     unit_price = UnitPrice.objects.get(date=bill.month)
@@ -243,7 +251,7 @@ def send_invoice_telegram_view(request, bill_id):
         resp = _post_multipart(
             url,
             {"chat_id": chat_id, "caption": caption},
-            {"photo": filepath},
+            {"photo": (filename, invoice_bytes)},
         )
         if not resp.get("ok"):
             messages.error(request, f"Telegram error: {resp}")
@@ -465,10 +473,6 @@ def generate_and_download_view(request):
         buffer = io.BytesIO()
         zip_file = ZipFile(buffer, "w")
 
-        invoice_dir = os.path.join(
-            settings.MEDIA_ROOT, "invoices/images", bill_month.strftime("%Y_%m")
-        )
-
         generated_count = 0
 
         rooms_qs = (
@@ -482,9 +486,10 @@ def generate_and_download_view(request):
                     bill=bill,
                     lang="kh",
                 )
-                file_path = os.path.join(invoice_dir, file_name)
-                if os.path.exists(file_path):
-                    zip_file.write(file_path, file_name)
+                storage_path = _invoice_storage_path(bill, file_name)
+                if default_storage.exists(storage_path):
+                    with default_storage.open(storage_path, "rb") as f:
+                        zip_file.writestr(file_name, f.read())
                     generated_count += 1
                 else:
                     messages.warning(
@@ -545,14 +550,14 @@ def bulk_download_view(request):
 
         for bill in bills:
             # path to existing invoice image
-            invoice_dir = os.path.join(
-                settings.MEDIA_ROOT, "invoices/images", bill_month.strftime("%Y_%m")
+            filename = (
+                f"invoice_room_{bill.room.room_number}_{bill.month.strftime('%Y_%m')}_kh.png"
             )
-            filename = f"invoice_room_{bill.room.room_number}_{bill.month.strftime('%Y_%m')}_kh.png"
-            invoice_path = os.path.join(invoice_dir, filename)
+            invoice_path = _invoice_storage_path(bill, filename)
 
-            if os.path.exists(invoice_path):
-                zip_file.write(invoice_path, os.path.basename(invoice_path))
+            if default_storage.exists(invoice_path):
+                with default_storage.open(invoice_path, "rb") as f:
+                    zip_file.writestr(filename, f.read())
             else:
                 messages.warning(
                     request, f"Invoice not found for room {bill.room.room_number}"
