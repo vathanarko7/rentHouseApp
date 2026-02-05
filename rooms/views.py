@@ -23,6 +23,7 @@ import uuid
 import urllib.request
 import urllib.error
 import urllib.parse
+import time
 
 
 def _invoice_storage_path(bill, filename):
@@ -278,21 +279,28 @@ def test_telegram_connection_view(request):
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
         messages.error(request, "Telegram bot token is not configured.")
-        return redirect(reverse("admin:rooms_monthlybill_changelist"))
+        return redirect(reverse("admin:rooms_clientprofile_changelist"))
 
     url = f"https://api.telegram.org/bot{token}/getMe"
-    try:
-        with urllib.request.urlopen(url, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        if not data.get("ok"):
-            messages.error(request, f"Telegram test failed: {data}")
-            return redirect(reverse("admin:rooms_monthlybill_changelist"))
-        result = data.get("result") or {}
-        bot_name = result.get("username") or result.get("first_name") or "Unknown"
-        messages.success(request, f"Telegram connection OK: {bot_name}")
-    except Exception as e:
-        messages.error(request, f"Telegram test failed: {str(e)}")
-    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+    last_error = None
+    for attempt in range(2):
+        try:
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            if not data.get("ok"):
+                messages.error(request, f"Telegram test failed: {data}")
+                return redirect(reverse("admin:rooms_clientprofile_changelist"))
+            result = data.get("result") or {}
+            bot_name = result.get("username") or result.get("first_name") or "Unknown"
+            messages.success(request, f"Telegram connection OK: {bot_name}")
+            return redirect(reverse("admin:rooms_clientprofile_changelist"))
+        except Exception as e:
+            last_error = e
+            if attempt == 0:
+                time.sleep(0.5)
+                continue
+    messages.error(request, f"Telegram test failed: {str(last_error)}")
+    return redirect(reverse("admin:rooms_clientprofile_changelist"))
 
 
 def test_tenant_telegram_view(request, bill_id):
@@ -334,17 +342,24 @@ def test_tenant_telegram_view(request, bill_id):
     except Exception:
         text = f"Test message for room {bill.room.room_number}."
     payload = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode("utf-8")
-    try:
-        req = urllib.request.Request(url, data=payload)
-        req.add_header("Content-Type", "application/x-www-form-urlencoded")
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        if not data.get("ok"):
-            messages.error(request, f"Telegram test failed: {data}")
+    last_error = None
+    for attempt in range(2):
+        try:
+            req = urllib.request.Request(url, data=payload)
+            req.add_header("Content-Type", "application/x-www-form-urlencoded")
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            if not data.get("ok"):
+                messages.error(request, f"Telegram test failed: {data}")
+                return redirect("..")
+            messages.success(request, "Tenant Telegram test message sent.")
             return redirect("..")
-        messages.success(request, "Tenant Telegram test message sent.")
-    except Exception as e:
-        messages.error(request, f"Telegram test failed: {str(e)}")
+        except Exception as e:
+            last_error = e
+            if attempt == 0:
+                time.sleep(0.5)
+                continue
+    messages.error(request, f"Telegram test failed: {str(last_error)}")
     return redirect("..")
 
 
@@ -387,17 +402,24 @@ def test_clientprofile_telegram_view(request, profile_id):
     except Exception:
         text = "Test message."
     payload = urllib.parse.urlencode({"chat_id": chat_id, "text": text}).encode("utf-8")
-    try:
-        req = urllib.request.Request(url, data=payload)
-        req.add_header("Content-Type", "application/x-www-form-urlencoded")
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-        if not data.get("ok"):
-            messages.error(request, f"Telegram test failed: {data}")
+    last_error = None
+    for attempt in range(2):
+        try:
+            req = urllib.request.Request(url, data=payload)
+            req.add_header("Content-Type", "application/x-www-form-urlencoded")
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+            if not data.get("ok"):
+                messages.error(request, f"Telegram test failed: {data}")
+                return redirect("admin:rooms_clientprofile_changelist")
+            messages.success(request, "Tenant Telegram test message sent.")
             return redirect("admin:rooms_clientprofile_changelist")
-        messages.success(request, "Tenant Telegram test message sent.")
-    except Exception as e:
-        messages.error(request, f"Telegram test failed: {str(e)}")
+        except Exception as e:
+            last_error = e
+            if attempt == 0:
+                time.sleep(0.5)
+                continue
+    messages.error(request, f"Telegram test failed: {str(last_error)}")
     return redirect("admin:rooms_clientprofile_changelist")
 
 

@@ -8,3 +8,16 @@
   {{ cl.opts.verbose_name_plural|capfirst }}
 </div>
 {% endblock %}
+
+{% block object-tools %}
+<div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+  <div style="display:flex; align-items:center; gap:8px;">
+    {{ block.super }}
+  </div>
+  <div style="display:flex; align-items:center; gap:8px;">
+    <a class="button" href="{% url 'admin:rooms_monthlybill_test_telegram' %}">
+      Test Telegram
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -190,29 +190,13 @@ class ClientProfileAdmin(admin.ModelAdmin):
     def has_change_permission(self, request, obj=None):
         if _is_tenant(request.user):
             return False
-        if obj is None:
-            return True
-        return obj.status == MonthlyBill.Status.DRAFT
+        return True
 
     def change_view(self, request, object_id, form_url="", extra_context=None):
-        obj = self.get_object(request, object_id)
-        if obj and obj.status != MonthlyBill.Status.DRAFT:
-            messages.error(request, "This bill is locked and cannot be edited.")
-            return redirect("admin:rooms_monthlybill_changelist")
         return super().change_view(request, object_id, form_url, extra_context)
 
     def has_delete_permission(self, request, obj=None):
         return not _is_tenant(request.user)
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj and obj.status != MonthlyBill.Status.DRAFT:
-            return [
-                "room_cost",
-                "water_cost",
-                "electricity_cost",
-                "total",
-            ]
-        return super().get_readonly_fields(request, obj)
 
     def get_actions(self, request):
         actions = super().get_actions(request)
@@ -230,16 +214,6 @@ class ClientProfileAdmin(admin.ModelAdmin):
             )
             queryset = queryset.exclude(status=MonthlyBill.Status.PAID)
         super().delete_queryset(request, queryset)
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj and obj.status != MonthlyBill.Status.DRAFT:
-            return [field.name for field in obj._meta.fields]
-        return super().get_readonly_fields(request, obj)
-
-    def get_readonly_fields(self, request, obj=None):
-        if obj and obj.status != MonthlyBill.Status.DRAFT:
-            return [field.name for field in obj._meta.fields]
-        return super().get_readonly_fields(request, obj)
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = extra_context or {}
@@ -269,7 +243,14 @@ class ClientProfileAdmin(admin.ModelAdmin):
                 "No chat ID",
             )
         return format_html(
-            '<a class="button" href="{}">Test Chat</a>',
+            '<a class="button test-chat-btn" href="{}">'
+            '<span class="test-chat-label">Test Chat</span>'
+            '<span class="test-chat-icon" aria-hidden="true">'
+            '<svg viewBox="0 0 24 24" width="16" height="16">'
+            '<path fill="currentColor" d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10 1.77 0 3.44-.46 4.9-1.26l3.1 1.02-1.02-3.1A9.96 9.96 0 0 0 22 12 10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.53 12.63l-.42.58.57 1.73-1.73-.57-.58.42A8 8 0 1 1 12 4zm-3 6h6v2H9V10zm0 4h4v2H9v-2z"/>'
+            '</svg>'
+            '</span>'
+            '</a>',
             reverse("admin:rooms_clientprofile_test_telegram", args=[obj.id]),
         )
 
@@ -1095,9 +1076,6 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 {
                     "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
                     "bulk_download_url": reverse("admin:rooms_bulk_download"),
-                    "telegram_test_url": reverse(
-                        "admin:rooms_monthlybill_test_telegram"
-                    ),
                     "rooms": Room.objects.all(),
                 }
             )
