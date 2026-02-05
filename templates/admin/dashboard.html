@@ -3,6 +3,14 @@
 
 {% block content_title %}{% endblock %}
 
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+  <a href="{% url 'admin:dashboard' %}">{% translate "Home" %}</a>
+  &rsaquo;
+  {% translate "Reports & Dashboard" %}
+</div>
+{% endblock %}
+
 {% block content %}
 <h1>{% translate "Reports & Dashboard" %}</h1>
 
@@ -12,42 +20,48 @@
 <p>{% translate "Showing all rooms (global view)." %}</p>
 {% endif %}
 
-<div style="margin-top: 16px;">
-  <h2>{% translate "Income per Month" %}</h2>
-  <canvas id="income-chart" height="120"></canvas>
-</div>
+<details open style="margin-top: 16px;">
+  <summary style="cursor:pointer; font-weight:600;">{% translate "Income per Month" %}</summary>
+  <div style="margin-top: 10px;">
+    <canvas id="income-chart" height="120"></canvas>
+  </div>
+</details>
 
-<div style="margin-top: 24px;">
-  <h2>{% translate "Water / Electricity Trends" %}</h2>
-  <canvas id="usage-chart" height="140"></canvas>
-</div>
+<details style="margin-top: 24px;">
+  <summary style="cursor:pointer; font-weight:600;">{% translate "Water / Electricity Trends" %}</summary>
+  <div style="margin-top: 10px;">
+    <canvas id="usage-chart" height="140"></canvas>
+  </div>
+</details>
 
-<div style="margin-top: 24px;">
-  <h2>{% translate "Recent actions" %}</h2>
-  {% get_admin_log 10 as admin_log for_user user %}
-  {% if not admin_log %}
-    <p class="quiet">{% translate "None available" %}</p>
-  {% else %}
-    <table class="actionlist" style="width:100%; border-collapse:collapse;">
-      <tbody>
-        {% for entry in admin_log %}
-          <tr class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
-            <td style="padding:6px 8px;">
-              {% if entry.is_deletion or not entry.get_admin_url %}
-                {{ entry.object_repr }}
-              {% else %}
-                <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
-              {% endif %}
-            </td>
-            <td class="mini quiet" style="padding:6px 8px; text-align:right;">
-              {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% endif %}
-</div>
+<details style="margin-top: 24px;">
+  <summary style="cursor:pointer; font-weight:600;">{% translate "Recent actions" %}</summary>
+  <div style="margin-top: 10px;">
+    {% get_admin_log 10 as admin_log for_user user %}
+    {% if not admin_log %}
+      <p class="quiet">{% translate "None available" %}</p>
+    {% else %}
+      <table class="actionlist" style="width:100%; border-collapse:collapse;">
+        <tbody>
+          {% for entry in admin_log %}
+            <tr class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
+              <td style="padding:6px 8px;">
+                {% if entry.is_deletion or not entry.get_admin_url %}
+                  {{ entry.object_repr }}
+                {% else %}
+                  <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                {% endif %}
+              </td>
+              <td class="mini quiet" style="padding:6px 8px; text-align:right;">
+                {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</details>
 
 {{ income_labels|json_script:"income-labels" }}
 {{ income_values|json_script:"income-values" }}

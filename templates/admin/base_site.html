@@ -16,7 +16,7 @@
 {% endblock %}
 
 {% block nav-global %}
-<div style="float: right; margin: 10px 0;">
+<div style="float: right; margin: 10px 0">
   {% include "includes/language_switcher.html" %}
 </div>
 {{ block.super }}
@@ -24,12 +24,14 @@
 
 {% block userlinks %}
   {% if user.has_usable_password %}
-    <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
-  {% endif %}
-  <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
-    {% csrf_token %}
-    <button type="submit">{% translate 'Log out' %}</button>
-  </form>
+<a href="{% url 'admin:password_change' %}"
+  >{% translate 'Change password' %}</a
+>
+/ {% endif %}
+<form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+  {% csrf_token %}
+  <button type="submit">{% translate 'Log out' %}</button>
+</form>
   {% include "admin/color_theme_toggle.html" %}
 {% endblock %}
 
@@ -44,10 +46,174 @@
       display: inline-block;
     }
   }
+  @media (max-width: 768px) {
+    body {
+      padding-bottom: calc(78px + env(safe-area-inset-bottom));
+    }
+    #nav-sidebar,
+    .nav-sidebar {
+      display: none;
+      position: fixed;
+      top: var(--header-height, 50px);
+      left: 0;
+      width: 260px;
+      max-width: 85vw;
+      height: calc(100vh - var(--header-height, 50px));
+      overflow-y: auto;
+      z-index: 2000;
+      background: var(--body-bg, #fff);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+      transform: translateX(-110%);
+      transition: transform 0.25s ease;
+    }
+    body.sidebar-open #nav-sidebar,
+    body.sidebar-open .nav-sidebar,
+    html.sidebar-open #nav-sidebar,
+    html.sidebar-open .nav-sidebar {
+      transform: translateX(0);
+    }
+    .sidebar-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      z-index: 1900;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    body.sidebar-open .sidebar-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .mobile-bottom-nav {
+      position: fixed;
+      left: 12px;
+      right: 12px;
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 3000;
+      background: color-mix(in srgb, var(--body-bg, #ffffff) 70%, transparent);
+      border: 1px solid
+        color-mix(in srgb, var(--border-color, #e5e7eb) 60%, transparent);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px 6px;
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+    }
+    .mobile-bottom-nav a {
+      color: var(--body-quiet-color, #6b7280);
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      min-width: 44px;
+    }
+    .mobile-bottom-nav svg {
+      width: 20px;
+      height: 20px;
+    }
+    .mobile-bottom-nav a.is-active {
+      color: var(--body-fg, #111827);
+      background: color-mix(in srgb, var(--body-bg, #fff) 70%, transparent);
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+    }
+    .mobile-bottom-nav a span {
+      display: none;
+    }
+    .mobile-bottom-nav a.is-active span {
+      display: inline;
+      font-weight: 600;
+    }
+    .mobile-bottom-nav .more-toggle {
+      color: var(--body-quiet-color, #6b7280);
+      text-decoration: none;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      min-width: 44px;
+      border: 1px solid
+        color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+      background: color-mix(in srgb, var(--body-bg, #fff) 70%, transparent);
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--border-color, #e5e7eb) 50%, transparent);
+    }
+    .mobile-bottom-nav .more-toggle:hover {
+      color: var(--body-fg, #111827);
+    }
+    .mobile-bottom-nav .more-toggle.is-open {
+      color: var(--body-fg, #111827);
+      background: color-mix(in srgb, var(--body-bg, #fff) 85%, transparent);
+      box-shadow: inset 0 0 0 1px
+        color-mix(in srgb, var(--border-color, #e5e7eb) 80%, transparent);
+    }
+    .mobile-bottom-nav .more-menu {
+      position: absolute;
+      right: 12px;
+      bottom: calc(64px + env(safe-area-inset-bottom));
+      min-width: 180px;
+      background: color-mix(in srgb, var(--body-bg, #ffffff) 80%, transparent);
+      border: 1px solid
+        color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+      border-radius: 14px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      padding: 8px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .mobile-bottom-nav .more-menu a {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      color: var(--body-fg, #111827);
+      text-decoration: none;
+      font-size: 13px;
+    }
+    .mobile-bottom-nav .more-menu a:hover {
+      background: color-mix(in srgb, var(--body-bg, #fff) 70%, transparent);
+    }
+    .mobile-bottom-nav .more-menu.is-open {
+      display: flex;
+    }
+    @media (max-width: 490px) {
+      .mobile-bottom-nav {
+        gap: 4px;
+        justify-content: space-between;
+      }
+      .mobile-bottom-nav a.nav-extra {
+        display: none;
+      }
+      .mobile-bottom-nav .more-toggle {
+        display: inline-flex;
+      }
+    }
+    @media (min-width: 491px) {
+      .mobile-bottom-nav .more-toggle,
+      .mobile-bottom-nav .more-menu {
+        display: none !important;
+      }
+    }
+  }
   .messagelist li {
     position: relative;
     padding-right: 28px;
-    transition: opacity 0.4s ease, transform 0.4s ease;
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease;
   }
   .messagelist li.is-fading {
     opacity: 0;
@@ -73,7 +239,6 @@
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
   }
   .confirm-modal {
     position: fixed;
@@ -109,6 +274,14 @@
     gap: 8px;
     margin-top: 14px;
   }
+  .mobile-bottom-nav {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .mobile-bottom-nav {
+      display: flex;
+    }
+  }
   .test-chat-btn {
     display: inline-flex;
     align-items: center;
@@ -125,19 +298,199 @@
       display: inline-flex;
     }
   }
+  /* Responsive tables on small screens */
+  @media (max-width: 768px) {
+    .results {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(6px + env(safe-area-inset-bottom));
+    }
+    .results table {
+      width: 100%;
+      min-width: 560px;
+      border-collapse: collapse;
+    }
+    .results thead th {
+      position: sticky;
+      top: 0;
+      background: var(--body-bg, #fff);
+      z-index: 2;
+    }
+    .results th,
+    .results td {
+      white-space: nowrap;
+    }
+    /* Hide low-priority columns on very small screens */
+    .results th.hide-mobile,
+    .results td.hide-mobile {
+      display: none;
+    }
+    /* Card-style stacked rows (opt-in via .stacked-rows) */
+    .results.stacked-rows table,
+    .results.stacked-rows thead {
+      display: none;
+    }
+    .results.stacked-rows tbody,
+    .results.stacked-rows tr,
+    .results.stacked-rows td {
+      display: block;
+      width: 100%;
+    }
+    .results.stacked-rows tr {
+      background: color-mix(in srgb, var(--body-bg, #fff) 92%, transparent);
+      border: 1px solid
+        color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+      border-radius: 12px;
+      padding: 10px;
+      margin: 10px 0;
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+    }
+    .results.stacked-rows td {
+      padding: 6px 0;
+    }
+    .results.stacked-rows td::before {
+      content: attr(data-label);
+      display: block;
+      font-size: 11px;
+      color: var(--body-quiet-color, #6b7280);
+      margin-bottom: 2px;
+    }
+  }
 </style>
-{% endblock %}
-
-{% block extrabody %}
-{{ block.super }}
+{% endblock %} {% block extrabody %} {{ block.super }}
+<div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+<nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+  <a href="{% url 'admin:dashboard' %}" data-nav="/admin/dashboard/">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"
+      />
+    </svg>
+    <span>Dashboard</span>
+  </a>
+  <a
+    href="{% url 'admin:rooms_monthlybill_changelist' %}"
+    data-nav="/admin/rooms/monthlybill/"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M6 2h9l5 5v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zm8 1.5V8h4.5L14 3.5zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"
+      />
+    </svg>
+    <span>Bills</span>
+  </a>
+  <a
+    href="{% url 'admin:rooms_room_changelist' %}"
+    data-nav="/admin/rooms/room/"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M12 3l9 7v11h-6v-6H9v6H3V10l9-7z" />
+    </svg>
+    <span>Rooms</span>
+  </a>
+  <a
+    href="{% url 'admin:rooms_clientprofile_changelist' %}"
+    data-nav="/admin/rooms/clientprofile/"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 12a4 4 0 1 0-4-4 4 4 0 0 0 4 4zm0 2c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z"
+      />
+    </svg>
+    <span>Tenants</span>
+  </a>
+  <a
+    href="{% url 'admin:rooms_electricity_changelist' %}"
+    data-nav="/admin/rooms/electricity/"
+    class="nav-extra"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+    </svg>
+    <span>Elec</span>
+  </a>
+  <a
+    href="{% url 'admin:rooms_water_changelist' %}"
+    data-nav="/admin/rooms/water/"
+    class="nav-extra"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M12 2C8 7 6 10 6 13a6 6 0 0 0 12 0c0-3-2-6-6-11z"
+      />
+    </svg>
+    <span>Water</span>
+  </a>
+  <a
+    href="{% url 'admin:rooms_unitprice_changelist' %}"
+    data-nav="/admin/rooms/unitprice/"
+    class="nav-extra prices-nav"
+  >
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M4 6h16v2H4V6zm0 5h10v2H4v-2zm0 5h16v2H4v-2z"
+      />
+    </svg>
+    <span>Prices</span>
+  </a>
+  <button type="button" class="more-toggle" aria-label="More">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M5 12a2 2 0 1 0 0 .01V12zm7 0a2 2 0 1 0 0 .01V12zm7 0a2 2 0 1 0 0 .01V12z"
+      />
+    </svg>
+    <span>More</span>
+  </button>
+  <div class="more-menu" id="mobile-more-menu" aria-label="More menu">
+    <a href="{% url 'admin:rooms_electricity_changelist' %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="currentColor" d="M13 2L3 14h7l-1 8 10-12h-7l1-8z" />
+      </svg>
+      <span>Electricity</span>
+    </a>
+    <a href="{% url 'admin:rooms_water_changelist' %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M12 2C8 7 6 10 6 13a6 6 0 0 0 12 0c0-3-2-6-6-11z"
+        />
+      </svg>
+      <span>Water</span>
+    </a>
+    <a href="{% url 'admin:rooms_unitprice_changelist' %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M4 6h16v2H4V6zm0 5h10v2H4v-2zm0 5h16v2H4v-2z"
+        />
+      </svg>
+      <span>Unit Prices</span>
+    </a>
+  </div>
+</nav>
 <div class="confirm-modal" id="confirm-modal" aria-hidden="true">
   <div class="confirm-modal__backdrop"></div>
-  <div class="confirm-modal__panel" role="dialog" aria-modal="true" aria-labelledby="confirm-modal-title">
+  <div
+    class="confirm-modal__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-modal-title"
+  >
     <h3 class="confirm-modal__title" id="confirm-modal-title">Confirm</h3>
     <p id="confirm-modal-message"></p>
     <div class="confirm-modal__actions">
-      <button type="button" class="button" id="confirm-modal-cancel">Cancel</button>
-      <button type="button" class="button default" id="confirm-modal-ok">OK</button>
+      <button type="button" class="button" id="confirm-modal-cancel">
+        Cancel
+      </button>
+      <button type="button" class="button default" id="confirm-modal-ok">
+        OK
+      </button>
     </div>
   </div>
 </div>
@@ -229,6 +582,51 @@
     });
 
     window.openConfirmModal = openConfirm;
+  })();
+</script>
+<script>
+  (function () {
+    var nav = document.querySelector(".mobile-bottom-nav");
+    if (!nav) return;
+    var links = nav.querySelectorAll("a[data-nav]");
+    var path = window.location.pathname;
+    var bestMatch = null;
+    var bestLength = -1;
+    links.forEach(function (link) {
+      var target = link.getAttribute("data-nav");
+      if (!target) return;
+      if (path.indexOf(target) === 0 && target.length > bestLength) {
+        bestMatch = link;
+        bestLength = target.length;
+      }
+    });
+    if (bestMatch) {
+      bestMatch.classList.add("is-active");
+    }
+  })();
+</script>
+<script>
+  (function () {
+    var nav = document.querySelector(".mobile-bottom-nav");
+    if (!nav) return;
+    var toggle = nav.querySelector(".more-toggle");
+    var menu = document.getElementById("mobile-more-menu");
+    if (!toggle || !menu) return;
+
+    function closeMenu() {
+      menu.classList.remove("is-open");
+      toggle.classList.remove("is-open");
+    }
+
+    toggle.addEventListener("click", function (e) {
+      e.preventDefault();
+      menu.classList.toggle("is-open");
+      toggle.classList.toggle("is-open");
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!nav.contains(e.target)) closeMenu();
+    });
   })();
 </script>
 {% endblock %}

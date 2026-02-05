@@ -3,7 +3,7 @@
 
 {% block breadcrumbs %}
 <div class="breadcrumbs">
-  <a href="{% url 'admin:index' %}">{% translate "Home" %}</a>
+  <a href="{% url 'admin:dashboard' %}">{% translate "Home" %}</a>
   &rsaquo;
   {{ cl.opts.verbose_name_plural|capfirst }}
 </div>
