@@ -12,7 +12,7 @@ from django.urls import reverse
 import io
 from zipfile import ZipFile
 
-from .models import MonthlyBill, Room, ClientProfile, UnitPrice
+from .models import MonthlyBill, Room, ClientProfile, UnitPrice, Water, Electricity
 from django.utils.formats import date_format
 from django.utils.translation import override
 from django.utils import timezone
@@ -32,11 +32,37 @@ def _invoice_storage_path(bill, filename):
     )
 
 
+def _has_missing_utility_data(bill):
+    if not UnitPrice.objects.filter(date=bill.month).exists():
+        return True
+    if not Water.objects.filter(room=bill.room, date=bill.month).exists():
+        return True
+    if not Water.objects.filter(room=bill.room, date__lt=bill.month).exists():
+        return True
+    if not Electricity.objects.filter(room=bill.room, date=bill.month).exists():
+        return True
+    if not Electricity.objects.filter(room=bill.room, date__lt=bill.month).exists():
+        return True
+    return False
+
+
 def download_invoice(request, bill_id, lang):
     if lang not in ("kh", "en", "fr"):
         raise Http404("Invalid language")
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if _has_missing_utility_data(bill):
+        messages.error(
+            request,
+            "Invoice is unavailable because required utility data is missing.",
+        )
+        return redirect("admin:rooms_monthlybill_changelist")
+    renter = bill.room.renter
+    if renter and not hasattr(renter, "client_profile"):
+        messages.warning(
+            request,
+            "Renter profile is missing. Some invoice fields may be blank.",
+        )
     if (
         request.user.is_active
         and not request.user.is_staff
@@ -55,7 +81,11 @@ def download_invoice(request, bill_id, lang):
         )
     ):
         raise Http404("Not found")
-    filename = generate_invoice_for_bill(bill, lang=lang)
+    try:
+        filename = generate_invoice_for_bill(bill, lang=lang)
+    except ValidationError as e:
+        messages.error(request, "; ".join(e.messages))
+        return redirect("admin:rooms_monthlybill_changelist")
 
     storage_path = _invoice_storage_path(bill, filename)
     if not default_storage.exists(storage_path):
@@ -71,6 +101,18 @@ def download_invoice(request, bill_id, lang):
 
 def preview_invoice(request, bill_id):
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if _has_missing_utility_data(bill):
+        messages.error(
+            request,
+            "Invoice is unavailable because required utility data is missing.",
+        )
+        return redirect("admin:rooms_monthlybill_changelist")
+    renter = bill.room.renter
+    if renter and not hasattr(renter, "client_profile"):
+        messages.warning(
+            request,
+            "Renter profile is missing. Some invoice fields may be blank.",
+        )
     if (
         request.user.is_active
         and not request.user.is_staff
@@ -90,7 +132,11 @@ def preview_invoice(request, bill_id):
     ):
         raise Http404("Not found")
 
-    filename = generate_invoice_for_bill(bill, lang="kh")
+    try:
+        filename = generate_invoice_for_bill(bill, lang="kh")
+    except ValidationError as e:
+        messages.error(request, "; ".join(e.messages))
+        return redirect("admin:rooms_monthlybill_changelist")
     storage_path = _invoice_storage_path(bill, filename)
     if not default_storage.exists(storage_path):
         raise Http404("Invoice file not found")
@@ -112,12 +158,22 @@ def regenerate_invoice_view(request, bill_id):
         return HttpResponseForbidden("Not allowed")
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if _has_missing_utility_data(bill):
+        messages.error(
+            request,
+            "Cannot re-generate invoice: required utility data is missing.",
+        )
+        return redirect("admin:rooms_monthlybill_changelist")
     if bill.status != MonthlyBill.Status.DRAFT:
         messages.error(request, "Invoice can only be re-generated in Draft status.")
         return redirect("..")
 
     for lang in ("kh", "en", "fr"):
-        generate_invoice_for_bill(bill=bill, lang=lang)
+        try:
+            generate_invoice_for_bill(bill=bill, lang=lang)
+        except ValidationError as e:
+            messages.error(request, "; ".join(e.messages))
+            return redirect("admin:rooms_monthlybill_changelist")
 
     messages.success(request, "Invoice re-generated successfully.")
     return redirect(reverse("admin:rooms_monthlybill_changelist"))
@@ -128,6 +184,12 @@ def issue_invoice_view(request, bill_id):
         return HttpResponseForbidden("Not allowed")
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if _has_missing_utility_data(bill):
+        messages.error(
+            request,
+            "Cannot issue invoice: required utility data is missing.",
+        )
+        return redirect("admin:rooms_monthlybill_changelist")
     if bill.status != MonthlyBill.Status.DRAFT:
         messages.error(request, "Invoice can only be issued from Draft status.")
         return redirect(reverse("admin:rooms_monthlybill_changelist"))
@@ -207,6 +269,12 @@ def send_invoice_telegram_view(request, bill_id):
         return HttpResponseForbidden("Not allowed")
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
+    if _has_missing_utility_data(bill):
+        messages.error(
+            request,
+            "Cannot send invoice: required utility data is missing.",
+        )
+        return redirect("..")
     if bill.status not in (MonthlyBill.Status.ISSUED, MonthlyBill.Status.SENT):
         messages.error(request, "Invoice can only be sent when status is Issued or Sent.")
         return redirect("..")
@@ -226,7 +294,11 @@ def send_invoice_telegram_view(request, bill_id):
         messages.error(request, "Telegram bot token is not configured.")
         return redirect("..")
 
-    filename = generate_invoice_for_bill(bill=bill, lang="kh")
+    try:
+        filename = generate_invoice_for_bill(bill=bill, lang="kh")
+    except ValidationError as e:
+        messages.error(request, "; ".join(e.messages))
+        return redirect("..")
     storage_path = _invoice_storage_path(bill, filename)
     if not default_storage.exists(storage_path):
         messages.error(request, "Invoice file not found.")
@@ -446,11 +518,16 @@ def generate_invoices_view(request):
             try:
                 # now generate invoice
                 bill = calculate_monthly_bill(room, bill_month)
-                generate_invoice_for_bill(
-                    bill=bill,
-                    lang="kh",
-                )
-                generated_count += 1
+                try:
+                    generate_invoice_for_bill(
+                        bill=bill,
+                        lang="kh",
+                    )
+                    generated_count += 1
+                except ValidationError as e:
+                    messages.warning(
+                        request, f"Room {room.room_number}: {'; '.join(e.messages)}"
+                    )
             except ValidationError as e:
                 # Show a friendly error message in the admin UI
                 messages.error(
@@ -504,10 +581,16 @@ def generate_and_download_view(request):
             try:
                 # now generate invoice
                 bill = calculate_monthly_bill(room, bill_month)
-                file_name = generate_invoice_for_bill(
-                    bill=bill,
-                    lang="kh",
-                )
+                try:
+                    file_name = generate_invoice_for_bill(
+                        bill=bill,
+                        lang="kh",
+                    )
+                except ValidationError as e:
+                    messages.warning(
+                        request, f"Room {room.room_number}: {'; '.join(e.messages)}"
+                    )
+                    continue
                 storage_path = _invoice_storage_path(bill, file_name)
                 if default_storage.exists(storage_path):
                     with default_storage.open(storage_path, "rb") as f:

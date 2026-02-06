@@ -2,10 +2,15 @@
 {% load static %}
 {% load i18n %}
 
+{% block submit_buttons_top %}
+  {{ block.super }}
+  <a class="button cancel-btn submit-row-cancel" href="{% url 'admin:rooms_room_changelist' %}">{% trans "Cancel" %}</a>
+{% endblock %}
+
 {% block content %}
 {{ block.super }}
 
-<details style="margin-top: 24px;" open>
+<details class="utility-reading-section" style="margin-top: 24px;" open>
   <summary style="font-size: 16px; font-weight: 600; cursor: pointer;">
     {% translate "Utility Readings" %}
   </summary>

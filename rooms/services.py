@@ -27,32 +27,62 @@ def calculate_monthly_bill(room, month):
     month = first day of billing month (date)
     """
 
-    unit_price = UnitPrice.objects.get(date=month)
+    pending_data = False
+    try:
+        unit_price = UnitPrice.objects.get(date=month)
+    except UnitPrice.DoesNotExist:
+        unit_price = None
+        pending_data = True
 
     # ---------- WATER ----------
-    water_current = Water.objects.get(room=room, date=month)
-    water_previous = get_previous_meter(Water, room, month)
-
-    water_usage = water_current.meter_value - water_previous.meter_value
-    if water_usage < 0:
-        raise ValidationError("Water meter value cannot decrease")
-
-    water_cost = Decimal(water_usage) * unit_price.water_unit_price
+    water_cost = Decimal(0)
+    if unit_price:
+        try:
+            water_current = Water.objects.get(room=room, date=month)
+            try:
+                water_previous = get_previous_meter(Water, room, month)
+            except ValidationError:
+                water_previous = None
+                pending_data = True
+            if water_previous:
+                water_usage = water_current.meter_value - water_previous.meter_value
+                if water_usage < 0:
+                    raise ValidationError("Water meter value cannot decrease")
+                water_cost = Decimal(water_usage) * unit_price.water_unit_price
+        except Water.DoesNotExist:
+            water_cost = Decimal(0)
+            pending_data = True
+    else:
+        pending_data = True
 
     # ---------- ELECTRICITY ----------
-    elec_current = Electricity.objects.get(room=room, date=month)
-    elec_previous = get_previous_meter(Electricity, room, month)
-
-    electricity_usage = elec_current.meter_value - elec_previous.meter_value
-    if electricity_usage < 0:
-        raise ValidationError("Electricity meter value cannot decrease")
-
-    electricity_cost = Decimal(electricity_usage) * unit_price.electricity_unit_price
+    electricity_cost = Decimal(0)
+    if unit_price:
+        try:
+            elec_current = Electricity.objects.get(room=room, date=month)
+            try:
+                elec_previous = get_previous_meter(Electricity, room, month)
+            except ValidationError:
+                elec_previous = None
+                pending_data = True
+            if elec_previous:
+                electricity_usage = elec_current.meter_value - elec_previous.meter_value
+                if electricity_usage < 0:
+                    raise ValidationError("Electricity meter value cannot decrease")
+                electricity_cost = (
+                    Decimal(electricity_usage) * unit_price.electricity_unit_price
+                )
+        except Electricity.DoesNotExist:
+            electricity_cost = Decimal(0)
+            pending_data = True
+    else:
+        pending_data = True
 
     # ---------- ROOM PRICE (USD → KHR) ----------
-    room_cost = room.price * unit_price.exchange_rate
+    room_cost = room.price * unit_price.exchange_rate if unit_price else Decimal(0)
 
     total = room_cost + water_cost + electricity_cost
+    data_note = "Pending data" if pending_data else ""
 
     bill, _ = MonthlyBill.objects.update_or_create(
         room=room,
@@ -62,6 +92,7 @@ def calculate_monthly_bill(room, month):
             "water_cost": water_cost,
             "electricity_cost": electricity_cost,
             "total": total,
+            "data_note": data_note,
         },
     )
 
@@ -70,17 +101,37 @@ def calculate_monthly_bill(room, month):
 
 # ---------- PDF INVOICE GENERATION ----------
 def generate_invoice_for_bill(bill, lang="kh"):
-    unit_price = UnitPrice.objects.get(date=bill.month)
+    renter = bill.room.renter
+    if not renter:
+        raise ValidationError(
+            f"Cannot generate invoice: no renter for room {bill.room.room_number}."
+        )
+    if not hasattr(renter, "client_profile"):
+        raise ValidationError(
+            f"Cannot generate invoice: renter profile missing for room {bill.room.room_number}."
+        )
+    try:
+        unit_price = UnitPrice.objects.get(date=bill.month)
+    except UnitPrice.DoesNotExist as e:
+        raise ValidationError(
+            f"Missing unit price for {bill.month.strftime('%Y-%m')}."
+        ) from e
 
-    water_current = Water.objects.get(room=bill.room, date=bill.month)
-    water_previous = Water.objects.filter(room=bill.room, date__lt=bill.month).latest(
-        "date"
-    )
+    try:
+        water_current = Water.objects.get(room=bill.room, date=bill.month)
+    except Water.DoesNotExist as e:
+        raise ValidationError(
+            f"Missing water reading for {bill.room.room_number} ({bill.month.strftime('%Y-%m')})."
+        ) from e
+    water_previous = get_previous_meter(Water, bill.room, bill.month)
 
-    elec_current = Electricity.objects.get(room=bill.room, date=bill.month)
-    elec_previous = Electricity.objects.filter(
-        room=bill.room, date__lt=bill.month
-    ).latest("date")
+    try:
+        elec_current = Electricity.objects.get(room=bill.room, date=bill.month)
+    except Electricity.DoesNotExist as e:
+        raise ValidationError(
+            f"Missing electricity reading for {bill.room.room_number} ({bill.month.strftime('%Y-%m')})."
+        ) from e
+    elec_previous = get_previous_meter(Electricity, bill.room, bill.month)
 
     water_usage = water_current.meter_value - water_previous.meter_value
     elec_usage = elec_current.meter_value - elec_previous.meter_value

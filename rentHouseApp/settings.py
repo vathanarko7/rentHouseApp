@@ -50,6 +50,11 @@ INSTALLED_APPS = [
     "rooms.apps.RoomsConfig",
 ]
 
+AUTHENTICATION_BACKENDS = [
+    "rooms.backends.UsernameOrEmailBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",

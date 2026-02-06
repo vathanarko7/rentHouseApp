@@ -7,7 +7,7 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth.forms import AuthenticationForm
 from django.template.response import TemplateResponse
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.utils.translation import gettext_lazy as _
+from django.utils.translation import gettext_lazy as _, ngettext
 from django.utils.formats import date_format
 from django.shortcuts import redirect
 from django.conf import settings
@@ -23,7 +23,7 @@ from rooms.models import (
     Electricity,
     RoomHistory,
 )
-from django.utils.html import format_html
+from django.utils.html import format_html, format_html_join
 from rooms.views import (
     download_invoice,
     generate_invoices_view,
@@ -142,6 +142,7 @@ class ClientProfileAdmin(admin.ModelAdmin):
         (
             "Account Info",
             {
+                "classes": ("collapse", "open"),
                 "fields": (
                     "username",
                     "first_name",
@@ -713,9 +714,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         "month_year",
         "room",
         "renter",
+        "alert_warning",
         "status_badge",
         "status_date",
-        "total",
+        "total_display",
         "invoice_actions",
         "row_actions",
     )
@@ -748,7 +750,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 "renter",
                 "status_badge",
                 "status_date",
-                "total",
+                "total_display",
                 "row_actions",
             )
         return self.list_display
@@ -889,10 +891,72 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     renter.short_description = "Renter"
 
+    def alert_warning(self, obj):
+        badges = []
+        renter = obj.room.renter
+        if not renter:
+            badges.append((_("Missing tenant"), "#f59e0b"))
+        elif not hasattr(renter, "client_profile"):
+            badges.append((_("Missing profile"), "#f59e0b"))
+
+        if not UnitPrice.objects.filter(date=obj.month).exists():
+            badges.append((_("Missing unit price"), "#ef4444"))
+        if not Water.objects.filter(room=obj.room, date=obj.month).exists():
+            badges.append((_("Missing water"), "#f59e0b"))
+        if not Water.objects.filter(room=obj.room, date__lt=obj.month).exists():
+            badges.append((_("No previous water"), "#f59e0b"))
+        if not Electricity.objects.filter(room=obj.room, date=obj.month).exists():
+            badges.append((_("Missing electricity"), "#f59e0b"))
+        if not Electricity.objects.filter(room=obj.room, date__lt=obj.month).exists():
+            badges.append((_("No previous electricity"), "#f59e0b"))
+
+        if not badges:
+            return ""
+        labels = [label for label, _ in badges]
+        tooltip = "; ".join([str(label) for label in labels])
+        if len(labels) == 1:
+            summary = labels[0]
+        else:
+            summary = ngettext(
+                "Missing data (%(count)d)",
+                "Missing data (%(count)d)",
+                len(labels),
+            ) % {"count": len(labels)}
+        sep = _(" • ")
+        detail_text = sep.join([str(label) for label in labels])
+        icon_html = ""
+        if len(labels) > 1:
+            icon_html = (
+                '<span class="alert-info-icon" title="{}" data-alert-details="{}" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="12" height="12">'
+                '<path fill="currentColor" d="M12 2a10 10 0 1 0 .001 20.001A10 10 0 0 0 12 2zm0 5.5a1.25 1.25 0 1 1 0 2.5a1.25 1.25 0 0 1 0-2.5zM11 11h2v7h-2v-7z"/>'
+                "</svg>"
+                "</span>"
+            )
+        return format_html(
+            '<span class="alert-badge" title="{}" data-alert-details="{}">{}</span>{}',
+            tooltip,
+            detail_text,
+            summary,
+            format_html(icon_html, tooltip, detail_text) if icon_html else "",
+        )
+
+    alert_warning.short_description = "Alert"
+
     def room_name(self, obj):
         return obj.room.room_number
 
     room_name.short_description = "Room"
+
+    def total_display(self, obj):
+        if obj.data_note:
+            return format_html(
+                '<span title="{}">N/A</span>',
+                "Missing data for this bill",
+            )
+        return obj.total
+
+    total_display.short_description = "Total"
 
     def status_badge(self, obj):
         color_map = {
@@ -988,47 +1052,116 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     def invoice_actions(self, obj):
         req = getattr(self, "_request", None)
         is_tenant = _is_tenant(req.user) if req else False
+        renter = obj.room.renter
+        missing_profile = False
+        if not renter or not hasattr(renter, "client_profile"):
+            missing_profile = True
+        missing_data = self._has_missing_utility_data(obj)
         regen_link = ""
-        if not is_tenant and obj.status == MonthlyBill.Status.DRAFT:
+        if (
+            not is_tenant
+            and not missing_profile
+            and not missing_data
+            and obj.status == MonthlyBill.Status.DRAFT
+        ):
             regen_link = format_html(
-                '<a class="button regen-btn btn-sm" href="{}">Re-generate</a> ',
+                '<a class="button regen-btn btn-sm" href="{}" aria-label="{}" title="{}">'
+                '<span class="btn-icon" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
+                '</span>'
+                '<span class="btn-label">{}</span>'
+                '</a> ',
                 reverse("admin:rooms_monthlybill_regenerate_invoice", args=[obj.id]),
+                _("Re-generate"),
+                _("Re-generate"),
+                _("Re-generate"),
             )
         issue_link = ""
-        if not is_tenant and obj.status == MonthlyBill.Status.DRAFT:
+        if (
+            not is_tenant
+            and not missing_profile
+            and not missing_data
+            and obj.status == MonthlyBill.Status.DRAFT
+        ):
             issue_confirm = _("Issue this invoice? It will be locked.")
             issue_link = format_html(
                 '<a class="button issue-btn btn-sm" href="{}" '
-                'data-confirm-message="{}">Issue</a> ',
+                'data-confirm-message="{}" data-confirm-kind="issue" data-confirm-label="Issue" '
+                'aria-label="{}" title="{}">'
+                '<span class="btn-icon" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M9 16.2l-3.5-3.5L4 14.2 9 19l11-11-1.5-1.5z"/></svg>'
+                '</span>'
+                '<span class="btn-label">{}</span>'
+                '</a> ',
                 reverse("admin:rooms_monthlybill_issue", args=[obj.id]),
                 issue_confirm,
+                _("Issue"),
+                _("Issue"),
+                _("Issue"),
             )
         send_link = ""
-        if not is_tenant and obj.status == MonthlyBill.Status.ISSUED:
+        if (
+            not is_tenant
+            and not missing_profile
+            and not missing_data
+            and obj.status == MonthlyBill.Status.ISSUED
+        ):
             send_confirm = _("Send this invoice to the tenant?")
             send_link = format_html(
                 '<a class="button send-btn btn-sm" href="{}" '
-                'data-confirm-message="{}">Send</a> ',
+                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="Send" '
+                'aria-label="{}" title="{}">'
+                '<span class="btn-icon" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>'
+                '</span>'
+                '<span class="btn-label">{}</span>'
+                '</a> ',
                 reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
                 send_confirm,
+                _("Send"),
+                _("Send"),
+                _("Send"),
             )
         resend_link = ""
-        if not is_tenant and obj.status == MonthlyBill.Status.SENT:
+        if (
+            not is_tenant
+            and not missing_profile
+            and not missing_data
+            and obj.status == MonthlyBill.Status.SENT
+        ):
             resend_confirm = _("Re-send this invoice to the tenant?")
             resend_link = format_html(
                 '<a class="button send-btn btn-sm" href="{}" '
-                'data-confirm-message="{}">Re-send</a> ',
+                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="Re-send" '
+                'aria-label="{}" title="{}">'
+                '<span class="btn-icon" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
+                '</span>'
+                '<span class="btn-label">{}</span>'
+                '</a> ',
                 reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
                 resend_confirm,
+                _("Re-send"),
+                _("Re-send"),
+                _("Re-send"),
             )
         paid_link = ""
-        if not is_tenant and obj.status == MonthlyBill.Status.SENT:
+        if not is_tenant and not missing_profile and obj.status == MonthlyBill.Status.SENT:
             paid_confirm = _("Mark this invoice as paid?")
             paid_link = format_html(
                 '<a class="button paid-btn btn-sm" href="{}" '
-                'data-confirm-message="{}">Mark Paid</a> ',
+                'data-confirm-message="{}" data-confirm-kind="paid" data-confirm-label="Mark Paid" '
+                'aria-label="{}" title="{}">'
+                '<span class="btn-icon" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M9 16.2l-3.5-3.5L4 14.2 9 19l11-11-1.5-1.5z"/></svg>'
+                '</span>'
+                '<span class="btn-label">{}</span>'
+                '</a> ',
                 reverse("admin:rooms_monthlybill_mark_paid", args=[obj.id]),
                 paid_confirm,
+                _("Mark Paid"),
+                _("Mark Paid"),
+                _("Mark Paid"),
             )
         test_link = ""
         if not (regen_link or issue_link or send_link or resend_link or paid_link or test_link):
@@ -1048,26 +1181,64 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     def row_actions(self, obj):
         req = getattr(self, "_request", None)
         is_tenant = _is_tenant(req.user) if req else False
+        renter = obj.room.renter
+        missing_profile = False
+        if not renter or not hasattr(renter, "client_profile"):
+            missing_profile = True
+        missing_data = self._has_missing_utility_data(obj)
         show_preview = True
+        if missing_data:
+            show_preview = False
         if is_tenant and obj.status not in (
             MonthlyBill.Status.PAID,
             MonthlyBill.Status.SENT,
         ):
             show_preview = False
+        if not is_tenant and (missing_profile or missing_data):
+            show_preview = False
         if not show_preview:
             return "-"
         preview_btn = format_html(
             '<button class="button preview-invoice-btn preview-btn btn-sm" '
-            'data-preview-url="{}" type="button">Preview</button>',
+            'data-preview-url="{}" type="button" aria-label="{}" title="{}">'
+            '<span class="btn-icon" aria-hidden="true">'
+            '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 5c5 0 9 5 9 7s-4 7-9 7-9-5-9-7 4-7 9-7zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/></svg>'
+            '</span>'
+            '<span class="btn-label">{}</span>'
+            '</button>',
             reverse("admin:rooms_monthlybill_preview_invoice", args=[obj.id]),
+            _("Preview"),
+            _("Preview"),
+            _("Preview"),
         )
         download_btn = format_html(
-            ' <a class="button download-btn btn-sm" href="{}">Download</a>',
+            ' <a class="button download-btn btn-sm" href="{}" aria-label="{}" title="{}">'
+            '<span class="btn-icon" aria-hidden="true">'
+            '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 3v10l4-4 1.5 1.5L12 16l-5.5-5.5L8 9l4 4V3h0zM5 19h14v2H5z"/></svg>'
+            '</span>'
+            '<span class="btn-label">{}</span>'
+            '</a>',
             reverse("admin:rooms_monthlybill_download_invoice", args=[obj.id, "kh"]),
+            _("Download"),
+            _("Download"),
+            _("Download"),
         )
         return format_html("{}{}", preview_btn, download_btn)
 
     row_actions.short_description = "Actions"
+
+    def _has_missing_utility_data(self, obj):
+        if not UnitPrice.objects.filter(date=obj.month).exists():
+            return True
+        if not Water.objects.filter(room=obj.room, date=obj.month).exists():
+            return True
+        if not Water.objects.filter(room=obj.room, date__lt=obj.month).exists():
+            return True
+        if not Electricity.objects.filter(room=obj.room, date=obj.month).exists():
+            return True
+        if not Electricity.objects.filter(room=obj.room, date__lt=obj.month).exists():
+            return True
+        return False
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}

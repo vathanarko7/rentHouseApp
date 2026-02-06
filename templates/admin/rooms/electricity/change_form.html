@@ -1,0 +1,7 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block submit_buttons_top %}
+  {{ block.super }}
+  <a class="button cancel-btn submit-row-cancel" href="{% url 'admin:rooms_electricity_changelist' %}">{% trans "Cancel" %}</a>
+{% endblock %}

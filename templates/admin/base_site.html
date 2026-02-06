@@ -1,7 +1,7 @@
 {% extends "admin/base.html" %}
 {% load i18n %}
 
-{% block title %}{{ site_title|default:_("Django site admin") }}{% endblock %}
+{% block title %}PtasJuolKruDy{% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
@@ -9,7 +9,7 @@
     {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
       {% translate "Tenant Dashboard" %}
     {% else %}
-      {{ site_header|default:_("Django administration") }}
+      PtasJuolKruDy
     {% endif %}
   </a>
 </h1>
@@ -49,6 +49,11 @@
   @media (max-width: 768px) {
     body {
       padding-bottom: calc(78px + env(safe-area-inset-bottom));
+    }
+    #content-main > .module:last-child,
+    #content > .module:last-child,
+    .module:last-of-type {
+      padding-bottom: calc(110px + env(safe-area-inset-bottom));
     }
     #nav-sidebar,
     .nav-sidebar {
@@ -274,6 +279,36 @@
     gap: 8px;
     margin-top: 14px;
   }
+  .confirm-modal__actions .confirm-cancel {
+    background: color-mix(in srgb, var(--body-bg, #fff) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+    color: var(--body-fg, #111827);
+  }
+  .confirm-modal__actions .confirm-ok {
+    background: color-mix(in srgb, var(--body-bg, #fff) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+    color: var(--body-fg, #111827);
+  }
+  .confirm-modal__actions .confirm-ok.confirm-delete {
+    background: #ef4444;
+    border-color: #dc2626;
+    color: #fff;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-issue {
+    background: #f59e0b;
+    border-color: #d97706;
+    color: #fff;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-send {
+    background: #8b5cf6;
+    border-color: #7c3aed;
+    color: #fff;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-paid {
+    background: #10b981;
+    border-color: #059669;
+    color: #fff;
+  }
   .mobile-bottom-nav {
     display: none;
   }
@@ -297,6 +332,291 @@
     .test-chat-icon {
       display: inline-flex;
     }
+  }
+  .btn-icon {
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .btn-label {
+    display: inline;
+  }
+  @media (max-width: 768px) {
+    .btn-label {
+      display: none;
+    }
+    .btn-icon {
+      display: inline-flex;
+    }
+    .button.btn-sm {
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    }
+    .button.btn-sm .btn-icon svg {
+      width: 14px;
+      height: 14px;
+    }
+    .button.btn-sm:hover {
+      transform: translateY(-1px);
+    }
+  }
+  .button.regen-btn {
+    background: #f59e0b;
+    border-color: #d97706;
+    color: #fff;
+  }
+  .button.issue-btn {
+    background: #3b82f6;
+    border-color: #2563eb;
+    color: #fff;
+  }
+  .button.send-btn {
+    background: #8b5cf6;
+    border-color: #7c3aed;
+    color: #fff;
+  }
+  .button.paid-btn {
+    background: #10b981;
+    border-color: #059669;
+    color: #fff;
+  }
+  .app-rooms.model-room .object-tools,
+  .app-rooms.model-electricity .object-tools,
+  .app-rooms.model-water .object-tools,
+  .app-rooms.model-unitprice .object-tools {
+    float: none;
+    display: flex;
+    justify-content: flex-start;
+    margin-left: 0;
+  }
+  .app-rooms.model-room .object-tools li,
+  .app-rooms.model-electricity .object-tools li,
+  .app-rooms.model-water .object-tools li,
+  .app-rooms.model-unitprice .object-tools li {
+    float: none;
+    margin-right: 8px;
+  }
+  .alert-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: #f59e0b;
+    color: #fff;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+  .alert-info-icon {
+    display: none;
+    vertical-align: middle;
+    color: #f59e0b;
+    margin-left: 6px;
+  }
+  .submit-row .cancel-btn {
+    background: color-mix(in srgb, var(--body-bg, #fff) 85%, #e2e8f0);
+    border-color: color-mix(in srgb, var(--border-color, #cbd5e1) 70%, #94a3b8);
+    color: var(--body-fg, #111827);
+    border-radius: 8px;
+    padding: 8px 12px;
+    transition: transform 120ms ease, box-shadow 120ms ease, background 120ms ease;
+  }
+  .submit-row .cancel-btn:hover {
+    background: color-mix(in srgb, var(--body-bg, #fff) 75%, #d1d5db);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+    transform: translateY(-1px);
+  }
+  .utility-reading-section {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  @media (max-width: 768px) {
+    .app-rooms.model-room.change-form .module,
+    .app-rooms.model-clientprofile.change-form .module {
+      margin-bottom: 10px !important;
+    }
+    .app-rooms.model-room.change-form .inline-group,
+    .app-rooms.model-clientprofile.change-form .inline-group {
+      margin-bottom: 10px !important;
+    }
+    .app-rooms.model-room.change-form details {
+      margin-top: 10px !important;
+    }
+    .app-rooms.model-room.change-form fieldset,
+    .app-rooms.model-clientprofile.change-form fieldset {
+      margin-bottom: 10px !important;
+    }
+    .app-rooms.model-room.change-form .form-row {
+      padding: 6px 0 !important;
+      margin-bottom: 6px !important;
+    }
+    .app-rooms.model-room.change-form .module > h2 {
+      margin-bottom: 6px !important;
+    }
+    .app-rooms.model-room.change-form .inline-group .tabular {
+      margin-top: 6px !important;
+    }
+    .app-rooms.model-room.change-form .inline-group {
+      padding-top: 6px !important;
+      padding-bottom: 6px !important;
+    }
+    .app-rooms.model-room.change-form .inline-group h2 {
+      margin-bottom: 6px !important;
+      padding-bottom: 4px !important;
+    }
+    .app-rooms.model-room.change-form .module {
+      padding-bottom: 8px !important;
+    }
+    .app-rooms.model-room.change-form .inline-group:last-of-type,
+    .app-rooms.model-room.change-form .module:last-of-type {
+      margin-bottom: 0 !important;
+    }
+    .utility-reading-section {
+      padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
+    .app-rooms.model-clientprofile.change-form .module:last-of-type {
+      padding-bottom: calc(88px + env(safe-area-inset-bottom));
+    }
+  }
+  .alert-details-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 4000;
+    padding: calc(16px + env(safe-area-inset-top)) 16px
+      calc(96px + env(safe-area-inset-bottom));
+  }
+  .alert-details-modal.is-open {
+    display: flex;
+  }
+  .alert-details-card {
+    background: var(--body-bg, #fff);
+    color: var(--body-fg, #111827);
+    border-radius: 14px;
+    max-width: 360px;
+    width: 100%;
+    padding: 16px;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+  }
+  .alert-details-title {
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+  .alert-details-list {
+    margin: 0;
+    padding-left: 18px;
+  }
+  .alert-details-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  body.login .mobile-bottom-nav,
+  body.login .sidebar-backdrop {
+    display: none !important;
+  }
+  body.logout .mobile-bottom-nav,
+  body.logout .sidebar-backdrop,
+  body.logged-out .mobile-bottom-nav,
+  body.logged-out .sidebar-backdrop {
+    display: none !important;
+  }
+  .month-picker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .month-picker-btn {
+    padding: 6px 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .month-picker-icon {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .month-popover {
+    position: relative;
+    display: inline-block;
+  }
+  .month-popover-panel {
+    position: absolute;
+    top: 38px;
+    left: 0;
+    z-index: 9999;
+    background: var(--body-bg, #fff);
+    border: 1px solid var(--border-color, #ddd);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    padding: 10px;
+    width: 240px;
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .month-popover-panel {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: min(92vw, 320px);
+      max-height: 70vh;
+      overflow: auto;
+    }
+    .month-popover-panel.is-open {
+      display: block;
+    }
+  }
+  .month-popover-panel.is-open {
+    display: block;
+  }
+  .month-popover,
+  .month-picker {
+    position: relative;
+    z-index: 9999;
+  }
+  .app-rooms .form-row {
+    overflow: visible;
+  }
+  .month-popover-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .month-popover-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  .month-popover-grid button {
+    padding: 6px 4px;
+    border: 1px solid var(--border-color, #e5e7eb);
+    border-radius: 6px;
+    background: var(--body-bg, #fff);
+    cursor: pointer;
+  }
+  .month-popover-grid button:hover {
+    background: var(--hairline-color, #f3f6fb);
+  }
+  .month-picker input[type="date"]::-webkit-calendar-picker-indicator,
+  .month-picker input[type="date"]::-webkit-inner-spin-button,
+  .month-picker input[type="date"]::-webkit-clear-button {
+    display: none;
   }
   /* Responsive tables on small screens */
   @media (max-width: 768px) {
@@ -355,9 +675,29 @@
       color: var(--body-quiet-color, #6b7280);
       margin-bottom: 2px;
     }
+    .alert-info-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: color-mix(in srgb, #f59e0b 20%, transparent);
+      color: #f59e0b;
+    }
   }
 </style>
 {% endblock %} {% block extrabody %} {{ block.super }}
+{% load i18n %}
+<div class="alert-details-modal" id="alert-details-modal" aria-hidden="true">
+  <div class="alert-details-card" role="dialog" aria-modal="true">
+    <h3 class="alert-details-title">{% trans "Missing data details" %}</h3>
+    <ul class="alert-details-list" id="alert-details-list"></ul>
+    <div class="alert-details-actions">
+      <button type="button" class="button" id="alert-details-close">{% trans "Close" %}</button>
+    </div>
+  </div>
+</div>
 <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
 <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
   <a href="{% url 'admin:dashboard' %}" data-nav="/admin/dashboard/">
@@ -485,11 +825,11 @@
     <h3 class="confirm-modal__title" id="confirm-modal-title">Confirm</h3>
     <p id="confirm-modal-message"></p>
     <div class="confirm-modal__actions">
-      <button type="button" class="button" id="confirm-modal-cancel">
+      <button type="button" class="button confirm-cancel" id="confirm-modal-cancel">
         Cancel
       </button>
-      <button type="button" class="button default" id="confirm-modal-ok">
-        OK
+      <button type="button" class="button confirm-ok" id="confirm-modal-ok">
+        Confirm
       </button>
     </div>
   </div>
@@ -536,6 +876,8 @@
 </script>
 <script>
   (function () {
+    var deleteGeneric = "{{ _('Are you sure you want to delete this item?')|escapejs }}\n{{ _('This will also delete related items.')|escapejs }}";
+    var deleteTemplate = "{{ _('Are you sure you want to delete \"%(name)s\"?')|escapejs }}\n{{ _('This will also delete related items.')|escapejs }}";
     var modal = document.getElementById("confirm-modal");
     if (!modal) return;
     var message = document.getElementById("confirm-modal-message");
@@ -544,8 +886,16 @@
     var backdrop = modal.querySelector(".confirm-modal__backdrop");
     var resolveFn = null;
 
-    function openConfirm(text, onConfirm) {
+    function openConfirm(text, onConfirm, opts) {
       message.textContent = text || "Are you sure?";
+      var isDelete = opts && opts.isDelete;
+      var customLabel = opts && opts.label;
+      okBtn.textContent = customLabel ? customLabel : (isDelete ? "Delete" : "Confirm");
+      okBtn.classList.toggle("confirm-delete", !!isDelete);
+      okBtn.classList.remove("confirm-issue", "confirm-send", "confirm-paid");
+      if (opts && opts.kind) {
+        okBtn.classList.add("confirm-" + opts.kind);
+      }
       modal.classList.add("is-open");
       modal.setAttribute("aria-hidden", "false");
       resolveFn = onConfirm;
@@ -576,12 +926,304 @@
       if (!trigger) return;
       e.preventDefault();
       var msg = trigger.getAttribute("data-confirm-message");
-      openConfirm(msg, function () {
-        window.location.href = trigger.getAttribute("href");
-      });
+      if (msg === "AUTO_DELETE_CONFIRM") {
+        var row = trigger.closest("tr");
+        var label = "";
+        if (row) {
+          var cell = row.querySelector("th") || row.querySelector("td");
+          if (cell) {
+            label = (cell.textContent || "").trim();
+          }
+        }
+        msg = label
+          ? deleteTemplate.replace("%(name)s", label)
+          : deleteGeneric;
+      }
+      var isDelete = trigger.getAttribute("data-delete-immediate") === "true";
+      var kind = trigger.getAttribute("data-confirm-kind");
+      var label = trigger.getAttribute("data-confirm-label");
+      openConfirm(
+        msg,
+        function () {
+        var href = trigger.getAttribute("href");
+        if (isDelete) {
+          var form = document.createElement("form");
+          form.method = "post";
+          form.action = href;
+
+          var csrf = (function getCookie(name) {
+            var value = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+            return value ? value.pop() : "";
+          })("csrftoken");
+
+          var csrfInput = document.createElement("input");
+          csrfInput.type = "hidden";
+          csrfInput.name = "csrfmiddlewaretoken";
+          csrfInput.value = csrf;
+          form.appendChild(csrfInput);
+
+          var postInput = document.createElement("input");
+          postInput.type = "hidden";
+          postInput.name = "post";
+          postInput.value = "yes";
+          form.appendChild(postInput);
+
+          document.body.appendChild(form);
+          form.submit();
+          return;
+        }
+          window.location.href = href;
+        },
+        { isDelete: isDelete, kind: kind, label: label }
+      );
     });
 
     window.openConfirmModal = openConfirm;
+  })();
+</script>
+<script>
+  (function () {
+    function attachDeleteConfirm() {
+      var links = document.querySelectorAll("a.deletelink");
+      if (!links.length) return;
+      links.forEach(function (link) {
+        if (link.getAttribute("data-confirm-message")) return;
+        var href = link.getAttribute("href") || "";
+        if (href.indexOf("/delete/") !== -1) {
+          link.setAttribute("data-confirm-message", "AUTO_DELETE_CONFIRM");
+          link.setAttribute("data-delete-immediate", "true");
+        }
+      });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", attachDeleteConfirm);
+    } else {
+      attachDeleteConfirm();
+    }
+  })();
+</script>
+<script>
+  (function () {
+    var modal = document.getElementById("alert-details-modal");
+    var list = document.getElementById("alert-details-list");
+    var closeBtn = document.getElementById("alert-details-close");
+    if (!modal || !list || !closeBtn) return;
+
+    function closeModal() {
+      modal.classList.remove("is-open");
+      modal.setAttribute("aria-hidden", "true");
+      list.innerHTML = "";
+    }
+
+    closeBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", function (e) {
+      if (e.target === modal) closeModal();
+    });
+
+    document.addEventListener("click", function (e) {
+      var target = e.target.closest("[data-alert-details]");
+      if (!target) return;
+      var details = target.getAttribute("data-alert-details");
+      if (!details) return;
+      var items = details.split(" • ").filter(Boolean);
+      list.innerHTML = items
+        .map(function (item) {
+          return "<li>" + item + "</li>";
+        })
+        .join("");
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+    });
+  })();
+</script>
+<script>
+  (function () {
+    var monthNames = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    function parseYearMonth(value) {
+      if (!value) return null;
+      var parts = value.split("-");
+      if (parts.length < 2) return null;
+      var y = parseInt(parts[0], 10);
+      var m = parseInt(parts[1], 10);
+      if (!y || !m) return null;
+      return { year: y, month: m };
+    }
+
+    function setInputValue(input, year, month) {
+      var mm = String(month).padStart(2, "0");
+      input.value = year + "-" + mm + "-01";
+    }
+
+    function buildMonthPicker(input) {
+      if (input.dataset.monthPickerReady) return;
+      input.dataset.monthPickerReady = "1";
+
+      input.type = "text";
+      input.inputMode = "numeric";
+      input.setAttribute("placeholder", "YYYY-MM-01");
+      input.classList.remove("vDateField");
+
+      var shortcut = input.parentNode.querySelector(".datetimeshortcuts");
+      if (shortcut) {
+        shortcut.remove();
+      }
+
+      var wrapper = document.createElement("div");
+      wrapper.className = "month-picker";
+      input.parentNode.insertBefore(wrapper, input);
+      wrapper.appendChild(input);
+
+      var popover = document.createElement("div");
+      popover.className = "month-popover";
+      wrapper.appendChild(popover);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "button month-picker-btn";
+      btn.setAttribute("aria-label", "Pick month");
+      btn.innerHTML =
+        '<svg class="month-picker-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<rect x="3" y="4" width="18" height="18" rx="2"></rect>' +
+        '<line x1="16" y1="2" x2="16" y2="6"></line>' +
+        '<line x1="8" y1="2" x2="8" y2="6"></line>' +
+        '<line x1="3" y1="10" x2="21" y2="10"></line>' +
+        "</svg>";
+      popover.appendChild(btn);
+
+      var panel = document.createElement("div");
+      panel.className = "month-popover-panel";
+      panel.setAttribute("aria-hidden", "true");
+      popover.appendChild(panel);
+
+      var header = document.createElement("div");
+      header.className = "month-popover-header";
+      panel.appendChild(header);
+
+      var yearLabel = document.createElement("strong");
+      header.appendChild(yearLabel);
+
+      var closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "button month-popover-close";
+      closeBtn.textContent = "Close";
+      header.appendChild(closeBtn);
+
+      var grid = document.createElement("div");
+      grid.className = "month-popover-grid";
+      panel.appendChild(grid);
+
+      var state = parseYearMonth(input.value) || (function () {
+        var d = new Date();
+        return { year: d.getFullYear(), month: d.getMonth() + 1 };
+      })();
+
+      function render() {
+        yearLabel.textContent = state.year;
+        grid.innerHTML = "";
+        monthNames.forEach(function (label, idx) {
+          var m = idx + 1;
+          var b = document.createElement("button");
+          b.type = "button";
+          b.textContent = label;
+          b.addEventListener("click", function () {
+            setInputValue(input, state.year, m);
+            panel.classList.remove("is-open");
+            panel.setAttribute("aria-hidden", "true");
+            panel.style.display = "none";
+          });
+          grid.appendChild(b);
+        });
+      }
+
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var willOpen = !panel.classList.contains("is-open");
+        panel.classList.toggle("is-open");
+        panel.setAttribute("aria-hidden", willOpen ? "false" : "true");
+        panel.style.display = willOpen ? "block" : "none";
+      });
+      closeBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        panel.classList.remove("is-open");
+        panel.setAttribute("aria-hidden", "true");
+        panel.style.display = "none";
+      });
+      document.addEventListener("click", function (e) {
+        if (!popover.contains(e.target)) {
+          panel.classList.remove("is-open");
+          panel.setAttribute("aria-hidden", "true");
+          panel.style.display = "none";
+        }
+      });
+
+      render();
+    }
+
+    function initForModel(bodyClass) {
+      var body = document.body;
+      if (!body.classList.contains("app-rooms")) return;
+      if (!body.classList.contains(bodyClass)) return;
+      var input = document.querySelector('input[name="date"]');
+      if (!input) return;
+      buildMonthPicker(input);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", function () {
+        initForModel("model-electricity");
+        initForModel("model-water");
+        initForModel("model-unitprice");
+      });
+    } else {
+      initForModel("model-electricity");
+      initForModel("model-water");
+      initForModel("model-unitprice");
+    }
+  })();
+</script>
+<script>
+  (function () {
+    function moveCancelButtons() {
+      var cancelButtons = document.querySelectorAll(".submit-row-cancel");
+      if (!cancelButtons.length) return;
+      var submitRow = document.querySelector(".submit-row");
+      if (!submitRow) return;
+      cancelButtons.forEach(function (btn) {
+        submitRow.insertBefore(btn, submitRow.firstChild);
+      });
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", moveCancelButtons);
+    } else {
+      moveCancelButtons();
+    }
+  })();
+</script>
+<script>
+  (function () {
+    var path = window.location.pathname || "";
+    if (path.indexOf("/admin/logout") === 0) {
+      var nav = document.querySelector(".mobile-bottom-nav");
+      var backdrop = document.querySelector(".sidebar-backdrop");
+      if (nav) nav.style.display = "none";
+      if (backdrop) backdrop.style.display = "none";
+    }
   })();
 </script>
 <script>

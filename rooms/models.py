@@ -163,6 +163,7 @@ class MonthlyBill(models.Model):
     issued_at = models.DateTimeField(null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
+    data_note = models.CharField(max_length=100, blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
 

@@ -5,13 +5,91 @@
 <div style="margin: 10px 0 16px; text-align: center;">
   {% include "includes/language_switcher.html" %}
 </div>
+<style>
+  .password-field-wrap {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+  }
+  .password-field-wrap input {
+    width: 100%;
+    padding-right: 44px;
+  }
+  .password-toggle-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--body-fg, #111827);
+  }
+  .password-toggle-btn:hover {
+    color: var(--body-quiet-color, #6b7280);
+  }
+</style>
 {{ block.super }}
+<script>
+  (function () {
+    var label = document.querySelector('label[for="id_username"]');
+    if (label) {
+      label.textContent = "{% translate 'Username or email' %}";
+    }
+    var input = document.getElementById("id_username");
+    if (input) {
+      input.setAttribute("placeholder", "{% translate 'Username or email' %}");
+    }
+    var pass = document.getElementById("id_password");
+    if (pass && !document.getElementById("toggle-password")) {
+      var wrapper = document.createElement("div");
+      wrapper.className = "password-field-wrap";
+      pass.parentNode.insertBefore(wrapper, pass);
+      wrapper.appendChild(pass);
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.id = "toggle-password";
+      btn.className = "password-toggle-btn";
+      btn.innerHTML =
+        '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+        '<path fill="currentColor" d="M12 5c5 0 9 5 9 7s-4 7-9 7-9-5-9-7 4-7 9-7zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>' +
+        "</svg>";
+      btn.setAttribute("aria-label", "{% translate 'Show password' %}");
+      btn.addEventListener("click", function () {
+        var isHidden = pass.getAttribute("type") === "password";
+        pass.setAttribute("type", isHidden ? "text" : "password");
+        btn.innerHTML = isHidden
+          ? '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+            '<path fill="currentColor" d="M12 5c5 0 9 5 9 7s-4 7-9 7-9-5-9-7 4-7 9-7zm0 2a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4z"/>' +
+            "</svg>"
+          : '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+            '<path fill="currentColor" d="M2 12c2.5-4 6.5-7 10-7 3.2 0 6.6 2.1 9.1 5.3l1.2 1.7-1.2 1.7C18.6 17.9 15.2 20 12 20c-3.5 0-7.5-3-10-8zm10 6c3.2 0 6.2-2.2 8.4-6-2.2-3.8-5.2-6-8.4-6-3.2 0-6.2 2.2-8.4 6 2.2 3.8 5.2 6 8.4 6z"/>' +
+            '<path fill="currentColor" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"/>' +
+            '<path fill="currentColor" d="M4 4l16 16-1.4 1.4L2.6 5.4z"/>' +
+            "</svg>";
+        btn.setAttribute(
+          "aria-label",
+          isHidden
+            ? "{% translate 'Hide password' %}"
+            : "{% translate 'Show password' %}"
+        );
+      });
+      wrapper.appendChild(btn);
+    }
+  })();
+</script>
 {% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
   <a href="{% url 'admin:index' %}">
-    {% translate "Rental App" %}
+    {% translate "PtasJuolKruDy" %}
   </a>
 </h1>
 {% endblock %}

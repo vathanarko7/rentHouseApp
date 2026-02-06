@@ -38,14 +38,19 @@ def generate_invoice_image(
     ).strftime("%d/%m/%Y")
     period_end = normalize_to_month_start(bill.month).strftime("%d/%m/%Y")
     invoice_date = date.today().strftime("%d/%m/%Y")
-    client_name = (
-        bill.room.renter.client_profile.user.get_full_name()
-        or bill.room.renter.client_profile.user.username
-    )
-    sex = bill.room.renter.client_profile.get_sex_display()
+    renter = bill.room.renter
+    profile = getattr(renter, "client_profile", None) if renter else None
+    client_name = "-"
+    sex = ""
+    id_number = ""
+    phone = ""
+    if renter:
+        client_name = renter.get_full_name() or renter.username
+    if profile:
+        sex = profile.get_sex_display()
+        id_number = profile.id_card_number
+        phone = profile.phone
     room_number = bill.room.room_number
-    id_number = bill.room.renter.client_profile.id_card_number
-    phone = bill.room.renter.client_profile.phone
 
     font_url = str(font_path).replace("\\", "/")
     # A4 landscape at 96 DPI

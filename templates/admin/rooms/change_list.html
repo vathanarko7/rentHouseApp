@@ -40,17 +40,52 @@
       if (!actionSelect) return;
       var anyChecked = form.querySelectorAll('input.action-select:checked').length > 0;
       if (!anyChecked) {
-        alert("Select at least one invoice first.");
+        var warnModal = document.getElementById("bulk-send-warning-modal");
+        if (warnModal) {
+          warnModal.classList.add("is-open");
+          warnModal.setAttribute("aria-hidden", "false");
+          var warnOk = document.getElementById("bulk-send-warning-ok");
+          var warnBackdrop = warnModal.querySelector(".confirm-modal__backdrop");
+          function closeWarn() {
+            warnModal.classList.remove("is-open");
+            warnModal.setAttribute("aria-hidden", "true");
+          }
+          if (warnOk) warnOk.onclick = closeWarn;
+          if (warnBackdrop) warnBackdrop.onclick = closeWarn;
+        } else {
+          alert("Select at least one invoice first.");
+        }
         return;
       }
-      if (window.openConfirmModal) {
-        window.openConfirmModal("Send selected invoices via Telegram?", function () {
-          actionSelect.value = "bulk_send_telegram";
-          form.submit();
-        });
-      } else {
+      var modal = document.getElementById("bulk-send-modal");
+      if (!modal) {
         actionSelect.value = "bulk_send_telegram";
         form.submit();
+        return;
+      }
+      modal.classList.add("is-open");
+      modal.setAttribute("aria-hidden", "false");
+      var okBtn = document.getElementById("bulk-send-confirm");
+      var cancelBtn = document.getElementById("bulk-send-cancel");
+      var backdrop = modal.querySelector(".confirm-modal__backdrop");
+      function closeModal() {
+        modal.classList.remove("is-open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+      if (okBtn) {
+        okBtn.onclick = function () {
+          closeModal();
+          actionSelect.value = "bulk_send_telegram";
+          form.submit();
+        };
+      }
+      if (cancelBtn) {
+        cancelBtn.onclick = function () {
+          closeModal();
+        };
+      }
+      if (backdrop) {
+        backdrop.onclick = closeModal;
       }
     });
   })();
@@ -85,6 +120,28 @@
       <button type="button" class="button" id="bulk-send-telegram-btn">
         Bulk Send via Telegram
       </button>
+    </div>
+  </div>
+
+  <div class="confirm-modal" id="bulk-send-modal" aria-hidden="true">
+    <div class="confirm-modal__backdrop"></div>
+    <div class="confirm-modal__panel" role="dialog" aria-modal="true">
+      <h3 class="confirm-modal__title">Bulk Send</h3>
+      <p>Send selected invoices via Telegram?</p>
+      <div class="confirm-modal__actions">
+        <button type="button" class="button confirm-cancel" id="bulk-send-cancel">Cancel</button>
+        <button type="button" class="button confirm-ok confirm-send" id="bulk-send-confirm">Send</button>
+      </div>
+    </div>
+  </div>
+  <div class="confirm-modal" id="bulk-send-warning-modal" aria-hidden="true">
+    <div class="confirm-modal__backdrop"></div>
+    <div class="confirm-modal__panel" role="dialog" aria-modal="true">
+      <h3 class="confirm-modal__title">Select invoices</h3>
+      <p>Select at least one invoice first.</p>
+      <div class="confirm-modal__actions">
+        <button type="button" class="button confirm-ok" id="bulk-send-warning-ok">OK</button>
+      </div>
     </div>
   </div>
 
