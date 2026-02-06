@@ -8,6 +8,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.template.response import TemplateResponse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _, ngettext
+from bisect import bisect_left
+import threading
+from django.db import close_old_connections
 from django.utils.formats import date_format
 from django.shortcuts import redirect
 from django.conf import settings
@@ -583,7 +586,16 @@ class UnitPriceAdmin(admin.ModelAdmin):
         return not _is_tenant(request.user)
 
     def has_delete_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        return True
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Water)
@@ -641,10 +653,61 @@ class WaterAdmin(admin.ModelAdmin):
         return not _is_tenant(request.user)
 
     def has_change_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if obj is None:
+            return True
+        locked = MonthlyBill.objects.filter(
+            room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+        ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+        return not locked
 
     def has_delete_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if obj is None:
+            return True
+        locked = MonthlyBill.objects.filter(
+            room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+        ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+        return not locked
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
+        if obj:
+            locked = MonthlyBill.objects.filter(
+                room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+            ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+            if locked and not getattr(request, "_lock_notice_shown", False):
+                self.message_user(
+                    request,
+                    "This record is locked because the invoice for this room and month is issued/sent/paid.",
+                    level=messages.WARNING,
+                )
+                request._lock_notice_shown = True
+            if locked:
+                extra_context = extra_context or {}
+                extra_context["show_save"] = False
+                extra_context["show_save_and_add_another"] = False
+                extra_context["show_save_and_continue"] = False
+                extra_context["show_save_and_view"] = False
+                extra_context["show_cancel"] = True
+                extra_context["show_close"] = False
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            locked = MonthlyBill.objects.filter(
+                room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+            ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+            if locked:
+                self.message_user(
+                    request,
+                    "Cannot add water reading for a locked invoice month.",
+                    level=messages.ERROR,
+                )
+                return
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(Electricity)
@@ -702,10 +765,61 @@ class ElectricityAdmin(admin.ModelAdmin):
         return not _is_tenant(request.user)
 
     def has_change_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if obj is None:
+            return True
+        locked = MonthlyBill.objects.filter(
+            room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+        ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+        return not locked
 
     def has_delete_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if obj is None:
+            return True
+        locked = MonthlyBill.objects.filter(
+            room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+        ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+        return not locked
+
+    def change_view(self, request, object_id, form_url="", extra_context=None):
+        obj = self.get_object(request, object_id)
+        if obj:
+            locked = MonthlyBill.objects.filter(
+                room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+            ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+            if locked and not getattr(request, "_lock_notice_shown", False):
+                self.message_user(
+                    request,
+                    "This record is locked because the invoice for this room and month is issued/sent/paid.",
+                    level=messages.WARNING,
+                )
+                request._lock_notice_shown = True
+            if locked:
+                extra_context = extra_context or {}
+                extra_context["show_save"] = False
+                extra_context["show_save_and_add_another"] = False
+                extra_context["show_save_and_continue"] = False
+                extra_context["show_save_and_view"] = False
+                extra_context["show_cancel"] = True
+                extra_context["show_close"] = False
+        return super().change_view(request, object_id, form_url, extra_context)
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            locked = MonthlyBill.objects.filter(
+                room=obj.room, month__year=obj.date.year, month__month=obj.date.month
+            ).exclude(status=MonthlyBill.Status.DRAFT).exists()
+            if locked:
+                self.message_user(
+                    request,
+                    "Cannot add electricity reading for a locked invoice month.",
+                    level=messages.ERROR,
+                )
+                return
+        super().save_model(request, obj, form, change)
 
 
 @admin.register(MonthlyBill)
@@ -714,7 +828,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         "month_year",
         "room",
         "renter",
-        "alert_warning",
+        "alert_job",
         "status_badge",
         "status_date",
         "total_display",
@@ -762,7 +876,8 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         self._request = request
-        qs = super().get_queryset(request)
+        qs = super().get_queryset(request).select_related("room", "room__renter")
+        self._prime_alert_cache(qs)
         if _is_tenant(request.user):
             return qs.filter(
                 room__renter=request.user,
@@ -801,6 +916,21 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         if not token:
             self.message_user(
                 request, "Telegram bot token is not configured.", level=messages.ERROR
+            )
+            return
+
+        if getattr(settings, "ASYNC_TASKS", True):
+            bill_ids = list(queryset.values_list("id", flat=True))
+            MonthlyBill.objects.filter(id__in=bill_ids).update(
+                async_job_pending=True, async_job_type="bulk_send"
+            )
+            threading.Thread(
+                target=self._bulk_send_worker,
+                args=(bill_ids, token),
+                daemon=True,
+            ).start()
+            self.message_user(
+                request, "Bulk send queued. Processing in background.", level=messages.SUCCESS
             )
             return
 
@@ -859,6 +989,46 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     bulk_send_telegram.short_description = "Send via Telegram"
 
+    def _bulk_send_worker(self, bill_ids, token):
+        close_old_connections()
+        bills = MonthlyBill.objects.filter(id__in=bill_ids)
+        for bill in bills:
+            try:
+                if bill.status != MonthlyBill.Status.ISSUED:
+                    continue
+                renter = bill.room.renter
+                chat_id = None
+                if renter:
+                    chat_id = getattr(
+                        getattr(renter, "client_profile", None), "telegram_chat_id", None
+                    )
+                if not chat_id:
+                    continue
+
+                filename = generate_invoice_for_bill(bill=bill, lang="kh")
+                invoices_dir = os.path.join(
+                    settings.MEDIA_ROOT, "invoices", "images", bill.month.strftime("%Y_%m")
+                )
+                filepath = os.path.join(invoices_dir, filename)
+                if not os.path.exists(filepath):
+                    continue
+
+                url = f"https://api.telegram.org/bot{token}/sendPhoto"
+                resp = _post_multipart(
+                    url,
+                    {"chat_id": chat_id},
+                    {"photo": filepath},
+                )
+                if not resp.get("ok"):
+                    continue
+
+                bill.status = MonthlyBill.Status.SENT
+                bill.sent_at = timezone.now()
+            finally:
+                bill.async_job_pending = False
+                bill.async_job_type = ""
+                bill.save(update_fields=["status", "sent_at", "async_job_pending", "async_job_type"])
+
     def has_view_permission(self, request, obj=None):
         if not _is_tenant(request.user):
             return True
@@ -911,8 +1081,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             badges.append((_("No previous electricity"), "#f59e0b"))
 
         if not badges:
+            obj._missing_labels = []
             return ""
         labels = [label for label, _ in badges]
+        obj._missing_labels = labels
         tooltip = "; ".join([str(label) for label in labels])
         if len(labels) == 1:
             summary = labels[0]
@@ -942,6 +1114,40 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         )
 
     alert_warning.short_description = "Alert"
+
+    def alert_job(self, obj):
+        alert_html = self.alert_warning(obj)
+        req = getattr(self, "_request", None)
+        is_tenant = _is_tenant(req.user) if req else False
+        job_html = "" if is_tenant else self.async_job_status(obj)
+        if not alert_html and not job_html:
+            return ""
+        if alert_html and job_html:
+            return format_html("{} {}", alert_html, job_html)
+        return alert_html or job_html
+
+    alert_job.short_description = "Alert / Job"
+
+    def async_job_status(self, obj):
+        if not obj.async_job_pending:
+            return ""
+        label = obj.async_job_type or "pending"
+        color_map = {
+            "issue": "#2563eb",
+            "regen": "#f59e0b",
+            "send": "#8b5cf6",
+            "bulk_send": "#0ea5e9",
+            "pending": "#6b7280",
+        }
+        color = color_map.get(label, "#0ea5e9")
+        return format_html(
+            '<span style="padding:2px 8px;border-radius:10px;'
+            'background:{};color:#fff;font-size:12px;">{}</span>',
+            color,
+            f"Job {label}",
+        )
+
+    async_job_status.short_description = "Job"
 
     def room_name(self, obj):
         return obj.room.room_number
@@ -1228,17 +1434,66 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     row_actions.short_description = "Actions"
 
     def _has_missing_utility_data(self, obj):
-        if not UnitPrice.objects.filter(date=obj.month).exists():
+        labels = getattr(obj, "_missing_labels", None)
+        if labels is not None:
+            return len(labels) > 0
+        self._prime_alert_cache()
+        if obj.month not in self._unitprice_dates:
             return True
-        if not Water.objects.filter(room=obj.room, date=obj.month).exists():
+        room_id = obj.room_id
+        if (room_id, obj.month) not in self._water_current:
             return True
-        if not Water.objects.filter(room=obj.room, date__lt=obj.month).exists():
+        water_dates = self._water_dates.get(room_id, [])
+        if bisect_left(water_dates, obj.month) == 0:
             return True
-        if not Electricity.objects.filter(room=obj.room, date=obj.month).exists():
+        if (room_id, obj.month) not in self._electricity_current:
             return True
-        if not Electricity.objects.filter(room=obj.room, date__lt=obj.month).exists():
+        elec_dates = self._electricity_dates.get(room_id, [])
+        if bisect_left(elec_dates, obj.month) == 0:
             return True
         return False
+
+    def _prime_alert_cache(self, qs=None):
+        if hasattr(self, "_alert_cache_ready") and self._alert_cache_ready:
+            return
+        if qs is None:
+            qs = MonthlyBill.objects.all()
+
+        months = list(qs.values_list("month", flat=True).distinct())
+        room_ids = list(qs.values_list("room_id", flat=True).distinct())
+
+        self._unitprice_dates = set(
+            UnitPrice.objects.filter(date__in=months).values_list("date", flat=True)
+        )
+
+        self._water_current = set(
+            Water.objects.filter(room_id__in=room_ids, date__in=months).values_list(
+                "room_id", "date"
+            )
+        )
+        self._electricity_current = set(
+            Electricity.objects.filter(
+                room_id__in=room_ids, date__in=months
+            ).values_list("room_id", "date")
+        )
+
+        self._water_dates = {}
+        for room_id, date in Water.objects.filter(room_id__in=room_ids).values_list(
+            "room_id", "date"
+        ):
+            self._water_dates.setdefault(room_id, []).append(date)
+        for dates in self._water_dates.values():
+            dates.sort()
+
+        self._electricity_dates = {}
+        for room_id, date in Electricity.objects.filter(
+            room_id__in=room_ids
+        ).values_list("room_id", "date"):
+            self._electricity_dates.setdefault(room_id, []).append(date)
+        for dates in self._electricity_dates.values():
+            dates.sort()
+
+        self._alert_cache_ready = True
 
     def changelist_view(self, request, extra_context=None):
         extra_context = extra_context or {}
@@ -1451,3 +1706,12 @@ admin.site.get_urls = MethodType(
     + admin.AdminSite.get_urls(self),
     admin.site,
 )
+
+
+def _custom_admin_index(self, request, extra_context=None):
+    if request.user.is_authenticated:
+        return redirect("admin:dashboard")
+    return admin.AdminSite.index(self, request, extra_context=extra_context)
+
+
+admin.site.index = MethodType(_custom_admin_index, admin.site)

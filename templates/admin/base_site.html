@@ -213,25 +213,92 @@
       }
     }
   }
+  .messagelist {
+    position: fixed;
+    top: calc(var(--header-height, 50px) + 12px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3500;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 10px;
+    width: min(560px, calc(100vw - 24px));
+    pointer-events: none;
+  }
+  @media (max-width: 768px) {
+    .messagelist {
+      left: 50%;
+      transform: translateX(-50%);
+      top: calc(var(--header-height, 50px) + 8px);
+      width: calc(100vw - 20px);
+    }
+  }
   .messagelist li {
     position: relative;
-    padding-right: 28px;
-    transition:
-      opacity 0.4s ease,
-      transform 0.4s ease;
+    padding: 12px 40px 12px 14px;
+    border-radius: 12px;
+    border: 1px solid color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+    background-color: color-mix(in srgb, var(--body-bg, #fff) 92%, transparent);
+    color: var(--body-fg, #111827);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: auto;
+    background-image: none !important;
+    background-repeat: no-repeat;
+    background-position: 0 0;
+    list-style: none;
+  }
+  .messagelist li::before {
+    content: none !important;
   }
   .messagelist li.is-fading {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-6px);
+  }
+  .messagelist li.success {
+    border-color: color-mix(in srgb, #10b981 55%, transparent);
+    background-color: color-mix(in srgb, #10b981 12%, var(--body-bg, #fff)) !important;
+    background-image: none !important;
+  }
+  .messagelist li.warning {
+    border-color: color-mix(in srgb, #f59e0b 55%, transparent);
+    background-color: color-mix(in srgb, #f59e0b 14%, var(--body-bg, #fff)) !important;
+    background-image: none !important;
+  }
+  .messagelist li.error,
+  .messagelist li.danger {
+    border-color: color-mix(in srgb, #ef4444 55%, transparent);
+    background-color: color-mix(in srgb, #ef4444 12%, var(--body-bg, #fff)) !important;
+    background-image: none !important;
+  }
+  .messagelist li.info {
+    border-color: color-mix(in srgb, #3b82f6 55%, transparent);
+    background-color: color-mix(in srgb, #3b82f6 10%, var(--body-bg, #fff)) !important;
+    background-image: none !important;
+  }
+  .messagelist li.success {
+    background-color: color-mix(in srgb, #10b981 22%, var(--body-bg, #fff)) !important;
+  }
+  .messagelist li.warning {
+    background-color: color-mix(in srgb, #f59e0b 24%, var(--body-bg, #fff)) !important;
+  }
+  .messagelist li.error,
+  .messagelist li.danger {
+    background-color: color-mix(in srgb, #ef4444 22%, var(--body-bg, #fff)) !important;
+  }
+  .messagelist li.info {
+    background-color: color-mix(in srgb, #3b82f6 20%, var(--body-bg, #fff)) !important;
   }
   .messagelist .msg-close {
     position: absolute;
-    right: 8px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
     border: none;
     background: transparent;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1;
     cursor: pointer;
     color: inherit;
@@ -1113,8 +1180,20 @@
       header.className = "month-popover-header";
       panel.appendChild(header);
 
+      var prevYear = document.createElement("button");
+      prevYear.type = "button";
+      prevYear.className = "button month-popover-prev";
+      prevYear.textContent = "‹";
+      header.appendChild(prevYear);
+
       var yearLabel = document.createElement("strong");
       header.appendChild(yearLabel);
+
+      var nextYear = document.createElement("button");
+      nextYear.type = "button";
+      nextYear.className = "button month-popover-next";
+      nextYear.textContent = "›";
+      header.appendChild(nextYear);
 
       var closeBtn = document.createElement("button");
       closeBtn.type = "button";
@@ -1156,6 +1235,18 @@
         panel.classList.toggle("is-open");
         panel.setAttribute("aria-hidden", willOpen ? "false" : "true");
         panel.style.display = willOpen ? "block" : "none";
+      });
+      prevYear.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        state.year -= 1;
+        render();
+      });
+      nextYear.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        state.year += 1;
+        render();
       });
       closeBtn.addEventListener("click", function (e) {
         e.preventDefault();

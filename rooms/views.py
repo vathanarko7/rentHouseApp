@@ -16,6 +16,7 @@ from .models import MonthlyBill, Room, ClientProfile, UnitPrice, Water, Electric
 from django.utils.formats import date_format
 from django.utils.translation import override
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from .services import calculate_monthly_bill, generate_invoice_for_bill
 import json
 import mimetypes
@@ -24,6 +25,8 @@ import urllib.request
 import urllib.error
 import urllib.parse
 import time
+import threading
+from django.db import close_old_connections
 
 
 def _invoice_storage_path(bill, filename):
@@ -46,6 +49,23 @@ def _has_missing_utility_data(bill):
     return False
 
 
+def _redirect_back(request, fallback_url=None):
+    if fallback_url is None:
+        fallback_url = reverse("admin:rooms_monthlybill_changelist")
+    next_url = (
+        request.POST.get("next")
+        or request.GET.get("next")
+        or request.META.get("HTTP_REFERER")
+    )
+    if next_url and url_has_allowed_host_and_scheme(
+        url=next_url,
+        allowed_hosts={request.get_host()},
+        require_https=request.is_secure(),
+    ):
+        return redirect(next_url)
+    return redirect(fallback_url)
+
+
 def download_invoice(request, bill_id, lang):
     if lang not in ("kh", "en", "fr"):
         raise Http404("Invalid language")
@@ -56,7 +76,7 @@ def download_invoice(request, bill_id, lang):
             request,
             "Invoice is unavailable because required utility data is missing.",
         )
-        return redirect("admin:rooms_monthlybill_changelist")
+        return _redirect_back(request)
     renter = bill.room.renter
     if renter and not hasattr(renter, "client_profile"):
         messages.warning(
@@ -85,7 +105,7 @@ def download_invoice(request, bill_id, lang):
         filename = generate_invoice_for_bill(bill, lang=lang)
     except ValidationError as e:
         messages.error(request, "; ".join(e.messages))
-        return redirect("admin:rooms_monthlybill_changelist")
+        return _redirect_back(request)
 
     storage_path = _invoice_storage_path(bill, filename)
     if not default_storage.exists(storage_path):
@@ -106,7 +126,7 @@ def preview_invoice(request, bill_id):
             request,
             "Invoice is unavailable because required utility data is missing.",
         )
-        return redirect("admin:rooms_monthlybill_changelist")
+        return _redirect_back(request)
     renter = bill.room.renter
     if renter and not hasattr(renter, "client_profile"):
         messages.warning(
@@ -136,7 +156,7 @@ def preview_invoice(request, bill_id):
         filename = generate_invoice_for_bill(bill, lang="kh")
     except ValidationError as e:
         messages.error(request, "; ".join(e.messages))
-        return redirect("admin:rooms_monthlybill_changelist")
+        return _redirect_back(request)
     storage_path = _invoice_storage_path(bill, filename)
     if not default_storage.exists(storage_path):
         raise Http404("Invoice file not found")
@@ -163,20 +183,36 @@ def regenerate_invoice_view(request, bill_id):
             request,
             "Cannot re-generate invoice: required utility data is missing.",
         )
-        return redirect("admin:rooms_monthlybill_changelist")
+        return _redirect_back(request)
     if bill.status != MonthlyBill.Status.DRAFT:
         messages.error(request, "Invoice can only be re-generated in Draft status.")
-        return redirect("..")
+        return _redirect_back(request)
 
-    for lang in ("kh", "en", "fr"):
+    def _regen():
+        close_old_connections()
         try:
-            generate_invoice_for_bill(bill=bill, lang=lang)
-        except ValidationError as e:
-            messages.error(request, "; ".join(e.messages))
-            return redirect("admin:rooms_monthlybill_changelist")
+            generate_invoice_for_bill(bill=bill, lang="kh")
+        finally:
+            bill.async_job_pending = False
+            bill.async_job_type = ""
+            bill.save(update_fields=["async_job_pending", "async_job_type"])
+
+    if getattr(settings, "ASYNC_TASKS", True):
+        bill.async_job_pending = True
+        bill.async_job_type = "regen"
+        bill.save(update_fields=["async_job_pending", "async_job_type"])
+        threading.Thread(target=_regen, daemon=True).start()
+        messages.success(request, "Invoice re-generation queued.")
+        return _redirect_back(request)
+
+    try:
+        _regen()
+    except ValidationError as e:
+        messages.error(request, "; ".join(e.messages))
+        return _redirect_back(request)
 
     messages.success(request, "Invoice re-generated successfully.")
-    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+    return _redirect_back(request)
 
 
 def issue_invoice_view(request, bill_id):
@@ -189,16 +225,32 @@ def issue_invoice_view(request, bill_id):
             request,
             "Cannot issue invoice: required utility data is missing.",
         )
-        return redirect("admin:rooms_monthlybill_changelist")
+        return _redirect_back(request)
     if bill.status != MonthlyBill.Status.DRAFT:
         messages.error(request, "Invoice can only be issued from Draft status.")
-        return redirect(reverse("admin:rooms_monthlybill_changelist"))
+        return _redirect_back(request)
 
     bill.status = MonthlyBill.Status.ISSUED
     bill.issued_at = timezone.now()
     bill.save(update_fields=["status", "issued_at"])
+
+    def _generate_issue_invoice():
+        close_old_connections()
+        try:
+            generate_invoice_for_bill(bill=bill, lang="kh")
+        finally:
+            bill.async_job_pending = False
+            bill.async_job_type = ""
+            bill.save(update_fields=["async_job_pending", "async_job_type"])
+
+    if getattr(settings, "ASYNC_TASKS", True):
+        bill.async_job_pending = True
+        bill.async_job_type = "issue"
+        bill.save(update_fields=["async_job_pending", "async_job_type"])
+        threading.Thread(target=_generate_issue_invoice, daemon=True).start()
+
     messages.success(request, "Invoice issued successfully.")
-    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+    return _redirect_back(request)
 
 
 def mark_paid_view(request, bill_id):
@@ -208,13 +260,13 @@ def mark_paid_view(request, bill_id):
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
     if bill.status != MonthlyBill.Status.SENT:
         messages.error(request, "Invoice can only be marked Paid after it is Sent.")
-        return redirect(reverse("admin:rooms_monthlybill_changelist"))
+        return _redirect_back(request)
 
     bill.status = MonthlyBill.Status.PAID
     bill.paid_at = timezone.now()
     bill.save(update_fields=["status", "paid_at"])
     messages.success(request, "Invoice marked as Paid.")
-    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+    return _redirect_back(request)
 
 
 def _post_multipart(url, fields, files, timeout=15):
@@ -260,6 +312,44 @@ def _post_multipart(url, fields, files, timeout=15):
         raise RuntimeError(f"Network error: {e.reason}") from e
 
 
+def _send_invoice_telegram_worker(bill, chat_id, token):
+    close_old_connections()
+    try:
+        filename = generate_invoice_for_bill(bill=bill, lang="kh")
+        storage_path = _invoice_storage_path(bill, filename)
+        if not default_storage.exists(storage_path):
+            return
+        with default_storage.open(storage_path, "rb") as f:
+            invoice_bytes = f.read()
+
+        url = f"https://api.telegram.org/bot{token}/sendPhoto"
+        unit_price = UnitPrice.objects.get(date=bill.month)
+        with override("km"):
+            month_label = date_format(bill.month, "F Y")
+        total_khr = f"{bill.total:,.0f}"
+        total_usd = bill.total / unit_price.exchange_rate
+        caption = (
+            f"📄 វិក័យប័ត្រ ខែ {month_label}\n"
+            f"បន្ទប់: {bill.room.room_number}\n"
+            f"សរុប: {total_khr}៛ ({total_usd:,.2f}$)\n"
+            "\n"
+            "📎 ទាញដាក់ និងផ្ទៀងផ្ទាត់វិក័យប័ត្រខាងលើ"
+        )
+        resp = _post_multipart(
+            url,
+            {"chat_id": chat_id, "caption": caption},
+            {"photo": (filename, invoice_bytes)},
+        )
+        if not resp.get("ok"):
+            return
+        bill.status = MonthlyBill.Status.SENT
+        bill.sent_at = timezone.now()
+    finally:
+        bill.async_job_pending = False
+        bill.async_job_type = ""
+        bill.save(update_fields=["status", "sent_at", "async_job_pending", "async_job_type"])
+
+
 def send_invoice_telegram_view(request, bill_id):
     if (
         request.user.is_active
@@ -274,10 +364,10 @@ def send_invoice_telegram_view(request, bill_id):
             request,
             "Cannot send invoice: required utility data is missing.",
         )
-        return redirect("..")
+        return _redirect_back(request)
     if bill.status not in (MonthlyBill.Status.ISSUED, MonthlyBill.Status.SENT):
         messages.error(request, "Invoice can only be sent when status is Issued or Sent.")
-        return redirect("..")
+        return _redirect_back(request)
 
     renter = bill.room.renter
     chat_id = None
@@ -287,22 +377,34 @@ def send_invoice_telegram_view(request, bill_id):
         )
     if not chat_id:
         messages.error(request, "Tenant Telegram chat ID is missing.")
-        return redirect("..")
+        return _redirect_back(request)
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
         messages.error(request, "Telegram bot token is not configured.")
-        return redirect("..")
+        return _redirect_back(request)
+
+    if getattr(settings, "ASYNC_TASKS", True):
+        threading.Thread(
+            target=_send_invoice_telegram_worker,
+            args=(bill, chat_id, token),
+            daemon=True,
+        ).start()
+        bill.async_job_pending = True
+        bill.async_job_type = "send"
+        bill.save(update_fields=["async_job_pending", "async_job_type"])
+        messages.success(request, "Sending invoice in background.")
+        return _redirect_back(request)
 
     try:
         filename = generate_invoice_for_bill(bill=bill, lang="kh")
     except ValidationError as e:
         messages.error(request, "; ".join(e.messages))
-        return redirect("..")
+        return _redirect_back(request)
     storage_path = _invoice_storage_path(bill, filename)
     if not default_storage.exists(storage_path):
         messages.error(request, "Invoice file not found.")
-        return redirect("..")
+        return _redirect_back(request)
 
     with default_storage.open(storage_path, "rb") as f:
         invoice_bytes = f.read()
@@ -328,16 +430,16 @@ def send_invoice_telegram_view(request, bill_id):
         )
         if not resp.get("ok"):
             messages.error(request, f"Telegram error: {resp}")
-            return redirect("..")
+            return _redirect_back(request)
     except Exception as e:
         messages.error(request, f"Telegram send failed: {str(e)}")
-        return redirect("..")
+        return _redirect_back(request)
 
     bill.status = MonthlyBill.Status.SENT
     bill.sent_at = timezone.now()
     bill.save(update_fields=["status", "sent_at"])
     messages.success(request, "Invoice sent via Telegram.")
-    return redirect(reverse("admin:rooms_monthlybill_changelist"))
+    return _redirect_back(request)
 
 
 def test_telegram_connection_view(request):
@@ -351,7 +453,7 @@ def test_telegram_connection_view(request):
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
         messages.error(request, "Telegram bot token is not configured.")
-        return redirect(reverse("admin:rooms_clientprofile_changelist"))
+        return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
     url = f"https://api.telegram.org/bot{token}/getMe"
     last_error = None
@@ -361,18 +463,22 @@ def test_telegram_connection_view(request):
                 data = json.loads(resp.read().decode("utf-8"))
             if not data.get("ok"):
                 messages.error(request, f"Telegram test failed: {data}")
-                return redirect(reverse("admin:rooms_clientprofile_changelist"))
+                return _redirect_back(
+                    request, reverse("admin:rooms_clientprofile_changelist")
+                )
             result = data.get("result") or {}
             bot_name = result.get("username") or result.get("first_name") or "Unknown"
             messages.success(request, f"Telegram connection OK: {bot_name}")
-            return redirect(reverse("admin:rooms_clientprofile_changelist"))
+            return _redirect_back(
+                request, reverse("admin:rooms_clientprofile_changelist")
+            )
         except Exception as e:
             last_error = e
             if attempt == 0:
                 time.sleep(0.5)
                 continue
     messages.error(request, f"Telegram test failed: {str(last_error)}")
-    return redirect(reverse("admin:rooms_clientprofile_changelist"))
+    return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
 
 def test_tenant_telegram_view(request, bill_id):
@@ -392,12 +498,12 @@ def test_tenant_telegram_view(request, bill_id):
         )
     if not chat_id:
         messages.error(request, "Tenant Telegram chat ID is missing.")
-        return redirect("..")
+        return _redirect_back(request)
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
         messages.error(request, "Telegram bot token is not configured.")
-        return redirect("..")
+        return _redirect_back(request)
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     template = getattr(
@@ -423,16 +529,16 @@ def test_tenant_telegram_view(request, bill_id):
                 data = json.loads(resp.read().decode("utf-8"))
             if not data.get("ok"):
                 messages.error(request, f"Telegram test failed: {data}")
-                return redirect("..")
+                return _redirect_back(request)
             messages.success(request, "Tenant Telegram test message sent.")
-            return redirect("..")
+            return _redirect_back(request)
         except Exception as e:
             last_error = e
             if attempt == 0:
                 time.sleep(0.5)
                 continue
     messages.error(request, f"Telegram test failed: {str(last_error)}")
-    return redirect("..")
+    return _redirect_back(request)
 
 
 def test_clientprofile_telegram_view(request, profile_id):
@@ -447,12 +553,12 @@ def test_clientprofile_telegram_view(request, profile_id):
     chat_id = getattr(profile, "telegram_chat_id", None)
     if not chat_id:
         messages.error(request, "Tenant Telegram chat ID is missing.")
-        return redirect("admin:rooms_clientprofile_changelist")
+        return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
         messages.error(request, "Telegram bot token is not configured.")
-        return redirect("admin:rooms_clientprofile_changelist")
+        return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     template = getattr(
@@ -483,16 +589,20 @@ def test_clientprofile_telegram_view(request, profile_id):
                 data = json.loads(resp.read().decode("utf-8"))
             if not data.get("ok"):
                 messages.error(request, f"Telegram test failed: {data}")
-                return redirect("admin:rooms_clientprofile_changelist")
+                return _redirect_back(
+                    request, reverse("admin:rooms_clientprofile_changelist")
+                )
             messages.success(request, "Tenant Telegram test message sent.")
-            return redirect("admin:rooms_clientprofile_changelist")
+            return _redirect_back(
+                request, reverse("admin:rooms_clientprofile_changelist")
+            )
         except Exception as e:
             last_error = e
             if attempt == 0:
                 time.sleep(0.5)
                 continue
     messages.error(request, f"Telegram test failed: {str(last_error)}")
-    return redirect("admin:rooms_clientprofile_changelist")
+    return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
 
 # View to generate invoices for selected rooms and month
@@ -542,7 +652,7 @@ def generate_invoices_view(request):
         messages.success(
             request, f"{generated_count} invoice(s) generated successfully"
         )
-        return redirect("..")
+        return _redirect_back(request)
 
     rooms = Room.objects.all()
     return render(
@@ -614,7 +724,7 @@ def generate_and_download_view(request):
 
         if generated_count == 0:
             messages.warning(request, "No invoices generated to download.")
-            return redirect("..")
+            return _redirect_back(request)
 
         response = HttpResponse(buffer, content_type="application/zip")
         response["Content-Disposition"] = f'attachment; filename="invoices_{month}.zip"'

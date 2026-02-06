@@ -163,6 +163,8 @@ class MonthlyBill(models.Model):
     issued_at = models.DateTimeField(null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)
     paid_at = models.DateTimeField(null=True, blank=True)
+    async_job_pending = models.BooleanField(default=False)
+    async_job_type = models.CharField(max_length=32, blank=True, default="")
     data_note = models.CharField(max_length=100, blank=True, default="")
 
     created_at = models.DateTimeField(auto_now_add=True)
