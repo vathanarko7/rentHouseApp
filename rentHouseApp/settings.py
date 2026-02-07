@@ -163,6 +163,22 @@ LOCALE_PATHS = [
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+# Static & media (GCS)
+GS_BUCKET_NAME = os.getenv("GS_BUCKET_NAME", "")
+
+STATIC_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+MEDIA_URL = STATIC_URL
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {"bucket_name": GS_BUCKET_NAME},
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+        "OPTIONS": {"bucket_name": GS_BUCKET_NAME},
+    },
+}
 
 STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -193,6 +209,7 @@ STORAGES = {
 }
 
 CSRF_TRUSTED_ORIGINS = []
+
 # Email settings (for future use)
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 EMAIL_HOST = "localhost"
