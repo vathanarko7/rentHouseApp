@@ -10,14 +10,14 @@
 {% endblock %}
 
 {% block object-tools %}
-<div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
-  <div style="display:flex; align-items:center; gap:8px;">
-    {{ block.super }}
-  </div>
-  <div style="display:flex; align-items:center; gap:8px;">
-    <a class="button" href="{% url 'admin:rooms_monthlybill_test_telegram' %}">
-      Test Telegram
-    </a>
-  </div>
+{{ block.super }}
+{% endblock %}
+
+{% block search %}
+<div style="margin: 0 0 8px 0;">
+  <a class="button" href="{% url 'admin:rooms_monthlybill_test_telegram' %}">
+    Test Telegram
+  </a>
 </div>
+{{ block.super }}
 {% endblock %}
