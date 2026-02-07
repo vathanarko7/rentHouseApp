@@ -1,10 +1,17 @@
-{% extends "admin/change_list.html" %}
-{% load i18n %}
-
-{% block breadcrumbs %}
+{% extends "admin/change_list.html" %} {% load i18n %} {% block content_title %}
+<h1>{% translate "Select room to change" %}</h1>
+{% endblock %} {% block object-tools %}
+<ul class="object-tools">
+  {% if has_add_permission %}
+  <li>
+    <a href="{% url 'admin:rooms_room_add' %}" class="addlink">{% translate "Add room" %}</a>
+  </li>
+  {% endif %}
+</ul>
+{% endblock %} {% block search %}
+{{ block.super }} {% endblock %} {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:dashboard' %}">{% translate "Home" %}</a>
-  &rsaquo;
-  {{ cl.opts.verbose_name_plural|capfirst }}
+  &rsaquo; {{ cl.opts.verbose_name_plural|capfirst }}
 </div>
 {% endblock %}

@@ -3,117 +3,155 @@ from django.contrib.auth.models import User
 from django.forms import ValidationError
 
 from rooms.utils import first_day_of_current_month
+from django.utils.translation import gettext_lazy as _
 
 
 # Create your models here.
 class Room(models.Model):
-    room_number = models.CharField(max_length=10, unique=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    room_number = models.CharField(max_length=10, unique=True, verbose_name=_("Room number"))
+    price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name=_("Price"))
 
     # 1 room - 1 client (user)
     renter = models.OneToOneField(
-        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="room"
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="room",
+        verbose_name=_("Renter"),
     )
 
     def __str__(self):
-        return f"Room {self.room_number}"
+        return _("Room %(number)s") % {"number": self.room_number}
 
     class Meta:
-        verbose_name_plural = "Rooms"
+        verbose_name = _("Room")
+        verbose_name_plural = _("Rooms")
 
 
 class RoomHistory(models.Model):
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="history")
     renter = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True, related_name="room_history"
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="room_history",
+        verbose_name=_("Renter"),
     )
-    start_date = models.DateField()
-    end_date = models.DateField(null=True, blank=True)
+    start_date = models.DateField(verbose_name=_("Start date"))
+    end_date = models.DateField(null=True, blank=True, verbose_name=_("End date"))
 
     class Meta:
         ordering = ["-start_date"]
-        verbose_name_plural = "Room History"
+        verbose_name_plural = _("Room History")
 
     def __str__(self):
-        renter_name = self.renter.get_full_name() if self.renter else "Unknown"
+        renter_name = self.renter.get_full_name() if self.renter else _("Unknown")
         return f"{self.room.room_number} - {renter_name}"
 
 
 # Utility Water meter readings
 class Water(models.Model):
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="waters")
-    date = models.DateField(default=first_day_of_current_month)
-    meter_value = models.PositiveIntegerField()
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, related_name="waters", verbose_name=_("Room")
+    )
+    date = models.DateField(default=first_day_of_current_month, verbose_name=_("Date"))
+    meter_value = models.PositiveIntegerField(verbose_name=_("Meter value"))
 
     is_initial = models.BooleanField(
-        default=False, help_text="Initial meter reading at move-in"
+        default=False,
+        help_text=_("Initial meter reading at move-in"),
+        verbose_name=_("Is initial"),
     )
 
     class Meta:
         unique_together = ("room", "date")
-        verbose_name_plural = "Water Readings"
+        verbose_name = _("Water")
+        verbose_name_plural = _("Water Readings")
         ordering = ["date"]
 
     def __str__(self):
-        return f"Water of room {self.room.room_number} - {self.date.strftime('%Y-%m')}"
+        return _("Water of room %(room)s - %(month)s") % {
+            "room": self.room.room_number,
+            "month": self.date.strftime("%Y-%m"),
+        }
 
 
 # Utility Electricity meter readings
 class Electricity(models.Model):
     room = models.ForeignKey(
-        Room, on_delete=models.CASCADE, related_name="electricities"
+        Room,
+        on_delete=models.CASCADE,
+        related_name="electricities",
+        verbose_name=_("Room"),
     )
-    date = models.DateField(default=first_day_of_current_month)
-    meter_value = models.PositiveIntegerField()
+    date = models.DateField(default=first_day_of_current_month, verbose_name=_("Date"))
+    meter_value = models.PositiveIntegerField(verbose_name=_("Meter value"))
 
     is_initial = models.BooleanField(
-        default=False, help_text="Initial meter reading at move-in"
+        default=False,
+        help_text=_("Initial meter reading at move-in"),
+        verbose_name=_("Is initial"),
     )
 
     class Meta:
         unique_together = ("room", "date")
         ordering = ["date"]
-        verbose_name_plural = "Water Readings"
-        verbose_name_plural = "Electricity Readings"
+        verbose_name = _("Electricity")
+        verbose_name_plural = _("Electricity Readings")
 
     def __str__(self):
-        return f"Electricity of room {self.room.room_number} - {self.date.strftime('%Y-%m')}"
+        return _("Electricity of room %(room)s - %(month)s") % {
+            "room": self.room.room_number,
+            "month": self.date.strftime("%Y-%m"),
+        }
 
 
 # Unit prices for utilities
 class UnitPrice(models.Model):
     date = models.DateField(
-        default=first_day_of_current_month, help_text="First day of month"
+        default=first_day_of_current_month,
+        help_text=_("First day of month"),
+        verbose_name=_("Date"),
     )
 
     water_unit_price = models.DecimalField(
-        max_digits=10, decimal_places=2, default=2000
+        max_digits=10,
+        decimal_places=2,
+        default=2000,
+        verbose_name=_("Water unit price"),
     )
     electricity_unit_price = models.DecimalField(
-        max_digits=10, decimal_places=2, default=1000
+        max_digits=10,
+        decimal_places=2,
+        default=1000,
+        verbose_name=_("Electricity unit price"),
     )
 
     exchange_rate = models.DecimalField(
         max_digits=10,
         decimal_places=6,
         default=4000,
-        help_text="Exchange rate USD → KHR",
+        help_text=_("Exchange rate USD to KHR"),
+        verbose_name=_("Exchange rate"),
     )
 
     class Meta:
         unique_together = ("date",)
-        verbose_name_plural = "Utility Rates"
+        verbose_name = _("Unit Price")
+        verbose_name_plural = _("Utility Rates")
 
     def __str__(self):
-        return f"UnitPrice of {self.date.strftime('%Y-%m')}"
+        return _("Unit Price of %(month)s") % {"month": self.date.strftime("%Y-%m")}
 
 
 # Client profile extending User model
 class ClientProfile(models.Model):
     SEX_CHOICES = (
-        ("M", "Male"),
-        ("F", "Female"),
-        ("O", "Other"),
+        ("M", _("Male")),
+        ("F", _("Female")),
+        ("O", _("Other")),
     )
 
     user = models.OneToOneField(
@@ -126,28 +164,28 @@ class ClientProfile(models.Model):
     telegram_chat_id = models.CharField(max_length=64, null=True, blank=True)
     id_card_number = models.CharField(max_length=50, unique=True, null=True, blank=True)
 
-    enter_date = models.DateField(null=True, blank=True, help_text="Move-in date")
-    exit_date = models.DateField(null=True, blank=True, help_text="Move-out date")
+    enter_date = models.DateField(null=True, blank=True, help_text=_("Move-in date"))
+    exit_date = models.DateField(null=True, blank=True, help_text=_("Move-out date"))
 
     def __str__(self):
         return f"{self.user.get_full_name() or self.user.username}"
 
     def clean(self):
         if self.exit_date and self.exit_date <= self.enter_date:
-            raise ValidationError("Exit date cannot be before enter date")
+            raise ValidationError(_("Exit date cannot be before enter date"))
 
     class Meta:
-        verbose_name = "Tenant"
-        verbose_name_plural = "Tenants"
+        verbose_name = _("Tenant")
+        verbose_name_plural = _("Tenants")
 
 
 # Monthly bill for a room
 class MonthlyBill(models.Model):
     class Status(models.TextChoices):
-        DRAFT = "draft", "Draft"
-        ISSUED = "issued", "Issued"
-        SENT = "sent", "Sent"
-        PAID = "paid", "Paid"
+        DRAFT = "draft", _("Draft")
+        ISSUED = "issued", _("Issued")
+        SENT = "sent", _("Sent")
+        PAID = "paid", _("Paid")
 
     room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="bills")
 
@@ -158,7 +196,7 @@ class MonthlyBill(models.Model):
     electricity_cost = models.DecimalField(max_digits=12, decimal_places=2)
     total = models.DecimalField(max_digits=14, decimal_places=2)
     status = models.CharField(
-        max_length=10, choices=Status.choices, default=Status.DRAFT
+        max_length=10, choices=Status.choices, default=Status.DRAFT, verbose_name=_("Status")
     )
     issued_at = models.DateTimeField(null=True, blank=True)
     sent_at = models.DateTimeField(null=True, blank=True)
@@ -175,10 +213,14 @@ class MonthlyBill(models.Model):
 
     class Meta:
         unique_together = ("room", "month")
-        verbose_name_plural = "Monthly Bills"
+        verbose_name = _("Monthly bill")
+        verbose_name_plural = _("Monthly Bills")
 
     def __str__(self):
-        return f"Bill {self.room.room_number} {self.month.strftime('%Y-%m')}"
+        return _("Bill %(room)s %(month)s") % {
+            "room": self.room.room_number,
+            "month": self.month.strftime("%Y-%m"),
+        }
 
     def clean(self):
         if not self.pk:
@@ -193,4 +235,4 @@ class MonthlyBill(models.Model):
             self.Status.PAID: 3,
         }
         if order.get(self.status, 0) < order.get(current, 0):
-            raise ValidationError("Status cannot move backward.")
+            raise ValidationError(_("Status cannot move backward."))

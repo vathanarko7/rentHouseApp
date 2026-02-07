@@ -1,6 +1,27 @@
 {% extends "admin/rooms/change_list.html" %}
 {% load i18n %}
 
+{% block extrahead %}
+{{ block.super }}
+<style>
+  /* Hide "Show counts" / "Hide counts" toggle */
+  #changelist-filter .viewlink,
+  #changelist-filter a.viewlink,
+  .filter .viewlink,
+  #changelist-filter details > summary > a,
+  #changelist-filter .hidelink { display: none !important; }
+</style>
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (!params.has("_facets")) {
+      params.set("_facets", "1");
+      window.location.search = params.toString();
+    }
+  })();
+</script>
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:dashboard' %}">{% translate "Home" %}</a>

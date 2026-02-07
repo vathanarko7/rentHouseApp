@@ -1,0 +1,956 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-07 20:47+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: km\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\rooms\admin.py:53
+msgid "Rent House Administration"
+msgstr "ការគ្រប់គ្រងផ្ទះជួល"
+
+#: .\rooms\admin.py:54
+msgid "Rent House Admin Portal"
+msgstr "ផ្ទាំងគ្រប់គ្រងផ្ទះជួល"
+
+#: .\rooms\admin.py:55
+msgid "Welcome to Rent House Admin Portal"
+msgstr "សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រងផ្ទះជួល"
+
+#: .\rooms\admin.py:78
+msgid "Leave blank to set an unusable password."
+msgstr "ទុកឲ្យទទេ ដើម្បីកំណត់ពាក្យសម្ងាត់ដែលមិនអាចប្រើបាន"
+
+#: .\rooms\admin.py:121
+msgid "Username"
+msgstr "ឈ្មោះអ្នកប្រើ"
+
+#: .\rooms\admin.py:122
+msgid "First name"
+msgstr "នាមខ្លួន"
+
+#: .\rooms\admin.py:123
+msgid "Last name"
+msgstr "នាមត្រកូល"
+
+#: .\rooms\admin.py:124 .\rooms\admin.py:254
+msgid "Email"
+msgstr "អ៊ីមែល"
+
+#: .\rooms\admin.py:125
+msgid "Password"
+msgstr "ពាក្យសម្ងាត់"
+
+#: .\rooms\admin.py:126
+msgid "Sex"
+msgstr "ភេទ"
+
+#: .\rooms\admin.py:127
+msgid "Phone"
+msgstr "លេខទូរស័ព្ទ"
+
+#: .\rooms\admin.py:128
+msgid "Telegram chat id"
+msgstr "លេខសម្គាល់ Telegram Chat"
+
+#: .\rooms\admin.py:129
+msgid "Id card number"
+msgstr "លេខអត្តសញ្ញាណប័ណ្ណ"
+
+#: .\rooms\admin.py:130
+msgid "Enter date"
+msgstr "កាលបរិច្ឆេទចូល"
+
+#: .\rooms\admin.py:131
+msgid "Exit date"
+msgstr "កាលបរិច្ឆេទចេញ"
+
+#: .\rooms\admin.py:145
+msgid "Username already exists."
+msgstr "ឈ្មោះអ្នកប្រើនេះមានរួចហើយ"
+
+#: .\rooms\admin.py:156
+msgid "Email already exists."
+msgstr "អ៊ីមែលនេះមានរួចហើយ"
+
+#: .\rooms\admin.py:165
+msgid "Account Info"
+msgstr "ព័ត៌មានគណនី"
+
+#: .\rooms\admin.py:178
+msgid "Profile Info"
+msgstr "ព័ត៌មានប្រវត្តិរូប"
+
+#: .\rooms\admin.py:235
+msgid "Paid invoices cannot be deleted."
+msgstr "វិក្កយបត្រដែលបានបង់មិនអាចលុបបាន"
+
+#: .\rooms\admin.py:266
+msgid "No chat ID"
+msgstr "មិនមាន Chat ID"
+
+#: .\rooms\admin.py:268
+msgid "Test Chat"
+msgstr "សាកល្បង Chat"
+
+#: .\rooms\admin.py:282
+msgid "Telegram"
+msgstr "Telegram"
+
+#: .\rooms\admin.py:397
+msgid "Room Modification"
+msgstr "កែប្រែបន្ទប់"
+
+#: .\rooms\admin.py:459 .\rooms\admin.py:1129 .\rooms\models.py:21
+#: .\rooms\models.py:40
+msgid "Renter"
+msgstr "អ្នកជួល"
+
+#: .\rooms\admin.py:517 .\rooms\admin.py:539
+#: .\templates\admin\dashboard.html:125
+msgid "Electricity (kWh)"
+msgstr "អគ្គិសនី (kWh)"
+
+#: .\rooms\admin.py:526 .\rooms\admin.py:540
+#: .\templates\admin\dashboard.html:117
+msgid "Water (m³)"
+msgstr "ទឹក (m³)"
+
+#: .\rooms\admin.py:536
+msgid "Readings"
+msgstr "តម្លៃកុងទ័រ"
+
+#: .\rooms\admin.py:537 .\rooms\models.py:101
+#: .\templates\admin\base_site.html:858
+msgid "Electricity"
+msgstr "អគ្គិសនី"
+
+#: .\rooms\admin.py:538 .\rooms\models.py:70
+#: .\templates\admin\base_site.html:829 .\templates\admin\base_site.html:867
+msgid "Water"
+msgstr "ទឹក"
+
+#: .\rooms\admin.py:546 .\rooms\admin.py:565
+msgid "month"
+msgstr "ខែ"
+
+#: .\rooms\admin.py:945
+msgid "Select at least one invoice."
+msgstr "សូមជ្រើសយ៉ាងហោចណាស់មួយវិក្កយបត្រ"
+
+#: .\rooms\admin.py:1056
+msgid "Invoice file missing."
+msgstr "ខ្វះឯកសារវិក្កយបត្រ"
+
+#: .\rooms\admin.py:1135
+msgid "Missing tenant"
+msgstr "ខ្វះព័ត៌មានអ្នកជួល"
+
+#: .\rooms\admin.py:1137
+msgid "Missing profile"
+msgstr "ខ្វះព័ត៌មានប្រវត្តិរូប"
+
+#: .\rooms\admin.py:1153
+msgid "Missing unit price"
+msgstr "ខ្វះតម្លៃឯកតា"
+
+#: .\rooms\admin.py:1155
+msgid "Missing current water"
+msgstr "ខ្វះអំនានទឹកខែថ្មី"
+
+#: .\rooms\admin.py:1157
+msgid "Missing previous water"
+msgstr "ខ្វះអំនានទឹកខែមុន"
+
+#: .\rooms\admin.py:1159
+msgid "Missing current electricity"
+msgstr "ខ្វះអំនានអគ្គិសនីខែថ្មី"
+
+#: .\rooms\admin.py:1161
+msgid "Missing previous electricity"
+msgstr "ខ្វះអំនានអគ្គិសនីខែមុន"
+
+#: .\rooms\admin.py:1173
+#, python-format
+msgid "Missing data (%(count)d)"
+msgid_plural "Missing data (%(count)d)"
+msgstr[0] "ខ្វះទិន្នន័យ (%(count)d)"
+
+#: .\rooms\admin.py:1177
+msgid " • "
+msgstr " • "
+
+#: .\rooms\admin.py:1196
+msgid "Alert"
+msgstr ""
+
+#: .\rooms\admin.py:1236
+msgid "Alert / Job"
+msgstr ""
+
+#: .\rooms\admin.py:1268
+msgid "Job"
+msgstr ""
+
+#: .\rooms\admin.py:1273 .\rooms\models.py:28 .\rooms\models.py:57
+#: .\rooms\models.py:87
+msgid "Room"
+msgstr "បន្ទប់"
+
+#: .\rooms\admin.py:1283
+msgid "Total"
+msgstr "សរុប"
+
+#: .\rooms\admin.py:1293 .\rooms\models.py:185
+msgid "Draft"
+msgstr "ព្រាង"
+
+#: .\rooms\admin.py:1294 .\rooms\models.py:186
+msgid "Issued"
+msgstr "បានចេញ"
+
+#: .\rooms\admin.py:1295 .\rooms\models.py:187
+msgid "Sent"
+msgstr "បានផ្ញើ"
+
+#: .\rooms\admin.py:1296 .\rooms\models.py:188
+msgid "Paid"
+msgstr "បានបង់"
+
+#: .\rooms\admin.py:1307 .\rooms\models.py:199
+msgid "Status"
+msgstr "ស្ថានភាព"
+
+#: .\rooms\admin.py:1318
+msgid "Status date"
+msgstr "កាលបរិច្ឆេទស្ថានភាព"
+
+#: .\rooms\admin.py:1323
+msgid "Month"
+msgstr "ខែ"
+
+#: .\rooms\admin.py:1399 .\rooms\admin.py:1400 .\rooms\admin.py:1401
+msgid "Re-generate"
+msgstr "បង្កើតម្តងទៀត"
+
+#: .\rooms\admin.py:1410
+msgid "Issue this invoice? It will be locked."
+msgstr "ចេញវិក្កយបត្រនេះមែនទេ? រាល់ទិន្នន័យពាក់ព័ន្ធនឹងមិនអាចកែបានទៀតនោះទេ"
+
+#: .\rooms\admin.py:1411
+msgid "Issue"
+msgstr "ចេញ"
+
+#: .\rooms\admin.py:1435
+msgid "Send this invoice to the tenant?"
+msgstr "ផ្ញើវិក្កយបត្រនេះទៅអ្នកជួលមែនទេ?"
+
+#: .\rooms\admin.py:1436 .\templates\admin\rooms\change_list.html:324
+msgid "Send"
+msgstr "ផ្ញើ"
+
+#: .\rooms\admin.py:1460
+msgid "Re-send this invoice to the tenant?"
+msgstr "ផ្ញើវិក្កយបត្រនេះម្ដងទៀតទៅអ្នកជួលមែនទេ?"
+
+#: .\rooms\admin.py:1461
+msgid "Re-send"
+msgstr "ផ្ញើម្ដងទៀត"
+
+#: .\rooms\admin.py:1480
+msgid "Mark this invoice as paid?"
+msgstr "សម្គាល់វិក្កយបត្រនេះថាបានបង់ហើយមែនទេ?"
+
+#: .\rooms\admin.py:1481
+msgid "Mark Paid"
+msgstr "សម្គាល់ថាបានបង់"
+
+#: .\rooms\admin.py:1511 .\rooms\admin.py:1689
+#: .\templates\admin\app_list.html:7
+msgid "Invoice"
+msgstr "វិក្កយបត្រ"
+
+#: .\rooms\admin.py:1542 .\rooms\admin.py:1543 .\rooms\admin.py:1544
+msgid "Preview"
+msgstr "មើលជាមុន"
+
+#: .\rooms\admin.py:1554 .\rooms\admin.py:1555 .\rooms\admin.py:1556
+msgid "Download"
+msgstr "ទាញយក"
+
+#: .\rooms\admin.py:1560
+msgid "Actions"
+msgstr "សកម្មភាព"
+
+#: .\rooms\admin.py:1668 .\rooms\admin.py:1674 .\rooms\admin.py:1818
+#: .\templates\admin\app_list.html:5 .\templates\admin\dashboard.html:10
+#: .\templates\admin\dashboard.html:15
+msgid "Reports & Dashboard"
+msgstr "របាយការណ៍ និងផ្ទាំងគ្រប់គ្រង"
+
+#: .\rooms\admin.py:1719
+msgid "This account is inactive."
+msgstr "គណនីនេះមិនដំណើរការ"
+
+#: .\rooms\admin.py:1725
+msgid "This account does not have access to the admin site."
+msgstr "គណនីនេះមិនមានសិទ្ធិចូលប្រើផ្នែកគ្រប់គ្រង"
+
+#: .\rooms\admin.py:1752
+msgid "Log in"
+msgstr "ចូលប្រើ"
+
+#: .\rooms\apps.py:8 .\templates\admin\app_list.html:6
+msgid "Utilities"
+msgstr "សេវាប្រើប្រាស់"
+
+#: .\rooms\models.py:11
+msgid "Room number"
+msgstr "លេខបន្ទប់"
+
+#: .\rooms\models.py:12
+msgid "Price"
+msgstr "តម្លៃ"
+
+#: .\rooms\models.py:25
+#, python-format
+msgid "Room %(number)s"
+msgstr "បន្ទប់ %(number)s"
+
+#: .\rooms\models.py:29 .\templates\admin\base_site.html:794
+#: .\templates\admin\rooms\change_list.html:590
+msgid "Rooms"
+msgstr "បន្ទប់"
+
+#: .\rooms\models.py:42
+msgid "Start date"
+msgstr "កាលបរិច្ឆេទចូល"
+
+#: .\rooms\models.py:43
+msgid "End date"
+msgstr "កាលបរិច្ឆេទចេញ"
+
+#: .\rooms\models.py:47
+msgid "Room History"
+msgstr "ប្រវត្តិបន្ទប់"
+
+#: .\rooms\models.py:50
+msgid "Unknown"
+msgstr "មិនស្គាល់"
+
+#: .\rooms\models.py:59 .\rooms\models.py:89 .\rooms\models.py:116
+msgid "Date"
+msgstr "កាលបរិច្ឆេទ"
+
+#: .\rooms\models.py:60 .\rooms\models.py:90
+msgid "Meter value"
+msgstr "អំនានកុងទ័រ"
+
+#: .\rooms\models.py:64 .\rooms\models.py:94
+msgid "Initial meter reading at move-in"
+msgstr "ការអានម៉ែត្រដំបូងនៅពេលចូល"
+
+#: .\rooms\models.py:65 .\rooms\models.py:95
+msgid "Is initial"
+msgstr "អំនានដើម"
+
+#: .\rooms\models.py:71
+msgid "Water Readings"
+msgstr "អំនានទឹក"
+
+#: .\rooms\models.py:75
+#, python-format
+msgid "Water of room %(room)s - %(month)s"
+msgstr "ទឹក បន្ទប់ %(room)s - %(month)s"
+
+#: .\rooms\models.py:102
+msgid "Electricity Readings"
+msgstr "អំនានអគ្គិសនី"
+
+#: .\rooms\models.py:105
+#, python-format
+msgid "Electricity of room %(room)s - %(month)s"
+msgstr "អគ្គិសនី បន្ទប់ %(room)s - %(month)s"
+
+#: .\rooms\models.py:115
+msgid "First day of month"
+msgstr "ថ្ងៃដំបូងនៃខែ"
+
+#: .\rooms\models.py:123
+msgid "Water unit price"
+msgstr "តម្លៃឯកតាទឹក"
+
+#: .\rooms\models.py:129
+msgid "Electricity unit price"
+msgstr "តម្លៃឯកតាអគ្គិសនី"
+
+#: .\rooms\models.py:136
+msgid "Exchange rate USD to KHR"
+msgstr "អត្រាប្តូរប្រាក់ USD ទៅ KHR"
+
+#: .\rooms\models.py:137
+msgid "Exchange rate"
+msgstr "អត្រាប្តូរប្រាក់"
+
+#: .\rooms\models.py:142
+msgid "Unit Price"
+msgstr "តម្លៃឯកតា"
+
+#: .\rooms\models.py:143
+msgid "Utility Rates"
+msgstr "តម្លៃសេវាប្រើប្រាស់"
+
+#: .\rooms\models.py:146
+#, python-format
+msgid "Unit Price of %(month)s"
+msgstr "តម្លៃឯកតា %(month)s"
+
+#: .\rooms\models.py:152
+msgid "Male"
+msgstr "ប្រុស"
+
+#: .\rooms\models.py:153
+msgid "Female"
+msgstr "ស្រី"
+
+#: .\rooms\models.py:154
+msgid "Other"
+msgstr "ផ្សេងទៀត"
+
+#: .\rooms\models.py:167
+msgid "Move-in date"
+msgstr "ថ្ងៃចូល"
+
+#: .\rooms\models.py:168
+msgid "Move-out date"
+msgstr "ថ្ងៃចេញ"
+
+#: .\rooms\models.py:175
+msgid "Exit date cannot be before enter date"
+msgstr "ថ្ងៃចេញមិនអាចមុនថ្ងៃចូលបាន"
+
+#: .\rooms\models.py:178
+msgid "Tenant"
+msgstr "អ្នកជួល"
+
+#: .\rooms\models.py:179 .\templates\admin\base_site.html:806
+msgid "Tenants"
+msgstr "អ្នកជួល"
+
+#: .\rooms\models.py:216
+msgid "Monthly bill"
+msgstr "វិក្កយបត្រប្រចាំខែ"
+
+#: .\rooms\models.py:217
+msgid "Monthly Bills"
+msgstr "វិក្កយបត្រប្រចាំខែ"
+
+#: .\rooms\models.py:220
+#, python-format
+msgid "Bill %(room)s %(month)s"
+msgstr "វិក្កយបត្រ %(room)s %(month)s"
+
+#: .\rooms\models.py:238
+msgid "Status cannot move backward."
+msgstr "ស្ថានភាពមិនអាចត្រឡប់ក្រោយបាន"
+
+#: .\rooms\views.py:528
+#, python-format
+msgid "Telegram connection OK: %(bot_name)s"
+msgstr "ការតភ្ជាប់ Telegram ជោគជ័យ៖ %(bot_name)s"
+
+#: .\templates\admin\app_list.html:4
+msgid "Authentication and Authorization"
+msgstr "ការផ្ទៀងផ្ទាត់ និងការអនុញ្ញាតសិទ្ធិ"
+
+#: .\templates\admin\app_list.html:16 .\templates\admin\app_list.html:68
+#, python-format
+msgid "Models in the %(name)s application"
+msgstr "ម៉ូដែលនៅក្នុងកម្មវិធី %(name)s"
+
+#: .\templates\admin\app_list.html:21 .\templates\admin\app_list.html:73
+msgid "Model name"
+msgstr "ឈ្មោះម៉ូដែល"
+
+#: .\templates\admin\app_list.html:22 .\templates\admin\app_list.html:74
+msgid "Add link"
+msgstr "តំណបន្ថែម"
+
+#: .\templates\admin\app_list.html:23 .\templates\admin\app_list.html:75
+msgid "Change or view list link"
+msgstr "កែប្រែ ឬមើលបញ្ជី"
+
+#: .\templates\admin\app_list.html:38 .\templates\admin\app_list.html:90
+msgid "Add"
+msgstr "បន្ថែម"
+
+#: .\templates\admin\app_list.html:45 .\templates\admin\app_list.html:97
+msgid "View"
+msgstr "មើល"
+
+#: .\templates\admin\app_list.html:47 .\templates\admin\app_list.html:99
+msgid "Change"
+msgstr "កែប្រែ"
+
+#: .\templates\admin\app_list.html:113
+msgid "You don’t have permission to view or edit anything."
+msgstr "អ្នកមិនមានសិទ្ធិមើល ឬកែប្រែអ្វីទាំងអស់ទេ"
+
+#: .\templates\admin\base_site.html:4 .\templates\admin\base_site.html:12
+#: .\templates\admin\login.html:92 .\templates\base.html:8
+msgid "PtasJuolKruDy"
+msgstr "ផ្ទះជួលគ្រូឌី"
+
+#: .\templates\admin\base_site.html:10
+msgid "Tenant Dashboard"
+msgstr "ផ្ទាំងអ្នកជួល"
+
+#: .\templates\admin\base_site.html:28
+msgid "Change password"
+msgstr "ប្ដូរពាក្យសម្ងាត់"
+
+#: .\templates\admin\base_site.html:33
+msgid "Log out"
+msgstr "ចាកចេញ"
+
+#: .\templates\admin\base_site.html:757
+msgid "Missing data details"
+msgstr "ទិន្នន័យដែលខ្វះ"
+
+#: .\templates\admin\base_site.html:760 .\templates\admin\base_site.html:902
+#: .\templates\admin\base_site.html:1127
+#: .\templates\admin\rooms\change_list.html:99
+#: .\templates\admin\rooms\change_list.html:123
+#: .\templates\admin\rooms\change_list.html:127
+#: .\templates\admin\rooms\change_list.html:144
+#: .\templates\admin\rooms\change_list.html:569
+#: .\templates\admin\rooms\change_list.html:608
+#: .\templates\admin\rooms\change_list.html:776
+msgid "Close"
+msgstr "បិទ"
+
+#: .\templates\admin\base_site.html:785
+msgid "Bills"
+msgstr "វិក្កយបត្រ"
+
+#: .\templates\admin\base_site.html:816
+msgid "Elec"
+msgstr "អគ្គិសនី"
+
+#: .\templates\admin\base_site.html:842
+msgid "Prices"
+msgstr "តម្លៃ"
+
+#: .\templates\admin\base_site.html:844 .\templates\admin\base_site.html:851
+msgid "More"
+msgstr "បន្ថែម"
+
+#: .\templates\admin\base_site.html:853
+msgid "More menu"
+msgstr "ម៉ឺនុយបន្ថែម"
+
+#: .\templates\admin\base_site.html:876
+msgid "Unit Prices"
+msgstr "តម្លៃឯកតា"
+
+#: .\templates\admin\base_site.html:888 .\templates\admin\base_site.html:895
+#: .\templates\admin\base_site.html:947
+msgid "Confirm"
+msgstr "បញ្ជាក់"
+
+#: .\templates\admin\base_site.html:892
+#: .\templates\admin\rooms\change_list.html:323
+#: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:18
+#: .\templates\admin\rooms\room\change_form.html:7
+msgid "Cancel"
+msgstr "បោះបង់"
+
+#: .\templates\admin\base_site.html:943
+msgid "Are you sure you want to delete this item?"
+msgstr "តើអ្នកប្រាកដថាចង់លុបធាតុនេះមែនទេ?"
+
+#: .\templates\admin\base_site.html:943 .\templates\admin\base_site.html:944
+msgid "This will also delete related items."
+msgstr "វានឹងលុបធាតុដែលពាក់ព័ន្ធផងដែរ"
+
+#: .\templates\admin\base_site.html:944
+#, python-format
+msgid "Are you sure you want to delete \"%(name)s\"?"
+msgstr "តើអ្នកប្រាកដថាចង់លុប \"%(name)s\" មែនទេ?"
+
+#: .\templates\admin\base_site.html:945
+msgid "Are you sure?"
+msgstr "តើអ្នកប្រាកដមែនទេ?"
+
+#: .\templates\admin\base_site.html:946
+msgid "Delete"
+msgstr "លុប"
+
+#: .\templates\admin\base_site.html:1110
+#: .\templates\admin\rooms\change_list.html:572
+msgid "Jan"
+msgstr "មករា"
+
+#: .\templates\admin\base_site.html:1111
+#: .\templates\admin\rooms\change_list.html:573
+msgid "Feb"
+msgstr "កុម្ភៈ"
+
+#: .\templates\admin\base_site.html:1112
+#: .\templates\admin\rooms\change_list.html:574
+msgid "Mar"
+msgstr "មីនា"
+
+#: .\templates\admin\base_site.html:1113
+#: .\templates\admin\rooms\change_list.html:575
+msgid "Apr"
+msgstr "មេសា"
+
+#: .\templates\admin\base_site.html:1114
+#: .\templates\admin\rooms\change_list.html:576
+msgid "May"
+msgstr "ឧសភា"
+
+#: .\templates\admin\base_site.html:1115
+#: .\templates\admin\rooms\change_list.html:577
+msgid "Jun"
+msgstr "មិថុនា"
+
+#: .\templates\admin\base_site.html:1116
+#: .\templates\admin\rooms\change_list.html:578
+msgid "Jul"
+msgstr "កក្កដា"
+
+#: .\templates\admin\base_site.html:1117
+#: .\templates\admin\rooms\change_list.html:579
+msgid "Aug"
+msgstr "សីហា"
+
+#: .\templates\admin\base_site.html:1118
+#: .\templates\admin\rooms\change_list.html:580
+msgid "Sep"
+msgstr "កញ្ញា"
+
+#: .\templates\admin\base_site.html:1119
+#: .\templates\admin\rooms\change_list.html:581
+msgid "Oct"
+msgstr "តុលា"
+
+#: .\templates\admin\base_site.html:1120
+#: .\templates\admin\rooms\change_list.html:582
+msgid "Nov"
+msgstr "វិច្ឆិកា"
+
+#: .\templates\admin\base_site.html:1121
+#: .\templates\admin\rooms\change_list.html:583
+msgid "Dec"
+msgstr "ធ្នូ"
+
+#: .\templates\admin\base_site.html:1123
+msgid "YYYY-MM-01"
+msgstr "YYYY-MM-01"
+
+#: .\templates\admin\base_site.html:1124
+#: .\templates\admin\rooms\change_list.html:561
+msgid "Pick month"
+msgstr "ជ្រើសខែ"
+
+#: .\templates\admin\base_site.html:1125
+msgid "Previous year"
+msgstr "ឆ្នាំមុន"
+
+#: .\templates\admin\base_site.html:1126
+msgid "Next year"
+msgstr "ឆ្នាំបន្ទាប់"
+
+#: .\templates\admin\dashboard.html:8
+#: .\templates\admin\rooms\clientprofile\change_list.html:6
+#: .\templates\admin\rooms\electricity\change_list.html:14
+#: .\templates\admin\rooms\monthlybill\change_list.html:6
+#: .\templates\admin\rooms\room\change_list.html:14
+#: .\templates\admin\rooms\unitprice\change_list.html:10
+#: .\templates\admin\rooms\water\change_list.html:20
+msgid "Home"
+msgstr "ទំព័រដើម"
+
+#: .\templates\admin\dashboard.html:18
+msgid "Showing your room data only."
+msgstr "បង្ហាញតែទិន្នន័យបន្ទប់របស់អ្នកប៉ុណ្ណោះ"
+
+#: .\templates\admin\dashboard.html:20
+msgid "Showing all rooms (global view)."
+msgstr "បង្ហាញបន្ទប់ទាំងអស់ (ទិដ្ឋភាពទូទៅ)"
+
+#: .\templates\admin\dashboard.html:24
+msgid "Income per Month"
+msgstr "ចំណូលក្នុងមួយខែ"
+
+#: .\templates\admin\dashboard.html:31
+msgid "Water / Electricity Trends"
+msgstr "និន្នាការទឹក / អគ្គិសនី"
+
+#: .\templates\admin\dashboard.html:38
+msgid "Recent actions"
+msgstr "សកម្មភាពថ្មីៗ"
+
+#: .\templates\admin\dashboard.html:42
+msgid "None available"
+msgstr "មិនមាន"
+
+#: .\templates\admin\dashboard.html:91
+msgid "Income"
+msgstr "ចំណូល"
+
+#: .\templates\admin\login.html:42 .\templates\admin\login.html:46
+msgid "Username or email"
+msgstr "ឈ្មោះអ្នកប្រើ ឬ អ៊ីមែល"
+
+#: .\templates\admin\login.html:63 .\templates\admin\login.html:80
+msgid "Show password"
+msgstr "បង្ហាញពាក្យសម្ងាត់"
+
+#: .\templates\admin\login.html:79
+msgid "Hide password"
+msgstr "លាក់ពាក្យសម្ងាត់"
+
+#: .\templates\admin\rooms\change_list.html:25
+#: .\templates\admin\rooms\change_list.html:605
+msgid "Clear"
+msgstr "សម្អាត"
+
+#: .\templates\admin\rooms\change_list.html:59
+#: .\templates\admin\rooms\change_list.html:332
+msgid "Select at least one invoice first."
+msgstr "សូមជ្រើសយ៉ាងហោចណាស់មួយវិក្កយបត្រជាមុនសិន"
+
+#: .\templates\admin\rooms\change_list.html:100
+#: .\templates\admin\rooms\change_list.html:124
+#: .\templates\admin\rooms\change_list.html:128
+#: .\templates\admin\rooms\change_list.html:145
+msgid "Job completed successfully."
+msgstr "ដំណើរការបានបញ្ចប់ដោយជោគជ័យ"
+
+#: .\templates\admin\rooms\change_list.html:101
+#: .\templates\admin\rooms\change_list.html:125
+#: .\templates\admin\rooms\change_list.html:129
+#: .\templates\admin\rooms\change_list.html:146
+msgid "Job failed."
+msgstr "ដំណើរការបរាជ័យ"
+
+#: .\templates\admin\rooms\change_list.html:102
+#: .\templates\admin\rooms\change_list.html:126
+#: .\templates\admin\rooms\change_list.html:130
+#: .\templates\admin\rooms\change_list.html:147
+msgid "Job updated."
+msgstr "ដំណើរការត្រូវបានអាប់ដេត"
+
+#: .\templates\admin\rooms\change_list.html:245
+#: .\templates\admin\rooms\change_list.html:248
+msgid "Generate Bills"
+msgstr "បង្កើតវិក្កយបត្រ"
+
+#: .\templates\admin\rooms\change_list.html:246
+msgid "Generate"
+msgstr "បង្កើត"
+
+#: .\templates\admin\rooms\change_list.html:254
+#: .\templates\admin\rooms\change_list.html:257
+msgid "Download Bills"
+msgstr "ទាញយកក្រុម"
+
+#: .\templates\admin\rooms\change_list.html:255
+msgid "Download ZIP"
+msgstr "ទាញយក ZIP"
+
+#: .\templates\admin\rooms\change_list.html:262
+msgid "Send via Telegram"
+msgstr "ផ្ញើក្រុម Telegram"
+
+#: .\templates\admin\rooms\change_list.html:320
+msgid "Bulk Send"
+msgstr "ផ្ញើជាក្រុម"
+
+#: .\templates\admin\rooms\change_list.html:321
+msgid "Send selected invoices via Telegram?"
+msgstr "ផ្ញើវិក្កយបត្រដែលបានជ្រើសតាម Telegram មែនទេ?"
+
+#: .\templates\admin\rooms\change_list.html:331
+msgid "Select invoices"
+msgstr "ជ្រើសវិក្កយបត្រ"
+
+#: .\templates\admin\rooms\change_list.html:334
+msgid "OK"
+msgstr "យល់ព្រម"
+
+#: .\templates\admin\rooms\change_list.html:539
+#: .\templates\admin\rooms\change_list.html:761
+msgid "Select a billing action to show the form."
+msgstr "សូមជ្រើសសកម្មភាពខាងលើ ដើម្បីឃើញបង្កើត ឬទាញយកវិក្កយបត្រ"
+
+#: .\templates\admin\rooms\change_list.html:546
+msgid "Generate Monthly Bills"
+msgstr "បង្កើតវិក្កយបត្រប្រចាំខែ"
+
+#: .\templates\admin\rooms\change_list.html:549
+msgid "Pick a month and rooms, then run the action."
+msgstr "ជ្រើសខែ និងបន្ទប់ រួចចុចបង្កើត ដើម្បីព្រាងវិក្កយបត្រ"
+
+#: .\templates\admin\rooms\change_list.html:556
+msgid "Month:"
+msgstr "ខែ៖"
+
+#: .\templates\admin\rooms\change_list.html:568
+msgid "Year"
+msgstr "ឆ្នាំ"
+
+#: .\templates\admin\rooms\change_list.html:591
+msgid "Leave unchecked = all rooms"
+msgstr "ទុកមិនធីក = បន្ទប់ទាំងអស់"
+
+#: .\templates\admin\rooms\change_list.html:603
+msgid "Submit"
+msgstr "ដាក់ស្នើ"
+
+#: .\templates\admin\rooms\change_list.html:650
+msgid "Selected action:"
+msgstr "សកម្មភាពដែលបានជ្រើស៖"
+
+#: .\templates\admin\rooms\change_list.html:777
+msgid "Invoice Preview"
+msgstr "មើលវិក្កយបត្រជាមុន"
+
+#: .\templates\admin\rooms\clientprofile\change_list.html:28
+msgid "Test Telegram"
+msgstr "សាកភ្ជាប់ Telegram"
+
+#: .\templates\admin\rooms\electricity\change_list.html:5
+msgid "Select electricity to change"
+msgstr "ជ្រើសរើសអំនានអគ្គិសនីដើម្បីកែ"
+
+#: .\templates\admin\rooms\electricity\change_list.html:25
+msgid "Add electricity"
+msgstr "បន្ថែមអគ្គិសនី"
+
+#: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:5
+msgid "Confirm bulk send"
+msgstr "បញ្ជាក់ការផ្ញើជាក្រុម"
+
+#: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:6
+msgid "You are about to send the selected invoices via Telegram."
+msgstr "អ្នកកំពុងត្រៀមផ្ញើវិក្កយបត្រដែលបានជ្រើសតាម Telegram"
+
+#: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:17
+msgid "Yes, send"
+msgstr "បាទ/ចាស ផ្ញើ"
+
+#: .\templates\admin\rooms\room\change_form.html:15
+msgid "Utility Readings"
+msgstr "ការអានសេវាប្រើប្រាស់"
+
+#: .\templates\admin\rooms\room\change_list.html:2
+msgid "Select room to change"
+msgstr "ជ្រើសបន្ទប់ដើម្បីកែប្រែ"
+
+#: .\templates\admin\rooms\room\change_list.html:7
+msgid "Add room"
+msgstr "បន្ថែមបន្ទប់"
+
+#: .\templates\admin\rooms\water\change_list.html:5
+msgid "Select water to change"
+msgstr "ជ្រើសរើស​ អំនានទឹក ដើម្បីកែ"
+
+#: .\templates\admin\rooms\water\change_list.html:12
+msgid "Add water"
+msgstr "បន្ថែមអំនានទឹក"
+
+#: .\templates\admin\search_form.html:7
+msgid "Search"
+msgstr "ស្វែងរក"
+
+#: .\templates\admin\search_form.html:9
+#, python-format
+msgid "%(counter)s result"
+msgid_plural "%(counter)s results"
+msgstr[0] ""
+
+#: .\templates\admin\search_form.html:9
+#, python-format
+msgid "%(full_result_count)s total"
+msgstr ""
+
+#: .\templates\admin\search_form.html:9
+msgid "Show all"
+msgstr ""
+
+#: .\templates\includes\language_switcher.html:6
+msgid "Language"
+msgstr "ភាសា"
+
+
+#~ msgid "Add %(name)s"
+#~ msgstr "បន្ថែម %(name)s"
+
+#~ msgid "Show counts"
+#~ msgstr "បង្ហាញចំនួន"
+
+#~ msgid "ID"
+#~ msgstr "លេខសម្គាល់"
+
+#~ msgid "Room cost"
+#~ msgstr "ថ្លៃបន្ទប់សរុប"
+
+#~ msgid "Water cost"
+#~ msgstr "តម្លៃទឹកសរុប"
+
+#~ msgid "Electricity cost"
+#~ msgstr "ថ្លៃអគ្គិសនីសរុប"
+
+#~ msgid "Issued at"
+#~ msgstr "កាលបរិច្ឆេទចេញបញ្ជី"
+
+#~ msgid "Sent at"
+#~ msgstr "កាលបរិច្ឆេទផ្ញើ"
+
+#~ msgid "Paid at"
+#~ msgstr "កាលបរិច្ឆេទបង់"
+
+#~ msgid "Async job pending"
+#~ msgstr "ការងារប្រព័ន្ធកំពុងរង់ចាំ"
+
+#~ msgid "Async job type"
+#~ msgstr "ប្រភេទការងារប្រព័ន្ធ"
+
+#~ msgid "Data note"
+#~ msgstr "កំណត់សម្គាល់ទិន្នន័យ"
+
+#~ msgid "Tenant name snapshot"
+#~ msgstr "ឈ្មោះអ្នកជួល (បានរក្សាទុក)"
+
+#~ msgid "Last job status"
+#~ msgstr "ស្ថានភាពប្រតិបត្តិការចុងក្រោយ"
+
+#~ msgid "Last job message"
+#~ msgstr "សារប្រតិបត្តិការចុងក្រោយ"
+
+#~ msgid "Last job at"
+#~ msgstr "ប្រតិបត្តិការចុងក្រោយ"
+
+#~ msgid "Created at"
+#~ msgstr "ថ្ងៃបង្កើត"
+
+#: .\rooms\admin.py:212
+msgid "The tenant \"%(name)s\" was added successfully."
+msgstr "អ្នកជួល \"%(name)s\" ត្រូវបានបន្ថែមដោយជោគជ័យ។"
