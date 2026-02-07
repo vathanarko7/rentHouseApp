@@ -110,6 +110,10 @@ def generate_invoice_for_bill(bill, lang="kh"):
         raise ValidationError(
             f"Cannot generate invoice: renter profile missing for room {bill.room.room_number}."
         )
+    current_name = renter.get_full_name() or renter.username
+    if bill.tenant_name_snapshot != current_name:
+        bill.tenant_name_snapshot = current_name
+        bill.save(update_fields=["tenant_name_snapshot"])
     try:
         unit_price = UnitPrice.objects.get(date=bill.month)
     except UnitPrice.DoesNotExist as e:

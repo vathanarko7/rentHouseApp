@@ -18,6 +18,7 @@ from django.utils.translation import override
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from .services import calculate_monthly_bill, generate_invoice_for_bill
+from rooms.invoice_i18n import INVOICE_LANGUAGES
 import json
 import mimetypes
 import uuid
@@ -33,6 +34,15 @@ def _invoice_storage_path(bill, filename):
     return (
         f"invoices/images/{bill.month.strftime('%Y_%m')}/{filename}".replace("\\", "/")
     )
+
+
+def _invoice_filename(bill, lang):
+    lang_cfg = INVOICE_LANGUAGES.get(lang)
+    if not lang_cfg:
+        return ""
+    room_number = bill.room.room_number
+    suffix = lang_cfg["suffix"]
+    return f"invoice_room_{room_number}_{bill.month.strftime('%Y_%m')}_{suffix}.png"
 
 
 def _has_missing_utility_data(bill):
@@ -64,6 +74,19 @@ def _redirect_back(request, fallback_url=None):
     ):
         return redirect(next_url)
     return redirect(fallback_url)
+
+
+def _set_job_result(bill, status, message):
+    bill.last_job_status = status
+    bill.last_job_message = message[:255]
+    bill.last_job_at = timezone.now()
+    bill.save(
+        update_fields=[
+            "last_job_status",
+            "last_job_message",
+            "last_job_at",
+        ]
+    )
 
 
 def download_invoice(request, bill_id, lang):
@@ -101,15 +124,22 @@ def download_invoice(request, bill_id, lang):
         )
     ):
         raise Http404("Not found")
-    try:
-        filename = generate_invoice_for_bill(bill, lang=lang)
-    except ValidationError as e:
-        messages.error(request, "; ".join(e.messages))
-        return _redirect_back(request)
-
-    storage_path = _invoice_storage_path(bill, filename)
-    if not default_storage.exists(storage_path):
-        raise Http404("Invoice file not found")
+    filename = _invoice_filename(bill, lang)
+    storage_path = _invoice_storage_path(bill, filename) if filename else ""
+    if not filename or not default_storage.exists(storage_path):
+        if bill.status == MonthlyBill.Status.DRAFT:
+            try:
+                generate_invoice_for_bill(bill=bill, lang=lang)
+            except ValidationError as e:
+                messages.error(request, "; ".join(e.messages))
+                return _redirect_back(request)
+            storage_path = _invoice_storage_path(bill, filename) if filename else ""
+        if not filename or not default_storage.exists(storage_path):
+            messages.error(
+                request,
+                "Invoice is locked; re-generate is only allowed in Draft status.",
+            )
+            return _redirect_back(request)
 
     return FileResponse(
         default_storage.open(storage_path, "rb"),
@@ -152,14 +182,22 @@ def preview_invoice(request, bill_id):
     ):
         raise Http404("Not found")
 
-    try:
-        filename = generate_invoice_for_bill(bill, lang="kh")
-    except ValidationError as e:
-        messages.error(request, "; ".join(e.messages))
-        return _redirect_back(request)
-    storage_path = _invoice_storage_path(bill, filename)
-    if not default_storage.exists(storage_path):
-        raise Http404("Invoice file not found")
+    filename = _invoice_filename(bill, "kh")
+    storage_path = _invoice_storage_path(bill, filename) if filename else ""
+    if not filename or not default_storage.exists(storage_path):
+        if bill.status == MonthlyBill.Status.DRAFT:
+            try:
+                generate_invoice_for_bill(bill=bill, lang="kh")
+            except ValidationError as e:
+                messages.error(request, "; ".join(e.messages))
+                return _redirect_back(request)
+            storage_path = _invoice_storage_path(bill, filename) if filename else ""
+        if not filename or not default_storage.exists(storage_path):
+            messages.error(
+                request,
+                "Invoice is locked; re-generate is only allowed in Draft status.",
+            )
+            return _redirect_back(request)
 
     return FileResponse(
         default_storage.open(storage_path, "rb"),
@@ -191,7 +229,11 @@ def regenerate_invoice_view(request, bill_id):
     def _regen():
         close_old_connections()
         try:
+            calculate_monthly_bill(room=bill.room, month=bill.month)
             generate_invoice_for_bill(bill=bill, lang="kh")
+            _set_job_result(bill, "success", "Invoice regenerated.")
+        except Exception as e:
+            _set_job_result(bill, "failed", f"Re-generate failed: {str(e)}")
         finally:
             bill.async_job_pending = False
             bill.async_job_type = ""
@@ -201,6 +243,7 @@ def regenerate_invoice_view(request, bill_id):
         bill.async_job_pending = True
         bill.async_job_type = "regen"
         bill.save(update_fields=["async_job_pending", "async_job_type"])
+        _set_job_result(bill, "pending", "Re-generate queued.")
         threading.Thread(target=_regen, daemon=True).start()
         messages.success(request, "Invoice re-generation queued.")
         return _redirect_back(request)
@@ -208,6 +251,7 @@ def regenerate_invoice_view(request, bill_id):
     try:
         _regen()
     except ValidationError as e:
+        _set_job_result(bill, "failed", "; ".join(e.messages))
         messages.error(request, "; ".join(e.messages))
         return _redirect_back(request)
 
@@ -237,7 +281,11 @@ def issue_invoice_view(request, bill_id):
     def _generate_issue_invoice():
         close_old_connections()
         try:
+            calculate_monthly_bill(room=bill.room, month=bill.month)
             generate_invoice_for_bill(bill=bill, lang="kh")
+            _set_job_result(bill, "success", "Invoice issued and generated.")
+        except Exception as e:
+            _set_job_result(bill, "failed", f"Issue failed: {str(e)}")
         finally:
             bill.async_job_pending = False
             bill.async_job_type = ""
@@ -247,6 +295,7 @@ def issue_invoice_view(request, bill_id):
         bill.async_job_pending = True
         bill.async_job_type = "issue"
         bill.save(update_fields=["async_job_pending", "async_job_type"])
+        _set_job_result(bill, "pending", "Issue queued.")
         threading.Thread(target=_generate_issue_invoice, daemon=True).start()
 
     messages.success(request, "Invoice issued successfully.")
@@ -315,9 +364,10 @@ def _post_multipart(url, fields, files, timeout=15):
 def _send_invoice_telegram_worker(bill, chat_id, token):
     close_old_connections()
     try:
-        filename = generate_invoice_for_bill(bill=bill, lang="kh")
-        storage_path = _invoice_storage_path(bill, filename)
-        if not default_storage.exists(storage_path):
+        filename = _invoice_filename(bill, "kh")
+        storage_path = _invoice_storage_path(bill, filename) if filename else ""
+        if not filename or not default_storage.exists(storage_path):
+            _set_job_result(bill, "failed", "Invoice file missing.")
             return
         with default_storage.open(storage_path, "rb") as f:
             invoice_bytes = f.read()
@@ -341,9 +391,11 @@ def _send_invoice_telegram_worker(bill, chat_id, token):
             {"photo": (filename, invoice_bytes)},
         )
         if not resp.get("ok"):
+            _set_job_result(bill, "failed", f"Telegram error: {resp}")
             return
         bill.status = MonthlyBill.Status.SENT
         bill.sent_at = timezone.now()
+        _set_job_result(bill, "success", "Sent via Telegram.")
     finally:
         bill.async_job_pending = False
         bill.async_job_type = ""
@@ -393,17 +445,17 @@ def send_invoice_telegram_view(request, bill_id):
         bill.async_job_pending = True
         bill.async_job_type = "send"
         bill.save(update_fields=["async_job_pending", "async_job_type"])
+        _set_job_result(bill, "pending", "Send queued.")
         messages.success(request, "Sending invoice in background.")
         return _redirect_back(request)
 
-    try:
-        filename = generate_invoice_for_bill(bill=bill, lang="kh")
-    except ValidationError as e:
-        messages.error(request, "; ".join(e.messages))
-        return _redirect_back(request)
-    storage_path = _invoice_storage_path(bill, filename)
-    if not default_storage.exists(storage_path):
-        messages.error(request, "Invoice file not found.")
+    filename = _invoice_filename(bill, "kh")
+    storage_path = _invoice_storage_path(bill, filename) if filename else ""
+    if not filename or not default_storage.exists(storage_path):
+        messages.error(
+            request,
+            "Invoice file not generated. Use Issue or Re-generate first.",
+        )
         return _redirect_back(request)
 
     with default_storage.open(storage_path, "rb") as f:
@@ -429,15 +481,18 @@ def send_invoice_telegram_view(request, bill_id):
             {"photo": (filename, invoice_bytes)},
         )
         if not resp.get("ok"):
+            _set_job_result(bill, "failed", f"Telegram error: {resp}")
             messages.error(request, f"Telegram error: {resp}")
             return _redirect_back(request)
     except Exception as e:
+        _set_job_result(bill, "failed", f"Telegram send failed: {str(e)}")
         messages.error(request, f"Telegram send failed: {str(e)}")
         return _redirect_back(request)
 
     bill.status = MonthlyBill.Status.SENT
     bill.sent_at = timezone.now()
     bill.save(update_fields=["status", "sent_at"])
+    _set_job_result(bill, "success", "Sent via Telegram.")
     messages.success(request, "Invoice sent via Telegram.")
     return _redirect_back(request)
 

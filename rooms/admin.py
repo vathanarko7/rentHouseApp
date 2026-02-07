@@ -39,7 +39,10 @@ from rooms.views import (
     test_telegram_connection_view,
     test_clientprofile_telegram_view,
     _post_multipart,
+    _invoice_filename,
+    _invoice_storage_path,
 )
+from django.core.files.storage import default_storage
 from rooms.services import generate_invoice_for_bill
 from django.urls import reverse, path, re_path
 from django.db.models import Sum
@@ -851,6 +854,29 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             True if _is_tenant(request.user) else super().has_module_permission(request)
         )
 
+    def has_add_permission(self, request):
+        return False
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_view_permission(self, request, obj=None):
+        return True
+
+    def get_readonly_fields(self, request, obj=None):
+        return [field.name for field in self.model._meta.fields]
+
+    def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
+        extra_context = extra_context or {}
+        extra_context.update(
+            {
+                "show_save": False,
+                "show_save_and_continue": False,
+                "show_save_and_add_another": False,
+            }
+        )
+        return super().changeform_view(request, object_id, form_url, extra_context)
+
     def get_list_filter(self, request):
         if _is_tenant(request.user):
             return (MonthlyBillMonthFilter,)
@@ -893,24 +919,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             self.message_user(request, "Not allowed.", level=messages.ERROR)
             return
 
-        if "post" not in request.POST:
-            if not queryset.exists():
-                self.message_user(
-                    request, "Select at least one invoice.", level=messages.ERROR
-                )
-                return
-            context = {
-                **self.admin_site.each_context(request),
-                "title": "Confirm bulk send",
-                "action_name": "bulk_send_telegram",
-                "queryset": queryset,
-                "action_checkbox_name": helpers.ACTION_CHECKBOX_NAME,
-            }
-            return TemplateResponse(
-                request,
-                "admin/rooms/monthlybill/bulk_send_confirm.html",
-                context,
+        if not queryset.exists():
+            self.message_user(
+                request, "Select at least one invoice.", level=messages.ERROR
             )
+            return
 
         token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
         if not token:
@@ -922,7 +935,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         if getattr(settings, "ASYNC_TASKS", True):
             bill_ids = list(queryset.values_list("id", flat=True))
             MonthlyBill.objects.filter(id__in=bill_ids).update(
-                async_job_pending=True, async_job_type="bulk_send"
+                async_job_pending=True,
+                async_job_type="bulk_send",
+                last_job_status="pending",
+                last_job_message="Bulk send queued.",
+                last_job_at=timezone.now(),
             )
             threading.Thread(
                 target=self._bulk_send_worker,
@@ -995,6 +1012,9 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         for bill in bills:
             try:
                 if bill.status != MonthlyBill.Status.ISSUED:
+                    bill.last_job_status = "failed"
+                    bill.last_job_message = "Not issued."
+                    bill.last_job_at = timezone.now()
                     continue
                 renter = bill.room.renter
                 chat_id = None
@@ -1003,31 +1023,52 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                         getattr(renter, "client_profile", None), "telegram_chat_id", None
                     )
                 if not chat_id:
+                    bill.last_job_status = "failed"
+                    bill.last_job_message = "Missing chat ID."
+                    bill.last_job_at = timezone.now()
                     continue
 
-                filename = generate_invoice_for_bill(bill=bill, lang="kh")
-                invoices_dir = os.path.join(
-                    settings.MEDIA_ROOT, "invoices", "images", bill.month.strftime("%Y_%m")
-                )
-                filepath = os.path.join(invoices_dir, filename)
-                if not os.path.exists(filepath):
+                filename = _invoice_filename(bill, "kh")
+                storage_path = _invoice_storage_path(bill, filename) if filename else ""
+                if not filename or not default_storage.exists(storage_path):
+                    bill.last_job_status = "failed"
+                    bill.last_job_message = "Invoice file missing."
+                    bill.last_job_at = timezone.now()
                     continue
 
                 url = f"https://api.telegram.org/bot{token}/sendPhoto"
+                with default_storage.open(storage_path, "rb") as f:
+                    invoice_bytes = f.read()
                 resp = _post_multipart(
                     url,
                     {"chat_id": chat_id},
-                    {"photo": filepath},
+                    {"photo": (filename, invoice_bytes)},
                 )
                 if not resp.get("ok"):
+                    bill.last_job_status = "failed"
+                    bill.last_job_message = f"Telegram error: {resp}"
+                    bill.last_job_at = timezone.now()
                     continue
 
                 bill.status = MonthlyBill.Status.SENT
                 bill.sent_at = timezone.now()
+                bill.last_job_status = "success"
+                bill.last_job_message = "Sent via Telegram."
+                bill.last_job_at = timezone.now()
             finally:
                 bill.async_job_pending = False
                 bill.async_job_type = ""
-                bill.save(update_fields=["status", "sent_at", "async_job_pending", "async_job_type"])
+                bill.save(
+                    update_fields=[
+                        "status",
+                        "sent_at",
+                        "async_job_pending",
+                        "async_job_type",
+                        "last_job_status",
+                        "last_job_message",
+                        "last_job_at",
+                    ]
+                )
 
     def has_view_permission(self, request, obj=None):
         if not _is_tenant(request.user):
@@ -1053,7 +1094,12 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return not _is_tenant(request.user)
 
+    def response_delete(self, request, obj_display, obj_id):
+        return redirect(reverse("admin:rooms_monthlybill_changelist"))
+
     def renter(self, obj):
+        if obj.status != MonthlyBill.Status.DRAFT and obj.tenant_name_snapshot:
+            return obj.tenant_name_snapshot
         renter = obj.room.renter
         if renter:
             return renter.get_full_name() or renter.username
@@ -1068,17 +1114,30 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             badges.append((_("Missing tenant"), "#f59e0b"))
         elif not hasattr(renter, "client_profile"):
             badges.append((_("Missing profile"), "#f59e0b"))
+        else:
+            chat_id = getattr(getattr(renter, "client_profile", None), "telegram_chat_id", None)
+            if not chat_id:
+                profile_url = reverse("admin:rooms_clientprofile_change", args=[renter.client_profile.id])
+                badges.append(
+                    (
+                        format_html(
+                            '<a href="{}">Missing chat ID</a>',
+                            profile_url,
+                        ),
+                        "#f59e0b",
+                    )
+                )
 
         if not UnitPrice.objects.filter(date=obj.month).exists():
             badges.append((_("Missing unit price"), "#ef4444"))
         if not Water.objects.filter(room=obj.room, date=obj.month).exists():
-            badges.append((_("Missing water"), "#f59e0b"))
+            badges.append((_("Missing current water"), "#f59e0b"))
         if not Water.objects.filter(room=obj.room, date__lt=obj.month).exists():
-            badges.append((_("No previous water"), "#f59e0b"))
+            badges.append((_("Missing previous water"), "#f59e0b"))
         if not Electricity.objects.filter(room=obj.room, date=obj.month).exists():
-            badges.append((_("Missing electricity"), "#f59e0b"))
+            badges.append((_("Missing current electricity"), "#f59e0b"))
         if not Electricity.objects.filter(room=obj.room, date__lt=obj.month).exists():
-            badges.append((_("No previous electricity"), "#f59e0b"))
+            badges.append((_("Missing previous electricity"), "#f59e0b"))
 
         if not badges:
             obj._missing_labels = []
@@ -1120,11 +1179,38 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         req = getattr(self, "_request", None)
         is_tenant = _is_tenant(req.user) if req else False
         job_html = "" if is_tenant else self.async_job_status(obj)
+        result_html = ""
+        if not is_tenant and obj.last_job_status and not obj.async_job_pending:
+            status = obj.last_job_status
+            meta_span = format_html(
+                '<span style="display:none" data-job-result="1" data-bill-id="{}" '
+                'data-job-status="{}" data-job-message="{}"></span>',
+                obj.pk,
+                status,
+                obj.last_job_message or "",
+            )
+            if status == "failed":
+                result_html = format_html(
+                    '<span style="padding:2px 8px;border-radius:10px;'
+                    'background:#ef4444;color:#fff;font-size:12px;" '
+                    'title="{}" data-job-result="1" data-bill-id="{}" '
+                    'data-job-status="{}" data-job-message="{}">Failed</span>',
+                    obj.last_job_message or "",
+                    obj.pk,
+                    status,
+                    obj.last_job_message or "",
+                )
+            else:
+                result_html = meta_span
         if not alert_html and not job_html:
-            return ""
+            return result_html or ""
         if alert_html and job_html:
-            return format_html("{} {}", alert_html, job_html)
-        return alert_html or job_html
+            return format_html("{} {} {}", alert_html, job_html, result_html)
+        if alert_html and result_html:
+            return format_html("{} {}", alert_html, result_html)
+        if job_html and result_html:
+            return format_html("{} {}", job_html, result_html)
+        return alert_html or job_html or result_html
 
     alert_job.short_description = "Alert / Job"
 
@@ -1132,6 +1218,14 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         if not obj.async_job_pending:
             return ""
         label = obj.async_job_type or "pending"
+        label_map = {
+            "issue": "Issuing...",
+            "regen": "Regenerating...",
+            "send": "Sending...",
+            "bulk_send": "Bulk sending...",
+            "pending": "Pending...",
+        }
+        display_label = label_map.get(label, "Pending...")
         color_map = {
             "issue": "#2563eb",
             "regen": "#f59e0b",
@@ -1142,9 +1236,12 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         color = color_map.get(label, "#0ea5e9")
         return format_html(
             '<span style="padding:2px 8px;border-radius:10px;'
-            'background:{};color:#fff;font-size:12px;">{}</span>',
+            'background:{};color:#fff;font-size:12px;" '
+            'data-job-pending="1" data-bill-id="{}" data-job-type="{}">{}</span>',
             color,
-            f"Job {label}",
+            obj.pk,
+            label,
+            display_label,
         )
 
     async_job_status.short_description = "Job"

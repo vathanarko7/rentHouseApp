@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
 import os
 
 
@@ -32,6 +33,9 @@ DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
 ASYNC_TASKS = os.getenv("ASYNC_TASKS", "true").lower() == "true"
 
+SESSION_COOKIE_AGE = int(os.getenv("SESSION_COOKIE_AGE", str(30 * 60)))
+SESSION_SAVE_EVERY_REQUEST = True
+
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost").split(",")
@@ -48,6 +52,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
     # Your apps here
     "rooms.apps.RoomsConfig",
 ]
@@ -89,6 +94,25 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "rentHouseApp.wsgi.application"
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.SessionAuthentication",
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(
+        minutes=int(os.getenv("JWT_ACCESS_MINUTES", "5"))
+    ),
+    "REFRESH_TOKEN_LIFETIME": timedelta(
+        days=int(os.getenv("JWT_REFRESH_DAYS", "7"))
+    ),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": False,
+}
 
 
 # Database

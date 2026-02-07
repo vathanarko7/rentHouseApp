@@ -19,10 +19,13 @@ from django.contrib import admin
 from django.urls import include, path
 from django.shortcuts import redirect
 from rooms.admin import dashboard_view
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path("", lambda request: redirect("admin:dashboard"), name="root"),
     path("tenant/dashboard/", dashboard_view, name="tenant_dashboard"),
     path("i18n/", include("django.conf.urls.i18n")),
+    path("api/auth/login/", TokenObtainPairView.as_view(), name="api_token_login"),
+    path("api/auth/refresh/", TokenRefreshView.as_view(), name="api_token_refresh"),
     path("admin/", admin.site.urls),
 ]

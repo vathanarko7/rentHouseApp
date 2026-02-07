@@ -90,6 +90,128 @@
     });
   })();
 </script>
+<script>
+  (function () {
+    function setupAutoRefresh() {
+      var table = document.getElementById("result_list");
+      if (!table) return;
+      var jobSpans = table.querySelectorAll('.field-alert_job [data-job-pending="1"]');
+      if (!jobSpans.length) return;
+      var hasJob = true;
+      if (!hasJob) return;
+      var refreshMs = 10000;
+      setTimeout(function () {
+        window.location.reload();
+      }, refreshMs);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", setupAutoRefresh);
+    } else {
+      setupAutoRefresh();
+    }
+  })();
+</script>
+<script>
+  (function () {
+    var table = document.getElementById("result_list");
+    if (!table) return;
+    var rows = table.querySelectorAll("tbody tr");
+    rows.forEach(function (row) {
+      var failed = row.querySelector(
+        '.field-alert_job [data-job-result="1"][data-job-status="failed"]'
+      );
+      if (failed) row.classList.add("job-failed");
+    });
+  })();
+</script>
+<script>
+  (function () {
+    var table = document.getElementById("result_list");
+    if (!table) return;
+
+    function getList() {
+      var list = document.querySelector(".messagelist");
+      if (!list) {
+        list = document.createElement("ul");
+        list.className = "messagelist";
+        document.body.appendChild(list);
+      }
+      return list;
+    }
+
+    function showToast(kind, message) {
+      var list = getList();
+      var li = document.createElement("li");
+      li.className = kind;
+      li.textContent = message;
+
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "msg-close";
+      btn.setAttribute("aria-label", "Close");
+      btn.textContent = "×";
+      btn.addEventListener("click", function () {
+        li.classList.add("is-fading");
+        setTimeout(function () {
+          li.style.display = "none";
+        }, 400);
+      });
+      li.appendChild(btn);
+      list.appendChild(li);
+
+      setTimeout(function () {
+        li.classList.add("is-fading");
+        setTimeout(function () {
+          li.style.display = "none";
+        }, 400);
+      }, 5000);
+    }
+
+    var storageKey = "monthlybillJobPending";
+    var shownKey = "monthlybillJobShown";
+    var prev = [];
+    var shown = {};
+    try {
+      prev = JSON.parse(localStorage.getItem(storageKey) || "[]");
+    } catch (e) {}
+    try {
+      shown = JSON.parse(localStorage.getItem(shownKey) || "{}");
+    } catch (e) {}
+
+    var current = [];
+    var pendingSpans = table.querySelectorAll('.field-alert_job [data-job-pending="1"]');
+    pendingSpans.forEach(function (span) {
+      var id = span.getAttribute("data-bill-id");
+      if (id) current.push(id);
+    });
+
+    prev.forEach(function (id) {
+      if (current.indexOf(id) !== -1) return;
+      var result = table.querySelector(
+        '.field-alert_job [data-job-result="1"][data-bill-id="' + id + '"]'
+      );
+      if (!result) return;
+      var status = (result.getAttribute("data-job-status") || "").toLowerCase();
+      var msg = result.getAttribute("data-job-message") || "";
+      var signature = status + "|" + msg;
+      if (shown[id] === signature) return;
+      shown[id] = signature;
+
+      var kind = status === "success" ? "success" : status === "failed" ? "error" : "info";
+      var text =
+        msg ||
+        (status === "success"
+          ? "Job completed successfully."
+          : status === "failed"
+          ? "Job failed."
+          : "Job updated.");
+      showToast(kind, text);
+    });
+
+    localStorage.setItem(storageKey, JSON.stringify(current));
+    localStorage.setItem(shownKey, JSON.stringify(shown));
+  })();
+</script>
 {% endblock %} {% block content %} {% if generate_invoice_url and rooms %}
 <div style="margin: 12px 0 16px 0">
   <div
@@ -491,7 +613,9 @@
     if (yearSelect) {
       var now = new Date();
       var currentYear = now.getFullYear();
-      for (var y = currentYear + 2; y >= currentYear - 5; y--) {
+      var startYear = currentYear;
+      var endYear = currentYear - 15;
+      for (var y = startYear; y >= endYear; y--) {
         var opt = document.createElement("option");
         opt.value = String(y);
         opt.textContent = String(y);
@@ -520,9 +644,30 @@
       monthClose.addEventListener("click", closeMonthPopover);
     }
 
+    function updateMonthAvailability() {
+      if (!yearSelect) return;
+      var now = new Date();
+      var currentYear = now.getFullYear();
+      var currentMonth = now.getMonth() + 1;
+      var selectedYear = parseInt(yearSelect.value, 10);
+      monthButtons.forEach(function (btn) {
+        var m = parseInt(btn.getAttribute("data-month"), 10);
+        var isFuture = selectedYear === currentYear && m > currentMonth;
+        btn.disabled = isFuture;
+        btn.style.opacity = isFuture ? "0.4" : "1";
+        btn.style.cursor = isFuture ? "not-allowed" : "pointer";
+      });
+    }
+
+    if (yearSelect) {
+      yearSelect.addEventListener("change", updateMonthAvailability);
+      updateMonthAvailability();
+    }
+
     monthButtons.forEach(function (btn) {
       btn.addEventListener("click", function () {
         if (!monthInput || !yearSelect) return;
+        if (btn.disabled) return;
         monthInput.value = yearSelect.value + "-" + btn.getAttribute("data-month");
         monthInput.dispatchEvent(new Event("input", { bubbles: true }));
         closeMonthPopover();

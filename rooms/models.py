@@ -166,6 +166,10 @@ class MonthlyBill(models.Model):
     async_job_pending = models.BooleanField(default=False)
     async_job_type = models.CharField(max_length=32, blank=True, default="")
     data_note = models.CharField(max_length=100, blank=True, default="")
+    tenant_name_snapshot = models.CharField(max_length=150, blank=True, default="")
+    last_job_status = models.CharField(max_length=12, blank=True, default="")
+    last_job_message = models.CharField(max_length=255, blank=True, default="")
+    last_job_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
 

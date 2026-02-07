@@ -586,6 +586,9 @@
     display: flex;
     justify-content: flex-end;
   }
+  .app-rooms.model-monthlybill .results tr.job-failed {
+    background: color-mix(in srgb, #ef4444 12%, var(--body-bg, #fff));
+  }
   body.login .mobile-bottom-nav,
   body.login .sidebar-backdrop {
     display: none !important;
@@ -1093,6 +1096,7 @@
       var details = target.getAttribute("data-alert-details");
       if (!details) return;
       var items = details.split(" • ").filter(Boolean);
+      if (items.length <= 1) return;
       list.innerHTML = items
         .map(function (item) {
           return "<li>" + item + "</li>";
@@ -1213,12 +1217,22 @@
       function render() {
         yearLabel.textContent = state.year;
         grid.innerHTML = "";
+        var now = new Date();
+        var currentYear = now.getFullYear();
+        var currentMonth = now.getMonth() + 1;
         monthNames.forEach(function (label, idx) {
           var m = idx + 1;
           var b = document.createElement("button");
           b.type = "button";
           b.textContent = label;
+          var isFuture = state.year === currentYear && m > currentMonth;
+          if (isFuture) {
+            b.disabled = true;
+            b.style.opacity = "0.4";
+            b.style.cursor = "not-allowed";
+          }
           b.addEventListener("click", function () {
+            if (b.disabled) return;
             setInputValue(input, state.year, m);
             panel.classList.remove("is-open");
             panel.setAttribute("aria-hidden", "true");
@@ -1245,6 +1259,9 @@
       nextYear.addEventListener("click", function (e) {
         e.preventDefault();
         e.stopPropagation();
+        var now = new Date();
+        var currentYear = now.getFullYear();
+        if (state.year >= currentYear) return;
         state.year += 1;
         render();
       });
@@ -1359,6 +1376,25 @@
 
     document.addEventListener("click", function (e) {
       if (!nav.contains(e.target)) closeMenu();
+    });
+  })();
+</script>
+<script>
+  (function () {
+    var table = document.getElementById("result_list");
+    if (!table) return;
+    var rows = table.querySelectorAll("tbody tr");
+    if (!rows.length) return;
+    rows.forEach(function (row) {
+      var statusCell = row.querySelector(".field-status_badge");
+      if (!statusCell) return;
+      var statusText = (statusCell.textContent || "").trim().toLowerCase();
+      if (statusText !== "draft") return;
+      var checkbox = row.querySelector("input.action-select");
+      if (!checkbox) return;
+      checkbox.checked = false;
+      checkbox.disabled = true;
+      checkbox.style.opacity = "0.45";
     });
   })();
 </script>

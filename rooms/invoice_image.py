@@ -44,7 +44,9 @@ def generate_invoice_image(
     sex = ""
     id_number = ""
     phone = ""
-    if renter:
+    if bill.tenant_name_snapshot:
+        client_name = bill.tenant_name_snapshot
+    elif renter:
         client_name = renter.get_full_name() or renter.username
     if profile:
         sex = profile.get_sex_display()
@@ -301,6 +303,8 @@ def generate_invoice_image(
         browser.close()
 
     with open(tmp_path, "rb") as f:
+        if default_storage.exists(storage_path):
+            default_storage.delete(storage_path)
         default_storage.save(storage_path, ContentFile(f.read()))
     os.unlink(tmp_path)
 
