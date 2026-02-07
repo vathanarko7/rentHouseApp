@@ -1,22 +1,21 @@
-{% load i18n %}
-{% get_current_language as LANGUAGE_CODE %}
-<!DOCTYPE html>
+{% load i18n %} {% get_current_language as LANGUAGE_CODE %}
+<!doctype html>
 <html lang="{{ LANGUAGE_CODE }}">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}PtasJuolKruDy{% endblock %}</title>
+    <title>
+      {% block title %}{% translate "PtasJuolKruDy" %}{% endblock %}
+    </title>
   </head>
   <body>
-    <header style="padding: 12px 16px; border-bottom: 1px solid #ddd;">
+    <header style="padding: 12px 16px; border-bottom: 1px solid #ddd">
       {% include "includes/language_switcher.html" %}
     </header>
 
-    <main style="padding: 16px;">
-      {% block content %}{% endblock %}
-    </main>
+    <main style="padding: 16px">{% block content %}{% endblock %}</main>
 
-    <footer style="padding: 12px 16px; border-top: 1px solid #ddd;">
+    <footer style="padding: 12px 16px; border-top: 1px solid #ddd">
       {% include "includes/language_switcher.html" %}
     </footer>
   </body>

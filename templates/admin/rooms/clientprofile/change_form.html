@@ -1,0 +1,25 @@
+{% extends "admin/change_form.html" %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script>
+    window.addEventListener("load", function () {
+      const openFirst = () => {
+        const fieldsets = document.querySelectorAll("fieldset.collapse");
+        if (!fieldsets.length) return;
+        const first = fieldsets[0];
+        first.classList.add("open");
+        first.classList.remove("collapsed");
+        const toggle = first.querySelector("h2 a, h2 .collapse-toggle");
+        if (toggle) {
+          toggle.setAttribute("aria-expanded", "true");
+          if (first.classList.contains("collapsed")) {
+            toggle.click();
+          }
+        }
+      };
+      openFirst();
+      setTimeout(openFirst, 50);
+    });
+  </script>
+{% endblock %}

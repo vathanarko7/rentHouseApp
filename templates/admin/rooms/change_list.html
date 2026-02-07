@@ -1,6 +1,9 @@
-{% extends "admin/change_list.html" %}
+﻿{% extends "admin/change_list.html" %}
+{% load i18n %}
 {% block object-tools %}
+{% if cl.opts.model_name != "monthlybill" %}
 {{ block.super }}
+{% endif %}
 {% endblock %}
 {% block search %}
 {{ block.super }}
@@ -19,7 +22,7 @@
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "button search-clear-btn";
-    btn.textContent = "Clear";
+    btn.textContent = "{% translate 'Clear' %}";
     btn.addEventListener("click", function () {
       input.value = "";
       form.submit();
@@ -53,7 +56,7 @@
           if (warnOk) warnOk.onclick = closeWarn;
           if (warnBackdrop) warnBackdrop.onclick = closeWarn;
         } else {
-          alert("Select at least one invoice first.");
+          alert("{% translate 'Select at least one invoice first.' %}");
         }
         return;
       }
@@ -93,7 +96,11 @@
 <script>
   (function () {
     function setupAutoRefresh() {
-      var table = document.getElementById("result_list");
+      var closeLabel = "{% translate 'Close' %}";
+    var jobSuccess = "{% translate 'Job completed successfully.' %}";
+    var jobFailed = "{% translate 'Job failed.' %}";
+    var jobUpdated = "{% translate 'Job updated.' %}";
+    var table = document.getElementById("result_list");
       if (!table) return;
       var jobSpans = table.querySelectorAll('.field-alert_job [data-job-pending="1"]');
       if (!jobSpans.length) return;
@@ -113,6 +120,14 @@
 </script>
 <script>
   (function () {
+    var closeLabel = "{% translate 'Close' %}";
+    var jobSuccess = "{% translate 'Job completed successfully.' %}";
+    var jobFailed = "{% translate 'Job failed.' %}";
+    var jobUpdated = "{% translate 'Job updated.' %}";
+    var closeLabel = "{% translate 'Close' %}";
+    var jobSuccess = "{% translate 'Job completed successfully.' %}";
+    var jobFailed = "{% translate 'Job failed.' %}";
+    var jobUpdated = "{% translate 'Job updated.' %}";
     var table = document.getElementById("result_list");
     if (!table) return;
     var rows = table.querySelectorAll("tbody tr");
@@ -126,6 +141,10 @@
 </script>
 <script>
   (function () {
+    var closeLabel = "{% translate 'Close' %}";
+    var jobSuccess = "{% translate 'Job completed successfully.' %}";
+    var jobFailed = "{% translate 'Job failed.' %}";
+    var jobUpdated = "{% translate 'Job updated.' %}";
     var table = document.getElementById("result_list");
     if (!table) return;
 
@@ -148,7 +167,7 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "msg-close";
-      btn.setAttribute("aria-label", "Close");
+      btn.setAttribute("aria-label", closeLabel);
       btn.textContent = "×";
       btn.addEventListener("click", function () {
         li.classList.add("is-fading");
@@ -201,10 +220,10 @@
       var text =
         msg ||
         (status === "success"
-          ? "Job completed successfully."
+          ? jobSuccess
           : status === "failed"
-          ? "Job failed."
-          : "Job updated.");
+          ? jobFailed
+          : jobUpdated);
       showToast(kind, text);
     });
 
@@ -216,53 +235,103 @@
 <div style="margin: 12px 0 16px 0">
   <div
     class="object-tools"
-    style="margin-bottom: 8px; float: none; display: flex; gap: 8px; align-items: center; justify-content: space-between;"
+    style="margin: 8px 0 12px 0; float: none; display: flex; gap: 8px; row-gap: 8px; flex-wrap: wrap; align-items: center; justify-content: space-between; width: 100%;"
   >
     <div style="display:flex; gap:8px; align-items:center;">
       <button
         type="button"
         class="button"
         data-action="{{ generate_invoice_url }}"
-        data-title="Generate Monthly Bills"
-        data-submit="Generate"
+        data-title="{% translate "Generate Bills" %}"
+        data-submit="{% translate "Generate" %}"
       >
-        Generate Monthly Bills
+        {% translate "Generate Bills" %}
       </button>
       <button
         type="button"
         class="button"
         data-action="{{ bulk_download_url }}"
-        data-title="Bulk Download Bills"
-        data-submit="Download ZIP"
+        data-title="{% translate "Download Bills" %}"
+        data-submit="{% translate "Download ZIP" %}"
       >
-        Bulk Download Bills
+        {% translate "Download Bills" %}
       </button>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
-      <button type="button" class="button" id="bulk-send-telegram-btn">
-        Bulk Send via Telegram
+      <button type="button" class="button" id="bulk-send-telegram-btn" onclick="return window.bulkSendTelegram && window.bulkSendTelegram();">
+        {% translate "Send via Telegram" %}
       </button>
     </div>
   </div>
+  <script>
+    window.bulkSendTelegram = function () {
+      var form = document.getElementById("changelist-form");
+      if (!form) return false;
+      var actionSelect = form.querySelector('select[name="action"]');
+      if (!actionSelect) return false;
+      var anyChecked = form.querySelectorAll('input.action-select:checked').length > 0;
+      if (!anyChecked) {
+        var warnModal = document.getElementById("bulk-send-warning-modal");
+        if (warnModal) {
+          warnModal.classList.add("is-open");
+          warnModal.setAttribute("aria-hidden", "false");
+          var warnOk = document.getElementById("bulk-send-warning-ok");
+          var warnBackdrop = warnModal.querySelector(".confirm-modal__backdrop");
+          function closeWarn() {
+            warnModal.classList.remove("is-open");
+            warnModal.setAttribute("aria-hidden", "true");
+          }
+          if (warnOk) warnOk.onclick = closeWarn;
+          if (warnBackdrop) warnBackdrop.onclick = closeWarn;
+        }
+        return false;
+      }
+      var modal = document.getElementById("bulk-send-modal");
+      if (modal) {
+        modal.classList.add("is-open");
+        modal.setAttribute("aria-hidden", "false");
+        var okBtn = document.getElementById("bulk-send-confirm");
+        var cancelBtn = document.getElementById("bulk-send-cancel");
+        var backdrop = modal.querySelector(".confirm-modal__backdrop");
+        function closeModal() {
+          modal.classList.remove("is-open");
+          modal.setAttribute("aria-hidden", "true");
+        }
+        if (okBtn) {
+          okBtn.onclick = function () {
+            closeModal();
+            actionSelect.value = "bulk_send_telegram";
+            form.submit();
+          };
+        }
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        if (backdrop) backdrop.onclick = closeModal;
+        return false;
+      }
+      actionSelect.value = "bulk_send_telegram";
+      form.submit();
+      return false;
+    };
+  </script>
 
   <div class="confirm-modal" id="bulk-send-modal" aria-hidden="true">
     <div class="confirm-modal__backdrop"></div>
     <div class="confirm-modal__panel" role="dialog" aria-modal="true">
-      <h3 class="confirm-modal__title">Bulk Send</h3>
-      <p>Send selected invoices via Telegram?</p>
+      <h3 class="confirm-modal__title">{% translate "Bulk Send" %}</h3>
+      <p>{% translate "Send selected invoices via Telegram?" %}</p>
       <div class="confirm-modal__actions">
-        <button type="button" class="button confirm-cancel" id="bulk-send-cancel">Cancel</button>
-        <button type="button" class="button confirm-ok confirm-send" id="bulk-send-confirm">Send</button>
+        <button type="button" class="button confirm-cancel" id="bulk-send-cancel">{% translate "Cancel" %}</button>
+        <button type="button" class="button confirm-ok confirm-send" id="bulk-send-confirm">{% translate "Send" %}</button>
       </div>
     </div>
   </div>
   <div class="confirm-modal" id="bulk-send-warning-modal" aria-hidden="true">
     <div class="confirm-modal__backdrop"></div>
     <div class="confirm-modal__panel" role="dialog" aria-modal="true">
-      <h3 class="confirm-modal__title">Select invoices</h3>
-      <p>Select at least one invoice first.</p>
+      <h3 class="confirm-modal__title">{% translate "Select invoices" %}</h3>
+      <p>{% translate "Select at least one invoice first." %}</p>
       <div class="confirm-modal__actions">
-        <button type="button" class="button confirm-ok" id="bulk-send-warning-ok">OK</button>
+        <button type="button" class="button confirm-ok" id="bulk-send-warning-ok">{% translate "OK" %}</button>
       </div>
     </div>
   </div>
@@ -467,59 +536,59 @@
   </style>
 
   <p id="invoice-action-note" style="margin: 4px 0 10px 0; color: #5a5a5a">
-    Select a billing action to show the form.
+    {% translate "Select a billing action to show the form." %}
   </p>
 
   <div id="invoice-form-wrapper" style="display: none">
     <div class="invoice-card">
       <div class="invoice-header">
         <h2 id="invoice-form-title" style="margin: 0">
-          Generate Monthly Bills
+          {% translate "Generate Monthly Bills" %}
         </h2>
         <p class="invoice-subtitle">
-          Pick a month and rooms, then run the action.
+          {% translate "Pick a month and rooms, then run the action." %}
         </p>
       </div>
       <form method="post" id="invoice-form" action="">
         {% csrf_token %}
 
         <div class="invoice-field">
-          <label><strong>Month:</strong></label
+          <label><strong>{% translate "Month:" %}</strong></label
           ><br />
           <div class="month-picker">
             <input type="month" name="month" class="month-input" required />
             <div class="month-popover">
-              <button type="button" class="button month-picker-btn" aria-label="Pick month">
+              <button type="button" class="button month-picker-btn" aria-label="{% translate "Pick month" %}">
                 <svg class="month-picker-icon" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M7 2v3M17 2v3M3 8h18M5 6h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z"></path>
                 </svg>
               </button>
               <div class="month-popover-panel" aria-hidden="true">
                 <div class="month-popover-header">
-                  <select class="month-year-select" aria-label="Year"></select>
-                  <button type="button" class="button month-popover-close">Close</button>
+                  <select class="month-year-select" aria-label="{% translate "Year" %}"></select>
+                  <button type="button" class="button month-popover-close">{% translate "Close" %}</button>
                 </div>
                 <div class="month-popover-grid">
-                  <button type="button" data-month="01">Jan</button>
-                  <button type="button" data-month="02">Feb</button>
-                  <button type="button" data-month="03">Mar</button>
-                  <button type="button" data-month="04">Apr</button>
-                  <button type="button" data-month="05">May</button>
-                  <button type="button" data-month="06">Jun</button>
-                  <button type="button" data-month="07">Jul</button>
-                  <button type="button" data-month="08">Aug</button>
-                  <button type="button" data-month="09">Sep</button>
-                  <button type="button" data-month="10">Oct</button>
-                  <button type="button" data-month="11">Nov</button>
-                  <button type="button" data-month="12">Dec</button>
+                  <button type="button" data-month="01">{% translate "Jan" %}</button>
+                  <button type="button" data-month="02">{% translate "Feb" %}</button>
+                  <button type="button" data-month="03">{% translate "Mar" %}</button>
+                  <button type="button" data-month="04">{% translate "Apr" %}</button>
+                  <button type="button" data-month="05">{% translate "May" %}</button>
+                  <button type="button" data-month="06">{% translate "Jun" %}</button>
+                  <button type="button" data-month="07">{% translate "Jul" %}</button>
+                  <button type="button" data-month="08">{% translate "Aug" %}</button>
+                  <button type="button" data-month="09">{% translate "Sep" %}</button>
+                  <button type="button" data-month="10">{% translate "Oct" %}</button>
+                  <button type="button" data-month="11">{% translate "Nov" %}</button>
+                  <button type="button" data-month="12">{% translate "Dec" %}</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <h3>Rooms</h3>
-        <p class="invoice-subtitle"><em>(Leave unchecked = all rooms)</em></p>
+        <h3>{% translate "Rooms" %}</h3>
+        <p class="invoice-subtitle"><em>({% translate "Leave unchecked = all rooms" %})</em></p>
 
         <div class="rooms-grid">
           {% for room in rooms %}
@@ -531,12 +600,12 @@
         </div>
 
         <br />
-        <button class="btn-generate" id="invoice-form-submit">Submit</button>
+        <button class="btn-generate" id="invoice-form-submit">{% translate "Submit" %}</button>
         <button type="reset" class="btn-clear" id="invoice-form-clear" disabled>
-          Clear
+          {% translate "Clear" %}
         </button>
         <button type="button" class="btn-close" id="invoice-form-close" style="float:right;">
-          Close
+          {% translate "Close" %}
         </button>
       </form>
     </div>
@@ -578,7 +647,7 @@
       title.textContent = button.getAttribute("data-title");
       submit.textContent = button.getAttribute("data-submit");
       note.textContent =
-        "Selected action: " + button.getAttribute("data-title");
+        "{% translate 'Selected action:' %} " + button.getAttribute("data-title");
       formWrapper.style.display = "block";
     }
 
@@ -689,7 +758,7 @@
         clearBtn.disabled = true;
       }
       formWrapper.style.display = "none";
-      note.textContent = "Select a billing action to show the form.";
+      note.textContent = "{% translate 'Select a billing action to show the form.' %}";
       buttons.forEach(function (btn) {
         btn.setAttribute("aria-pressed", "false");
         btn.classList.remove("is-selected");
@@ -704,8 +773,8 @@
 <div id="invoice-preview-modal" style="display: none">
   <div class="preview-backdrop"></div>
   <div class="preview-panel">
-    <button type="button" class="preview-close">Close</button>
-    <img id="invoice-preview-image" alt="Invoice Preview" />
+    <button type="button" class="preview-close">{% translate "Close" %}</button>
+    <img id="invoice-preview-image" alt="{% translate "Invoice Preview" %}" />
   </div>
 </div>
 
@@ -884,3 +953,9 @@
     font-size: 14px;
     line-height: 1.3;
   }
+
+
+
+
+
+

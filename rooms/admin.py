@@ -50,9 +50,9 @@ from django.db.models.functions import TruncMonth
 from django.core.exceptions import PermissionDenied
 
 # Register your models here.
-admin.site.site_header = "Rent House Administration"
-admin.site.site_title = "Rent House Admin Portal"
-admin.site.index_title = "Welcome to Rent House Admin Portal"
+admin.site.site_header = _("Rent House Administration")
+admin.site.site_title = _("Rent House Admin Portal")
+admin.site.index_title = _("Welcome to Rent House Admin Portal")
 admin.ModelAdmin.save_on_top = True
 # admin.site.register(Room)
 # admin.site.register(MonthlyBill)
@@ -75,7 +75,7 @@ class ClientProfileAdminForm(forms.ModelForm):
     password = forms.CharField(
         required=False,
         widget=forms.PasswordInput(render_value=False),
-        help_text="Leave blank to set an unusable password.",
+        help_text=_("Leave blank to set an unusable password."),
     )
 
     class Meta:
@@ -117,6 +117,22 @@ class ClientProfileAdminForm(forms.ModelForm):
                 )
             for name in ("username", "first_name", "last_name", "email", "password"):
                 self.fields[name].required = False
+        labels = {
+            "username": _("Username"),
+            "first_name": _("First name"),
+            "last_name": _("Last name"),
+            "email": _("Email"),
+            "password": _("Password"),
+            "sex": _("Sex"),
+            "phone": _("Phone"),
+            "telegram_chat_id": _("Telegram chat id"),
+            "id_card_number": _("Id card number"),
+            "enter_date": _("Enter date"),
+            "exit_date": _("Exit date"),
+        }
+        for field_name, label in labels.items():
+            if field_name in self.fields:
+                self.fields[field_name].label = label
 
     def clean_username(self):
         username = self.cleaned_data.get("username")
@@ -126,7 +142,7 @@ class ClientProfileAdminForm(forms.ModelForm):
         if self.instance and self.instance.pk and self.instance.user_id:
             qs = qs.exclude(pk=self.instance.user_id)
         if qs.exists():
-            raise forms.ValidationError("Username already exists.")
+            raise forms.ValidationError(_("Username already exists."))
         return username
 
     def clean_email(self):
@@ -137,7 +153,7 @@ class ClientProfileAdminForm(forms.ModelForm):
         if self.instance and self.instance.pk and self.instance.user_id:
             qs = qs.exclude(pk=self.instance.user_id)
         if qs.exists():
-            raise forms.ValidationError("Email already exists.")
+            raise forms.ValidationError(_("Email already exists."))
         return email
 
 
@@ -146,9 +162,9 @@ class ClientProfileAdmin(admin.ModelAdmin):
     form = ClientProfileAdminForm
     fieldsets = (
         (
-            "Account Info",
+            _("Account Info"),
             {
-                "classes": ("collapse", "open"),
+                "classes": ("open",),
                 "fields": (
                     "username",
                     "first_name",
@@ -159,7 +175,7 @@ class ClientProfileAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Profile Info",
+            _("Profile Info"),
             {
                 "classes": ("collapse",),
                 "fields": (
@@ -202,6 +218,21 @@ class ClientProfileAdmin(admin.ModelAdmin):
     def change_view(self, request, object_id, form_url="", extra_context=None):
         return super().change_view(request, object_id, form_url, extra_context)
 
+    def save_model(self, request, obj, form, change):
+        is_new = obj.pk is None
+        super().save_model(request, obj, form, change)
+        if is_new:
+            name = ""
+            if obj.user_id:
+                full_name = obj.user.get_full_name()
+                name = full_name if full_name else obj.user.username
+            if not name:
+                name = _("tenant")
+            messages.success(
+                request,
+                _("The tenant \"%(name)s\" was added successfully.") % {"name": name},
+            )
+
     def has_delete_permission(self, request, obj=None):
         return not _is_tenant(request.user)
 
@@ -216,7 +247,7 @@ class ClientProfileAdmin(admin.ModelAdmin):
         if paid_qs.exists():
             self.message_user(
                 request,
-                "Paid invoices cannot be deleted.",
+                _("Paid invoices cannot be deleted."),
                 level=messages.ERROR,
             )
             queryset = queryset.exclude(status=MonthlyBill.Status.PAID)
@@ -235,7 +266,7 @@ class ClientProfileAdmin(admin.ModelAdmin):
         user = obj.user
         return user.email if user else ""
 
-    email.short_description = "Email"
+    email.short_description = _("Email")
 
     def telegram_test_action(self, obj):
         request = getattr(self, "_request", None)
@@ -247,11 +278,12 @@ class ClientProfileAdmin(admin.ModelAdmin):
         if not chat_id:
             return format_html(
                 '<span style="color: var(--body-quiet-color, #6b7280);">{}</span>',
-                "No chat ID",
+                _("No chat ID"),
             )
+        test_label = _("Test Chat")
         return format_html(
             '<a class="button test-chat-btn" href="{}">'
-            '<span class="test-chat-label">Test Chat</span>'
+            '<span class="test-chat-label">{}</span>'
             '<span class="test-chat-icon" aria-hidden="true">'
             '<svg viewBox="0 0 24 24" width="16" height="16">'
             '<path fill="currentColor" d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10 1.77 0 3.44-.46 4.9-1.26l3.1 1.02-1.02-3.1A9.96 9.96 0 0 0 22 12 10 10 0 0 0 12 2zm0 2a8 8 0 0 1 6.53 12.63l-.42.58.57 1.73-1.73-.57-.58.42A8 8 0 1 1 12 4zm-3 6h6v2H9V10zm0 4h4v2H9v-2z"/>'
@@ -259,9 +291,10 @@ class ClientProfileAdmin(admin.ModelAdmin):
             '</span>'
             '</a>',
             reverse("admin:rooms_clientprofile_test_telegram", args=[obj.id]),
+            test_label,
         )
 
-    telegram_test_action.short_description = "Telegram"
+    telegram_test_action.short_description = _("Telegram")
 
     def get_queryset(self, request):
         self._request = request
@@ -376,7 +409,7 @@ class RoomAdmin(admin.ModelAdmin):
     ordering = ("room_number",)
     fieldsets = (
         (
-            "Modification de room",
+            _("Room Modification"),
             {
                 "fields": ("room_number", "price", "renter"),
             },
@@ -438,7 +471,7 @@ class RoomAdmin(admin.ModelAdmin):
             return name
         return "-"
 
-    renter_name.short_description = "Renter"
+    renter_name.short_description = _("Renter")
 
     def has_module_permission(self, request):
         return not _is_tenant(request.user)
@@ -518,12 +551,14 @@ class RoomAdmin(admin.ModelAdmin):
             "axis_readings": _("Readings"),
             "tooltip_electricity": _("Electricity"),
             "tooltip_water": _("Water"),
+            "label_electricity": _("Electricity (kWh)"),
+            "label_water": _("Water (m³)"),
         }
         return super().change_view(request, object_id, form_url, extra_context)
 
 
 class MonthlyBillMonthFilter(SimpleListFilter):
-    title = "month"
+    title = _("month")
     parameter_name = "month"
 
     def lookups(self, request, model_admin):
@@ -542,7 +577,7 @@ class MonthlyBillMonthFilter(SimpleListFilter):
 
 
 class ReadingMonthFilter(SimpleListFilter):
-    title = "month"
+    title = _("month")
     parameter_name = "month"
 
     def lookups(self, request, model_admin):
@@ -569,6 +604,7 @@ class UnitPriceAdmin(admin.ModelAdmin):
         "exchange_rate",
     )
     list_filter = (ReadingMonthFilter,)
+    search_fields = ("date",)
     ordering = ("-date",)
 
     def month_year(self, obj):
@@ -921,7 +957,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
         if not queryset.exists():
             self.message_user(
-                request, "Select at least one invoice.", level=messages.ERROR
+                request, _("Select at least one invoice."), level=messages.ERROR
             )
             return
 
@@ -1032,7 +1068,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 storage_path = _invoice_storage_path(bill, filename) if filename else ""
                 if not filename or not default_storage.exists(storage_path):
                     bill.last_job_status = "failed"
-                    bill.last_job_message = "Invoice file missing."
+                    bill.last_job_message = _("Invoice file missing.")
                     bill.last_job_at = timezone.now()
                     continue
 
@@ -1105,7 +1141,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             return renter.get_full_name() or renter.username
         return "-"
 
-    renter.short_description = "Renter"
+    renter.short_description = _("Renter")
 
     def alert_warning(self, obj):
         badges = []
@@ -1172,7 +1208,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             format_html(icon_html, tooltip, detail_text) if icon_html else "",
         )
 
-    alert_warning.short_description = "Alert"
+    alert_warning.short_description = _("Alert")
 
     def alert_job(self, obj):
         alert_html = self.alert_warning(obj)
@@ -1212,7 +1248,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             return format_html("{} {}", job_html, result_html)
         return alert_html or job_html or result_html
 
-    alert_job.short_description = "Alert / Job"
+    alert_job.short_description = _("Alert / Job")
 
     def async_job_status(self, obj):
         if not obj.async_job_pending:
@@ -1244,12 +1280,12 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             display_label,
         )
 
-    async_job_status.short_description = "Job"
+    async_job_status.short_description = _("Job")
 
     def room_name(self, obj):
         return obj.room.room_number
 
-    room_name.short_description = "Room"
+    room_name.short_description = _("Room")
 
     def total_display(self, obj):
         if obj.data_note:
@@ -1259,7 +1295,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             )
         return obj.total
 
-    total_display.short_description = "Total"
+    total_display.short_description = _("Total")
 
     def status_badge(self, obj):
         color_map = {
@@ -1269,10 +1305,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             MonthlyBill.Status.PAID: "#10b981",
         }
         label_map = {
-            MonthlyBill.Status.DRAFT: "Draft",
-            MonthlyBill.Status.ISSUED: "Issued",
-            MonthlyBill.Status.SENT: "Sent",
-            MonthlyBill.Status.PAID: "Paid",
+            MonthlyBill.Status.DRAFT: _("Draft"),
+            MonthlyBill.Status.ISSUED: _("Issued"),
+            MonthlyBill.Status.SENT: _("Sent"),
+            MonthlyBill.Status.PAID: _("Paid"),
         }
         color = color_map.get(obj.status, "#6b7280")
         label = label_map.get(obj.status, obj.status)
@@ -1283,7 +1319,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             label,
         )
 
-    status_badge.short_description = "Status"
+    status_badge.short_description = _("Status")
 
     def status_date(self, obj):
         if obj.status == MonthlyBill.Status.ISSUED and obj.issued_at:
@@ -1294,12 +1330,12 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             return date_format(obj.paid_at, "SHORT_DATETIME_FORMAT")
         return ""
 
-    status_date.short_description = "Status date"
+    status_date.short_description = _("Status date")
 
     def month_year(self, obj):
         return date_format(obj.month, "F Y")
 
-    month_year.short_description = "Month"
+    month_year.short_description = _("Month")
 
     def get_urls(self):
         urls = super().get_urls()
@@ -1387,9 +1423,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             and obj.status == MonthlyBill.Status.DRAFT
         ):
             issue_confirm = _("Issue this invoice? It will be locked.")
+            issue_label = _("Issue")
             issue_link = format_html(
                 '<a class="button issue-btn btn-sm" href="{}" '
-                'data-confirm-message="{}" data-confirm-kind="issue" data-confirm-label="Issue" '
+                'data-confirm-message="{}" data-confirm-kind="issue" data-confirm-label="{}" '
                 'aria-label="{}" title="{}">'
                 '<span class="btn-icon" aria-hidden="true">'
                 '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M9 16.2l-3.5-3.5L4 14.2 9 19l11-11-1.5-1.5z"/></svg>'
@@ -1398,9 +1435,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 '</a> ',
                 reverse("admin:rooms_monthlybill_issue", args=[obj.id]),
                 issue_confirm,
-                _("Issue"),
-                _("Issue"),
-                _("Issue"),
+                issue_label,
+                issue_label,
+                issue_label,
+                issue_label,
             )
         send_link = ""
         if (
@@ -1410,9 +1448,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             and obj.status == MonthlyBill.Status.ISSUED
         ):
             send_confirm = _("Send this invoice to the tenant?")
+            send_label = _("Send")
             send_link = format_html(
                 '<a class="button send-btn btn-sm" href="{}" '
-                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="Send" '
+                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="{}" '
                 'aria-label="{}" title="{}">'
                 '<span class="btn-icon" aria-hidden="true">'
                 '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>'
@@ -1421,9 +1460,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 '</a> ',
                 reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
                 send_confirm,
-                _("Send"),
-                _("Send"),
-                _("Send"),
+                send_label,
+                send_label,
+                send_label,
+                send_label,
             )
         resend_link = ""
         if (
@@ -1433,9 +1473,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             and obj.status == MonthlyBill.Status.SENT
         ):
             resend_confirm = _("Re-send this invoice to the tenant?")
+            resend_label = _("Re-send")
             resend_link = format_html(
                 '<a class="button send-btn btn-sm" href="{}" '
-                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="Re-send" '
+                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="{}" '
                 'aria-label="{}" title="{}">'
                 '<span class="btn-icon" aria-hidden="true">'
                 '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
@@ -1444,16 +1485,18 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 '</a> ',
                 reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
                 resend_confirm,
-                _("Re-send"),
-                _("Re-send"),
-                _("Re-send"),
+                resend_label,
+                resend_label,
+                resend_label,
+                resend_label,
             )
         paid_link = ""
         if not is_tenant and not missing_profile and obj.status == MonthlyBill.Status.SENT:
             paid_confirm = _("Mark this invoice as paid?")
+            paid_label = _("Mark Paid")
             paid_link = format_html(
                 '<a class="button paid-btn btn-sm" href="{}" '
-                'data-confirm-message="{}" data-confirm-kind="paid" data-confirm-label="Mark Paid" '
+                'data-confirm-message="{}" data-confirm-kind="paid" data-confirm-label="{}" '
                 'aria-label="{}" title="{}">'
                 '<span class="btn-icon" aria-hidden="true">'
                 '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M9 16.2l-3.5-3.5L4 14.2 9 19l11-11-1.5-1.5z"/></svg>'
@@ -1462,9 +1505,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 '</a> ',
                 reverse("admin:rooms_monthlybill_mark_paid", args=[obj.id]),
                 paid_confirm,
-                _("Mark Paid"),
-                _("Mark Paid"),
-                _("Mark Paid"),
+                paid_label,
+                paid_label,
+                paid_label,
+                paid_label,
             )
         test_link = ""
         if not (regen_link or issue_link or send_link or resend_link or paid_link or test_link):
@@ -1479,7 +1523,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             test_link,
         )
 
-    invoice_actions.short_description = "Invoice"
+    invoice_actions.short_description = _("Invoice")
 
     def row_actions(self, obj):
         req = getattr(self, "_request", None)
@@ -1528,7 +1572,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         )
         return format_html("{}{}", preview_btn, download_btn)
 
-    row_actions.short_description = "Actions"
+    row_actions.short_description = _("Actions")
 
     def _has_missing_utility_data(self, obj):
         labels = getattr(obj, "_missing_labels", None)
@@ -1636,13 +1680,13 @@ def _custom_get_app_list(self, request, app_label=None):
                 ordered.append(model)
         app["models"] = ordered
         dashboard_app = {
-            "name": "Reports & Dashboard",
+            "name": _("Reports & Dashboard"),
             "app_label": "dashboard",
             "app_url": reverse("admin:dashboard"),
             "has_module_perms": True,
             "models": [
                 {
-                    "name": "Reports & Dashboard",
+                    "name": _("Reports & Dashboard"),
                     "object_name": "Dashboard",
                     "admin_url": reverse("admin:dashboard"),
                     "perms": {
@@ -1657,7 +1701,7 @@ def _custom_get_app_list(self, request, app_label=None):
 
     if monthly_bill_model:
         invoice_app = {
-            "name": "Invoice",
+            "name": _("Invoice"),
             "app_label": "invoice",
             "app_url": monthly_bill_model.get("admin_url", ""),
             "has_module_perms": True,
@@ -1786,7 +1830,7 @@ def dashboard_view(request):
 
     context = {
         **admin.site.each_context(request),
-        "title": "Reports & Dashboard",
+        "title": _("Reports & Dashboard"),
         "is_tenant": is_tenant,
         "income_labels": income_labels,
         "income_values": income_values,

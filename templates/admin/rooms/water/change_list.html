@@ -1,10 +1,44 @@
 {% extends "admin/change_list.html" %}
 {% load i18n %}
 
+{% block content_title %}
+<h1>{% translate "Select water to change" %}</h1>
+{% endblock %}
+
+{% block object-tools %}
+<ul class="object-tools">
+  {% if has_add_permission %}
+  <li>
+    <a href="{% url 'admin:rooms_water_add' %}" class="addlink">{% translate "Add water" %}</a>
+  </li>
+  {% endif %}
+</ul>
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:dashboard' %}">{% translate "Home" %}</a>
   &rsaquo;
   {{ cl.opts.verbose_name_plural|capfirst }}
 </div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+  #changelist-filter .viewlink,
+  #changelist-filter a.viewlink,
+  .filter .viewlink,
+  #changelist-filter details > summary > a,
+  #changelist-filter .hidelink { display: none !important; }
+</style>
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (!params.has("_facets")) {
+      params.set("_facets", "1");
+      window.location.search = params.toString();
+    }
+  })();
+</script>
 {% endblock %}

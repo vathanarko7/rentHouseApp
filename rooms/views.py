@@ -14,7 +14,7 @@ from zipfile import ZipFile
 
 from .models import MonthlyBill, Room, ClientProfile, UnitPrice, Water, Electricity
 from django.utils.formats import date_format
-from django.utils.translation import override
+from django.utils.translation import override, gettext as _
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from .services import calculate_monthly_bill, generate_invoice_for_bill
@@ -523,7 +523,10 @@ def test_telegram_connection_view(request):
                 )
             result = data.get("result") or {}
             bot_name = result.get("username") or result.get("first_name") or "Unknown"
-            messages.success(request, f"Telegram connection OK: {bot_name}")
+            messages.success(
+                request,
+                _("Telegram connection OK: %(bot_name)s") % {"bot_name": bot_name},
+            )
             return _redirect_back(
                 request, reverse("admin:rooms_clientprofile_changelist")
             )

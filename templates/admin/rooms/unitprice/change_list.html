@@ -1,6 +1,30 @@
 {% extends "admin/change_list.html" %}
 {% load i18n %}
 
+{% block search %}
+{{ block.super }}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+  #changelist-filter .viewlink,
+  #changelist-filter a.viewlink,
+  .filter .viewlink,
+  #changelist-filter details > summary > a,
+  #changelist-filter .hidelink { display: none !important; }
+</style>
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (!params.has("_facets")) {
+      params.set("_facets", "1");
+      window.location.search = params.toString();
+    }
+  })();
+</script>
+{% endblock %}
+
 {% block breadcrumbs %}
 <div class="breadcrumbs">
   <a href="{% url 'admin:dashboard' %}">{% translate "Home" %}</a>
