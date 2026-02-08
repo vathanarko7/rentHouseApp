@@ -1,16 +1,23 @@
 {% extends "admin/base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% translate "PtasJuolKruDy" %}{% endblock %}
 
 {% block branding %}
 <h1 id="site-name">
-  <a href="{% url 'admin:index' %}">
-    {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
-      {% translate "Tenant Dashboard" %}
-    {% else %}
-      {% translate "PtasJuolKruDy" %}
-    {% endif %}
+  <a href="{% url 'admin:index' %}" class="brand-link">
+    <img
+      class="brand-logo"
+      src="{% static 'images/ptasjuolkrudy-logo-small.svg' %}"
+      alt="{% translate 'PtasJuolKruDy' %}"
+    />
+    <span class="brand-text">
+      {% if request.user.is_authenticated and not request.user.is_staff and not request.user.is_superuser %}
+        {% translate "Tenant Dashboard" %}
+      {% else %}
+        {% translate "PtasJuolKruDy" %}
+      {% endif %}
+    </span>
   </a>
 </h1>
 {% endblock %}
@@ -353,6 +360,19 @@
     font-weight: 700;
     letter-spacing: 0.2px;
     text-decoration: none;
+  }
+  #branding .brand-link {
+    display: inline-flex;
+    align-items: center;
+  }
+  #branding .brand-logo {
+    height:36px;
+    width: auto;
+    display: block;
+    filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+  }
+  #branding .brand-text {
+    display: inline-block;
   }
   #header a {
     color: #e8f1f6;
@@ -1718,4 +1738,9 @@
     });
   })();
 </script>
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/ptasjuolkrudy-logo-small.svg' %}">
 {% endblock %}

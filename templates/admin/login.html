@@ -1,11 +1,160 @@
-{% extends "admin/login.html" %}
-{% load i18n %}
-
-{% block content %}
-<div style="margin: 10px 0 16px; text-align: center;">
+{% extends "admin/login.html" %} {% load i18n static %} {% block content %}
+<div
+  id="language-switcher-wrap"
+  style="margin: 10px 0 16px; text-align: center"
+>
   {% include "includes/language_switcher.html" %}
 </div>
 <style>
+  body.login {
+    background: radial-gradient(
+      1200px 800px at 10% 10%,
+      #2f4f5f 0%,
+      #1a2a34 40%,
+      #0b0f14 100%
+    );
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  .login #container {
+    max-width: 420px;
+    width: min(92vw, 420px);
+    margin: 4vh auto 4vh;
+    padding: 0;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+  .login #content {
+    padding: 0;
+    background: transparent;
+  }
+  .login #content-main {
+    background: rgba(17, 24, 39, 0.86);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    padding: 0;
+    padding-top: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(8px);
+  }
+  .login #header {
+    background: transparent;
+    border: none;
+    padding: 0;
+    margin-bottom: 8px;
+  }
+  .login .brand-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    margin: 0 0 10px 0;
+    transform: none;
+    width: 100%;
+  }
+  .login .brand-logo {
+    height: auto;
+    width: 100%;
+    max-width: 100%;
+    max-height: 50px;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 18px rgba(56, 189, 248, 0.25));
+  }
+  .login form .brand-header {
+    margin-bottom: 4px;
+  }
+  .login .brand-title {
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    background: linear-gradient(135deg, #e2e8f0 0%, #93c5fd 45%, #38bdf8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 6px 18px rgba(56, 189, 248, 0.25);
+  }
+  .login form {
+    padding: 18px 18px 20px;
+  }
+  .login .form-row {
+    margin-bottom: 12px;
+  }
+  .login .form-row label {
+    color: #cbd5f5;
+    font-weight: 600;
+  }
+  .login input[type="text"],
+  .login input[type="password"],
+  .login select {
+    width: 100%;
+    border-radius: 12px;
+    padding: 10px 12px;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    background: rgba(15, 23, 42, 0.6);
+    color: #e2e8f0;
+  }
+  .login input[type="text"]::placeholder,
+  .login input[type="password"]::placeholder {
+    color: #94a3b8;
+  }
+  .login input[type="text"]:focus,
+  .login input[type="password"]:focus,
+  .login select:focus {
+    outline: none;
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  }
+  .login .submit-row {
+    margin-top: 12px;
+  }
+  .login .submit-row input {
+    width: 100%;
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%);
+    border: none;
+  }
+  .login .submit-row input:hover {
+    filter: brightness(1.05);
+  }
+  .password-toggle-btn {
+    color: #e2e8f0;
+  }
+  .password-toggle-btn:hover {
+    color: #93c5fd;
+  }
+  .login .language-switcher {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    margin-top: 2px;
+  }
+  @media (max-width: 480px) {
+    .login #container {
+      margin-top: 6vh;
+    }
+    .login form {
+      padding: 16px 16px 18px;
+    }
+    .login .brand-header {
+      padding: 14px 16px 0;
+      gap: 8px;
+    }
+    .login .brand-title {
+      font-size: 18px;
+    }
+    .login #content-main {
+      border-radius: 16px;
+    }
+  }
   .password-field-wrap {
     position: relative;
     display: inline-block;
@@ -37,6 +186,23 @@
 {{ block.super }}
 <script>
   (function () {
+    var branding = document.getElementById("site-name");
+    var form = document.querySelector(".login form");
+    if (branding && form && !form.querySelector(".brand-header")) {
+      form.insertBefore(branding, form.firstChild);
+    }
+    var langWrap = document.getElementById("language-switcher-wrap");
+    var langSwitcher = langWrap
+      ? langWrap.querySelector(".language-switcher")
+      : null;
+    if (form && langSwitcher && !form.querySelector(".language-switcher")) {
+      var insertAfter = form.querySelector(".brand-header");
+      form.insertBefore(
+        langSwitcher,
+        insertAfter ? insertAfter.nextSibling : form.firstChild,
+      );
+      langWrap.remove();
+    }
     var label = document.querySelector('label[for="id_username"]');
     if (label) {
       label.textContent = "{% translate 'Username or email' %}";
@@ -77,19 +243,19 @@
           "aria-label",
           isHidden
             ? "{% translate 'Hide password' %}"
-            : "{% translate 'Show password' %}"
+            : "{% translate 'Show password' %}",
         );
       });
       wrapper.appendChild(btn);
     }
   })();
 </script>
-{% endblock %}
-
-{% block branding %}
-<h1 id="site-name">
-  <a href="{% url 'admin:index' %}">
-    {% translate "PtasJuolKruDy" %}
-  </a>
-</h1>
+{% endblock %} {% block branding %}
+<div id="site-name" class="brand-header">
+  <img
+    class="brand-logo"
+    src="{% static 'images/ptasjuolkrudy-logo.svg' %}"
+    alt="{% translate 'PtasJuolKruDy' %}"
+  />
+</div>
 {% endblock %}

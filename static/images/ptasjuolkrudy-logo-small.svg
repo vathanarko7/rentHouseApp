@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="ptasjuolkrudy logo icon">
+  <defs>
+    <linearGradient id="roofGrad" x1="120" y1="120" x2="420" y2="320" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#5DE2FF"></stop>
+      <stop offset="1" stop-color="#2A6BFF"></stop>
+    </linearGradient>
+
+    <linearGradient id="waveGrad" x1="80" y1="340" x2="460" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3FE7FF"></stop>
+      <stop offset="1" stop-color="#2A6BFF"></stop>
+    </linearGradient>
+
+    <linearGradient id="houseGrad" x1="170" y1="170" x2="350" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#173B8C"></stop>
+      <stop offset="1" stop-color="#0C1F4F"></stop>
+    </linearGradient>
+
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"></feGaussianBlur>
+      <feMerge>
+        <feMergeNode in="blur"></feMergeNode>
+        <feMergeNode in="SourceGraphic"></feMergeNode>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Icon Group -->
+  <g filter="url(#softGlow)">
+    <!-- Roof -->
+    <path d="M120 230 L256 130 L392 230" fill="none" stroke="url(#roofGrad)" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></path>
+    <!-- Chimney -->
+    <path d="M338 152 V206" fill="none" stroke="url(#roofGrad)" stroke-width="22" stroke-linecap="round"></path>
+
+    <!-- House body -->
+    <path d="M170 228 Q170 214 184 214 H328 Q342 214 342 228 V318
+             Q342 336 324 336 H188 Q170 336 170 318 Z" fill="url(#houseGrad)"></path>
+
+    <!-- Window (warm light) -->
+    <g>
+      <rect x="226" y="244" width="60" height="60" rx="10" fill="#FFD24A"></rect>
+      <path d="M256 244 V304" stroke="#F2B700" stroke-width="6" stroke-linecap="round"></path>
+      <path d="M226 274 H286" stroke="#F2B700" stroke-width="6" stroke-linecap="round"></path>
+    </g>
+
+    <!-- Wave swoosh -->
+    <path d="M108 342
+             C160 370, 216 370, 260 356
+             C312 340, 366 328, 418 344
+             C380 392, 250 404, 150 384
+             C120 378, 98 364, 88 350
+             C86 346, 90 342, 108 342 Z" fill="url(#waveGrad)"></path>
+  </g>
+</svg>
