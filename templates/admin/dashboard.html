@@ -20,19 +20,72 @@
 <p>{% translate "Showing all rooms (global view)." %}</p>
 {% endif %}
 
-<details open style="margin-top: 16px;">
-  <summary style="cursor:pointer; font-weight:600;">{% translate "Income per Month" %}</summary>
-  <div style="margin-top: 10px;">
-    <canvas id="income-chart" height="120"></canvas>
-  </div>
-</details>
+<style>
+  .dashboard-section {
+    margin-top: 16px;
+  }
+  .dashboard-section summary {
+    cursor: pointer;
+    font-weight: 600;
+    list-style: none;
+  }
+  .dashboard-section summary::-webkit-details-marker {
+    display: none;
+  }
+  .chart-card {
+    margin-top: 10px;
+    background: color-mix(in srgb, var(--body-bg, #fff) 92%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
+  }
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    height: 260px;
+  }
+  @media (max-width: 900px) {
+    .chart-wrap {
+      height: 220px;
+    }
+  }
+  @media (max-width: 640px) {
+    .chart-wrap {
+      height: 200px;
+    }
+    .chart-card {
+      padding: 12px;
+    }
+  }
+  #income-chart,
+  #usage-chart {
+    width: 100% !important;
+    height: 100% !important;
+  }
+</style>
 
-<details style="margin-top: 24px;">
-  <summary style="cursor:pointer; font-weight:600;">{% translate "Water / Electricity Trends" %}</summary>
-  <div style="margin-top: 10px;">
-    <canvas id="usage-chart" height="140"></canvas>
+<section class="dashboard-section">
+  <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">
+    {% translate "Income per Month" %}
+  </h2>
+  <div class="chart-card">
+    <div class="chart-wrap">
+      <canvas id="income-chart"></canvas>
+    </div>
   </div>
-</details>
+</section>
+
+<section class="dashboard-section" style="margin-top: 24px;">
+  <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">
+    {% translate "Water / Electricity Trends" %}
+  </h2>
+  <div class="chart-card">
+    <div class="chart-wrap">
+      <canvas id="usage-chart"></canvas>
+    </div>
+  </div>
+</section>
 
 <details style="margin-top: 24px;">
   <summary style="cursor:pointer; font-weight:600;">{% translate "Recent actions" %}</summary>
@@ -73,6 +126,10 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
   (function () {
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    var gridColor = isDark ? "rgba(148, 163, 184, 0.25)" : "rgba(148, 163, 184, 0.18)";
+    var textColor = isDark ? "#e2e8f0" : "#334155";
+
     var incomeLabels = JSON.parse(document.getElementById("income-labels").textContent || "[]");
     var incomeValues = JSON.parse(document.getElementById("income-values").textContent || "[]");
     var waterLabels = JSON.parse(document.getElementById("water-labels").textContent || "[]");
@@ -91,16 +148,39 @@
               label: "{% translate "Income" %}",
               data: incomeValues,
               borderColor: "#16a34a",
-              backgroundColor: "rgba(22, 163, 74, 0.15)",
+              backgroundColor: "rgba(22, 163, 74, 0.18)",
               fill: true,
-              tension: 0.25,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              borderWidth: 2,
             },
           ],
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                color: textColor,
+                boxWidth: 18,
+                usePointStyle: true,
+              },
+            },
+            tooltip: {
+              backgroundColor: isDark ? "#111827" : "#0f172a",
+              titleColor: "#fff",
+              bodyColor: "#fff",
+              padding: 10,
+              cornerRadius: 8,
+            },
+          },
           scales: {
-            y: { beginAtZero: true },
+            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
           },
         },
       });
@@ -117,24 +197,50 @@
               label: "{% translate "Water (m³)" %}",
               data: waterValues,
               borderColor: "#0ea5e9",
-              backgroundColor: "rgba(14, 165, 233, 0.10)",
+              backgroundColor: "rgba(14, 165, 233, 0.14)",
               fill: true,
-              tension: 0.25,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              borderWidth: 2,
             },
             {
               label: "{% translate "Electricity (kWh)" %}",
               data: elecValues,
               borderColor: "#2563eb",
-              backgroundColor: "rgba(37, 99, 235, 0.12)",
+              backgroundColor: "rgba(37, 99, 235, 0.16)",
               fill: true,
-              tension: 0.25,
+              tension: 0.35,
+              pointRadius: 3,
+              pointHoverRadius: 5,
+              borderWidth: 2,
             },
           ],
         },
         options: {
           responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: "index", intersect: false },
+          plugins: {
+            legend: {
+              position: "top",
+              labels: {
+                color: textColor,
+                boxWidth: 18,
+                usePointStyle: true,
+              },
+            },
+            tooltip: {
+              backgroundColor: isDark ? "#111827" : "#0f172a",
+              titleColor: "#fff",
+              bodyColor: "#fff",
+              padding: 10,
+              cornerRadius: 8,
+            },
+          },
           scales: {
-            y: { beginAtZero: true },
+            x: { grid: { color: gridColor }, ticks: { color: textColor } },
+            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
           },
         },
       });
