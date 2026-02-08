@@ -34,67 +34,6 @@
 
 <script>
   (function () {
-    var btn = document.getElementById("bulk-send-telegram-btn");
-    if (!btn) return;
-    btn.addEventListener("click", function () {
-      var form = document.getElementById("changelist-form");
-      if (!form) return;
-      var actionSelect = form.querySelector('select[name="action"]');
-      if (!actionSelect) return;
-      var anyChecked = form.querySelectorAll('input.action-select:checked').length > 0;
-      if (!anyChecked) {
-        var warnModal = document.getElementById("bulk-send-warning-modal");
-        if (warnModal) {
-          warnModal.classList.add("is-open");
-          warnModal.setAttribute("aria-hidden", "false");
-          var warnOk = document.getElementById("bulk-send-warning-ok");
-          var warnBackdrop = warnModal.querySelector(".confirm-modal__backdrop");
-          function closeWarn() {
-            warnModal.classList.remove("is-open");
-            warnModal.setAttribute("aria-hidden", "true");
-          }
-          if (warnOk) warnOk.onclick = closeWarn;
-          if (warnBackdrop) warnBackdrop.onclick = closeWarn;
-        } else {
-          alert("{% translate 'Select at least one invoice first.' %}");
-        }
-        return;
-      }
-      var modal = document.getElementById("bulk-send-modal");
-      if (!modal) {
-        actionSelect.value = "bulk_send_telegram";
-        form.submit();
-        return;
-      }
-      modal.classList.add("is-open");
-      modal.setAttribute("aria-hidden", "false");
-      var okBtn = document.getElementById("bulk-send-confirm");
-      var cancelBtn = document.getElementById("bulk-send-cancel");
-      var backdrop = modal.querySelector(".confirm-modal__backdrop");
-      function closeModal() {
-        modal.classList.remove("is-open");
-        modal.setAttribute("aria-hidden", "true");
-      }
-      if (okBtn) {
-        okBtn.onclick = function () {
-          closeModal();
-          actionSelect.value = "bulk_send_telegram";
-          form.submit();
-        };
-      }
-      if (cancelBtn) {
-        cancelBtn.onclick = function () {
-          closeModal();
-        };
-      }
-      if (backdrop) {
-        backdrop.onclick = closeModal;
-      }
-    });
-  })();
-</script>
-<script>
-  (function () {
     function setupAutoRefresh() {
       var closeLabel = "{% translate 'Close' %}";
     var jobSuccess = "{% translate 'Job completed successfully.' %}";
@@ -258,81 +197,16 @@
       </button>
     </div>
     <div style="display:flex; gap:8px; align-items:center;">
-      <button type="button" class="button" id="bulk-send-telegram-btn" onclick="return window.bulkSendTelegram && window.bulkSendTelegram();">
+      <button
+        type="button"
+        class="button"
+        data-action="{{ bulk_send_group_url }}"
+        data-status="{{ bulk_send_group_status_url }}"
+        data-title="{% translate "Send Monthly Album" %}"
+        data-submit="{% translate "Send to Telegram" %}"
+      >
         {% translate "Send via Telegram" %}
       </button>
-    </div>
-  </div>
-  <script>
-    window.bulkSendTelegram = function () {
-      var form = document.getElementById("changelist-form");
-      if (!form) return false;
-      var actionSelect = form.querySelector('select[name="action"]');
-      if (!actionSelect) return false;
-      var anyChecked = form.querySelectorAll('input.action-select:checked').length > 0;
-      if (!anyChecked) {
-        var warnModal = document.getElementById("bulk-send-warning-modal");
-        if (warnModal) {
-          warnModal.classList.add("is-open");
-          warnModal.setAttribute("aria-hidden", "false");
-          var warnOk = document.getElementById("bulk-send-warning-ok");
-          var warnBackdrop = warnModal.querySelector(".confirm-modal__backdrop");
-          function closeWarn() {
-            warnModal.classList.remove("is-open");
-            warnModal.setAttribute("aria-hidden", "true");
-          }
-          if (warnOk) warnOk.onclick = closeWarn;
-          if (warnBackdrop) warnBackdrop.onclick = closeWarn;
-        }
-        return false;
-      }
-      var modal = document.getElementById("bulk-send-modal");
-      if (modal) {
-        modal.classList.add("is-open");
-        modal.setAttribute("aria-hidden", "false");
-        var okBtn = document.getElementById("bulk-send-confirm");
-        var cancelBtn = document.getElementById("bulk-send-cancel");
-        var backdrop = modal.querySelector(".confirm-modal__backdrop");
-        function closeModal() {
-          modal.classList.remove("is-open");
-          modal.setAttribute("aria-hidden", "true");
-        }
-        if (okBtn) {
-          okBtn.onclick = function () {
-            closeModal();
-            actionSelect.value = "bulk_send_telegram";
-            form.submit();
-          };
-        }
-        if (cancelBtn) cancelBtn.onclick = closeModal;
-        if (backdrop) backdrop.onclick = closeModal;
-        return false;
-      }
-      actionSelect.value = "bulk_send_telegram";
-      form.submit();
-      return false;
-    };
-  </script>
-
-  <div class="confirm-modal" id="bulk-send-modal" aria-hidden="true">
-    <div class="confirm-modal__backdrop"></div>
-    <div class="confirm-modal__panel" role="dialog" aria-modal="true">
-      <h3 class="confirm-modal__title">{% translate "Bulk Send" %}</h3>
-      <p>{% translate "Send selected invoices via Telegram?" %}</p>
-      <div class="confirm-modal__actions">
-        <button type="button" class="button confirm-cancel" id="bulk-send-cancel">{% translate "Cancel" %}</button>
-        <button type="button" class="button confirm-ok confirm-send" id="bulk-send-confirm">{% translate "Send" %}</button>
-      </div>
-    </div>
-  </div>
-  <div class="confirm-modal" id="bulk-send-warning-modal" aria-hidden="true">
-    <div class="confirm-modal__backdrop"></div>
-    <div class="confirm-modal__panel" role="dialog" aria-modal="true">
-      <h3 class="confirm-modal__title">{% translate "Select invoices" %}</h3>
-      <p>{% translate "Select at least one invoice first." %}</p>
-      <div class="confirm-modal__actions">
-        <button type="button" class="button confirm-ok" id="bulk-send-warning-ok">{% translate "OK" %}</button>
-      </div>
     </div>
   </div>
 
@@ -764,6 +638,150 @@
         btn.classList.remove("is-selected");
       });
     });
+  })();
+</script>
+<style>
+  .progress-toast {
+    position: fixed;
+    right: 16px;
+    top: 16px;
+    z-index: 4000;
+    background: #111827;
+    color: #fff;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 12px 14px;
+    min-width: 260px;
+    max-width: 360px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    display: none;
+  }
+  .progress-toast.show {
+    display: block;
+  }
+  .progress-toast .pt-title {
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .progress-toast .pt-message {
+    font-size: 12px;
+    opacity: 0.9;
+    margin-bottom: 8px;
+  }
+  .progress-toast .pt-bar {
+    height: 8px;
+    background: #1f2937;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress-toast .pt-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #f59e0b, #f97316);
+    transition: width 0.25s ease;
+  }
+  .progress-toast.success .pt-bar-fill {
+    background: linear-gradient(90deg, #22c55e, #16a34a);
+  }
+  .progress-toast.failed .pt-bar-fill {
+    background: linear-gradient(90deg, #ef4444, #dc2626);
+  }
+  .progress-toast .pt-close {
+    position: absolute;
+    right: 8px;
+    top: 6px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+  }
+</style>
+<script>
+  (function () {
+    var statusBtn = document.querySelector('.object-tools [data-status]');
+    if (!statusBtn) return;
+    var statusUrl = statusBtn.getAttribute("data-status") || "";
+    if (!statusUrl) return;
+
+    var toast = null;
+    var lastSignature = "";
+
+    function ensureToast() {
+      if (toast) return toast;
+      toast = document.createElement("div");
+      toast.className = "progress-toast";
+      toast.innerHTML =
+        '<div class="pt-title">{% translate "Send to Telegram group" %}</div>' +
+        '<button class="pt-close" aria-label="{% translate "Close" %}">×</button>' +
+        '<div class="pt-message">{% translate "Sending" %}</div>' +
+        '<div class="pt-bar"><div class="pt-bar-fill"></div></div>';
+      document.body.appendChild(toast);
+      toast.querySelector(".pt-close").addEventListener("click", function () {
+        toast.classList.remove("show");
+      });
+      return toast;
+    }
+
+    function setToast(status, message, percent) {
+      var el = ensureToast();
+      el.classList.add("show");
+      el.classList.toggle("failed", status === "failed");
+      el.classList.toggle("success", status === "success");
+      var msgEl = el.querySelector(".pt-message");
+      var bar = el.querySelector(".pt-bar-fill");
+      if (msgEl) msgEl.textContent = message;
+      if (bar) bar.style.width = percent + "%";
+    }
+
+    function poll() {
+      fetch(statusUrl, { credentials: "same-origin" })
+        .then(function (resp) {
+          return resp.json();
+        })
+        .then(function (data) {
+          if (!data || !data.active) return;
+          var total = data.total || 0;
+          var completed = data.completed || 0;
+          var failed = data.failed || 0;
+          var status = (data.status || "").toLowerCase();
+          var percent =
+            total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
+          var msg =
+            data.message ||
+            ("{% translate "Sending" %}: " + completed + "/" + total);
+          var percentText = " " + percent + "%";
+          var signature =
+            status + "|" + completed + "|" + failed + "|" + total + "|" + msg;
+          if (signature !== lastSignature) {
+            lastSignature = signature;
+            setToast(
+              status,
+              msg + " (" + completed + "/" + total + ")" + percentText,
+              percent
+            );
+          }
+          if (!data.done) {
+            setTimeout(poll, 3000);
+          } else {
+            setToast(
+              status,
+              (status === "success"
+                ? "{% translate "Completed" %}"
+                : "{% translate "Completed with errors" %}") + " 100%",
+              100
+            );
+            setTimeout(function () {
+              if (toast) toast.classList.remove("show");
+            }, 5000);
+          }
+        })
+        .catch(function () {
+          setTimeout(poll, 4000);
+        });
+    }
+
+    poll();
   })();
 </script>
 

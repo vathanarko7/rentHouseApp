@@ -36,6 +36,8 @@ from rooms.views import (
     mark_paid_view,
     preview_invoice,
     send_invoice_telegram_view,
+    send_group_invoices_telegram_view,
+    telegram_group_status_view,
     test_telegram_connection_view,
     test_clientprofile_telegram_view,
     _post_multipart,
@@ -1389,6 +1391,16 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 self.admin_site.admin_view(bulk_download_view),
                 name="rooms_bulk_download",
             ),
+            path(
+                "telegram/send-group/",
+                self.admin_site.admin_view(send_group_invoices_telegram_view),
+                name="rooms_monthlybill_send_group_telegram",
+            ),
+            path(
+                "telegram/send-group/status/",
+                self.admin_site.admin_view(telegram_group_status_view),
+                name="rooms_monthlybill_send_group_telegram_status",
+            ),
         ]
         return custom_urls + urls
 
@@ -1647,6 +1659,12 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 {
                     "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
                     "bulk_download_url": reverse("admin:rooms_bulk_download"),
+                    "bulk_send_group_url": reverse(
+                        "admin:rooms_monthlybill_send_group_telegram"
+                    ),
+                    "bulk_send_group_status_url": reverse(
+                        "admin:rooms_monthlybill_send_group_telegram_status"
+                    ),
                     "rooms": Room.objects.all(),
                 }
             )

@@ -4,6 +4,7 @@ from django.forms import ValidationError
 
 from rooms.utils import first_day_of_current_month
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 
 # Create your models here.
@@ -236,3 +237,35 @@ class MonthlyBill(models.Model):
         }
         if order.get(self.status, 0) < order.get(current, 0):
             raise ValidationError(_("Status cannot move backward."))
+
+
+class TelegramBatchJob(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending", _("Pending")
+        RUNNING = "running", _("Running")
+        SUCCESS = "success", _("Success")
+        FAILED = "failed", _("Failed")
+
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="telegram_batch_jobs",
+    )
+    month = models.DateField()
+    total_batches = models.PositiveIntegerField(default=0)
+    completed_batches = models.PositiveIntegerField(default=0)
+    failed_batches = models.PositiveIntegerField(default=0)
+    status = models.CharField(
+        max_length=12, choices=Status.choices, default=Status.PENDING
+    )
+    message = models.CharField(max_length=255, blank=True, default="")
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"Telegram batch {self.month.strftime('%Y-%m')} ({self.status})"

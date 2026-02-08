@@ -197,6 +197,61 @@ msgstr " • "
 msgid "Alert"
 msgstr ""
 
+#: templates/admin/rooms/change_list.html
+msgid "Send to Telegram group"
+msgstr "ផ្ញើទៅក្រុម Telegram"
+
+#: templates/admin/rooms/change_list.html
+msgid "Sending"
+msgstr "កំពុងផ្ញើ"
+
+#: templates/admin/rooms/change_list.html
+msgid "Completed"
+msgstr "ផ្ញើអស់"
+
+#: templates/admin/rooms/change_list.html
+msgid "Completed with errors"
+msgstr "ផ្ញើអស់តែមានបញ្ហា"
+
+#: .\rooms\views.py
+msgid "all rooms"
+msgstr "បន្ទប់ទាំងអស់"
+
+#: .\rooms\views.py
+#, python-format
+msgid "%(count)s room(s)"
+msgstr "%(count)s បន្ទប់"
+
+#: .\rooms\views.py
+#, python-format
+msgid "Generate bills %(month)s"
+msgstr "បង្កើតវិក្កយបត្រ %(month)s"
+
+#: .\rooms\views.py
+#, python-format
+msgid "Generate bills for %(month)s, %(rooms)s."
+msgstr "បង្កើតវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
+
+#: .\rooms\views.py
+#, python-format
+msgid "Generate and download bills %(month)s"
+msgstr "បង្កើត និងទាញយកវិក្កយបត្រ %(month)s"
+
+#: .\rooms\views.py
+#, python-format
+msgid "Generate and download bills for %(month)s, %(rooms)s."
+msgstr "បង្កើត និងទាញយកវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
+
+#: .\rooms\views.py
+#, python-format
+msgid "Download bills %(month)s"
+msgstr "ទាញយកវិក្កយបត្រ %(month)s"
+
+#: .\rooms\views.py
+#, python-format
+msgid "Download bills for %(month)s, %(rooms)s."
+msgstr "ទាញយកវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
+
 #: .\rooms\admin.py:1236
 msgid "Alert / Job"
 msgstr ""

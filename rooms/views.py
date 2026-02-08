@@ -1,4 +1,10 @@
-from django.http import FileResponse, Http404, HttpResponse, HttpResponseForbidden
+from django.http import (
+    FileResponse,
+    Http404,
+    HttpResponse,
+    HttpResponseForbidden,
+    JsonResponse,
+)
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from datetime import date
@@ -12,10 +18,20 @@ from django.urls import reverse
 import io
 from zipfile import ZipFile
 
-from .models import MonthlyBill, Room, ClientProfile, UnitPrice, Water, Electricity
+from .models import (
+    MonthlyBill,
+    Room,
+    ClientProfile,
+    UnitPrice,
+    Water,
+    Electricity,
+    TelegramBatchJob,
+)
 from django.utils.formats import date_format
 from django.utils.translation import override, gettext as _
 from django.utils import timezone
+from django.contrib.admin.models import LogEntry, CHANGE
+from django.contrib.contenttypes.models import ContentType
 from django.utils.http import url_has_allowed_host_and_scheme
 from .services import calculate_monthly_bill, generate_invoice_for_bill
 from rooms.invoice_i18n import INVOICE_LANGUAGES
@@ -87,6 +103,21 @@ def _set_job_result(bill, status, message):
             "last_job_at",
         ]
     )
+
+
+def _admin_action_log(request, title, message):
+    try:
+        ct = ContentType.objects.get_for_model(MonthlyBill)
+        LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=ct.pk,
+            object_id="",
+            object_repr=title,
+            action_flag=CHANGE,
+            change_message=message,
+        )
+    except Exception:
+        pass
 
 
 def download_invoice(request, bill_id, lang):
@@ -497,6 +528,225 @@ def send_invoice_telegram_view(request, bill_id):
     return _redirect_back(request)
 
 
+def _send_telegram_album(chat_id, token, items):
+    url = f"https://api.telegram.org/bot{token}/sendMediaGroup"
+    media = []
+    files = {}
+    for idx, item in enumerate(items):
+        attach_name = f"file{idx}"
+        media.append(
+            {
+                "type": "photo",
+                "media": f"attach://{attach_name}",
+                "caption": item.get("caption", ""),
+            }
+        )
+        files[attach_name] = (item["filename"], item["bytes"])
+    return _post_multipart(
+        url,
+        {"chat_id": chat_id, "media": json.dumps(media)},
+        files,
+        timeout=30,
+    )
+
+
+def _set_batch_job(job_id, status, message=None, completed=None, failed=None):
+    job = TelegramBatchJob.objects.filter(pk=job_id).first()
+    if not job:
+        return
+    if status:
+        job.status = status
+    if message is not None:
+        job.message = message[:255]
+    if completed is not None:
+        job.completed_batches = completed
+    if failed is not None:
+        job.failed_batches = failed
+    job.save(
+        update_fields=[
+            "status",
+            "message",
+            "completed_batches",
+            "failed_batches",
+            "updated_at",
+        ]
+    )
+
+
+def _send_group_invoices_worker(job_id, chat_id, token, items):
+    close_old_connections()
+    total_batches = (len(items) + 9) // 10
+    _set_batch_job(job_id, TelegramBatchJob.Status.RUNNING, "Sending albums...")
+    completed = 0
+    failed = 0
+    for i in range(0, len(items), 10):
+        batch = items[i : i + 10]
+        try:
+            resp = _send_telegram_album(chat_id, token, batch)
+            if not resp.get("ok"):
+                failed += 1
+            else:
+                completed += 1
+        except Exception:
+            failed += 1
+        _set_batch_job(job_id, None, None, completed=completed, failed=failed)
+
+    if completed == total_batches and failed == 0:
+        _set_batch_job(job_id, TelegramBatchJob.Status.SUCCESS, "All albums sent.")
+    elif completed > 0:
+        _set_batch_job(
+            job_id,
+            TelegramBatchJob.Status.FAILED,
+            "Some albums failed.",
+        )
+    else:
+        _set_batch_job(job_id, TelegramBatchJob.Status.FAILED, "All albums failed.")
+
+
+def send_group_invoices_telegram_view(request):
+    if (
+        request.user.is_active
+        and not request.user.is_staff
+        and not request.user.is_superuser
+    ):
+        return HttpResponseForbidden("Not allowed")
+
+    if request.method != "POST":
+        return _redirect_back(request)
+
+    month = request.POST.get("month", "")
+    if not month:
+        messages.error(request, "Please select a month.")
+        return _redirect_back(request)
+
+    try:
+        year, month_num = map(int, month.split("-"))
+        bill_month = date(year, month_num, 1)
+    except Exception:
+        messages.error(request, "Invalid month format.")
+        return _redirect_back(request)
+
+    room_ids = request.POST.getlist("rooms")
+    bills = MonthlyBill.objects.filter(month=bill_month)
+    if room_ids:
+        bills = bills.filter(room__id__in=room_ids)
+
+    if not bills.exists():
+        messages.warning(request, "No invoices found for the selected month.")
+        return _redirect_back(request)
+
+    token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+    chat_id = getattr(settings, "TENANTS_TELEGRAM_GROUP_CHAT_ID", "")
+    if not token:
+        messages.error(request, "Telegram bot token is not configured.")
+        return _redirect_back(request)
+    if not chat_id:
+        messages.error(request, "Telegram group chat ID is not configured.")
+        return _redirect_back(request)
+
+    items = []
+    skipped = 0
+    for bill in bills:
+        filename = _invoice_filename(bill, "kh")
+        storage_path = _invoice_storage_path(bill, filename) if filename else ""
+        if not filename or not default_storage.exists(storage_path):
+            skipped += 1
+            continue
+        with default_storage.open(storage_path, "rb") as f:
+            data = f.read()
+        items.append({"filename": filename, "bytes": data, "caption": ""})
+
+    if not items:
+        messages.warning(request, "No invoice files found to send.")
+        return _redirect_back(request)
+
+    with override("km"):
+        kh_month = date_format(bill_month, "F")
+    kh_year = bill_month.strftime("%Y")
+    album_caption = (
+        f"📄 វិក្កយបត្រ ខែ {kh_month} ឆ្នាំ {kh_year}\n"
+        "📎 ទាញយក និងផ្ទៀងផ្ទាត់វិក្កយបត្រខាងលើ មុននឹងបង់ប្រាក់"
+    )
+
+    for i in range(0, len(items), 10):
+        if items[i : i + 10]:
+            items[i]["caption"] = album_caption
+
+    job = TelegramBatchJob.objects.create(
+        created_by=request.user,
+        month=bill_month,
+        total_batches=(len(items) + 9) // 10,
+        status=TelegramBatchJob.Status.PENDING,
+        message="Queued.",
+    )
+    request.session["telegram_group_job_id"] = job.id
+    try:
+        ct = ContentType.objects.get_for_model(MonthlyBill)
+        room_label = "all rooms" if not room_ids else f"{len(room_ids)} room(s)"
+        LogEntry.objects.log_action(
+            user_id=request.user.pk,
+            content_type_id=ct.pk,
+            object_id=str(job.id),
+            object_repr=f"Telegram group send {bill_month.strftime('%Y-%m')}",
+            action_flag=CHANGE,
+            change_message=f"Send to Telegram group ({bill_month.strftime('%Y-%m')}), {room_label}.",
+        )
+    except Exception:
+        pass
+
+    if getattr(settings, "ASYNC_TASKS", True):
+        threading.Thread(
+            target=_send_group_invoices_worker,
+            args=(job.id, chat_id, token, items),
+            daemon=True,
+        ).start()
+        messages.success(request, "Sending invoices to Telegram group in background.")
+        if skipped:
+            messages.warning(
+                request, f"Skipped {skipped} invoice(s) with missing files."
+            )
+        return _redirect_back(request)
+
+    _send_group_invoices_worker(job.id, chat_id, token, items)
+    if skipped:
+        messages.warning(request, f"Skipped {skipped} invoice(s) with missing files.")
+    return _redirect_back(request)
+
+
+def telegram_group_status_view(request):
+    if (
+        request.user.is_active
+        and not request.user.is_staff
+        and not request.user.is_superuser
+    ):
+        return HttpResponseForbidden("Not allowed")
+
+    job_id = request.session.get("telegram_group_job_id")
+    if not job_id:
+        return JsonResponse({"active": False})
+
+    job = TelegramBatchJob.objects.filter(pk=job_id).first()
+    if not job:
+        request.session.pop("telegram_group_job_id", None)
+        return JsonResponse({"active": False})
+
+    done = job.status in (TelegramBatchJob.Status.SUCCESS, TelegramBatchJob.Status.FAILED)
+    if done:
+        request.session.pop("telegram_group_job_id", None)
+
+    return JsonResponse(
+        {
+            "active": True,
+            "status": job.status,
+            "message": job.message,
+            "total": job.total_batches,
+            "completed": job.completed_batches,
+            "failed": job.failed_batches,
+            "done": done,
+        }
+    )
+
+
 def test_telegram_connection_view(request):
     if (
         request.user.is_active
@@ -674,6 +924,15 @@ def generate_invoices_view(request):
     if request.method == "POST":
         month = request.POST.get("month")
         room_ids = request.POST.getlist("rooms")
+        room_label = (
+            _("all rooms") if not room_ids else _("%(count)s room(s)") % {"count": len(room_ids)}
+        )
+        _admin_action_log(
+            request,
+            _("Generate bills %(month)s") % {"month": month},
+            _("Generate bills for %(month)s, %(rooms)s.")
+            % {"month": month, "rooms": room_label},
+        )
 
         year, month_num = map(int, month.split("-"))
         bill_month = date(year, month_num, 1)
@@ -733,6 +992,15 @@ def generate_and_download_view(request):
     if request.method == "POST":
         month = request.POST.get("month")
         room_ids = request.POST.getlist("rooms")
+        room_label = (
+            _("all rooms") if not room_ids else _("%(count)s room(s)") % {"count": len(room_ids)}
+        )
+        _admin_action_log(
+            request,
+            _("Generate and download bills %(month)s") % {"month": month},
+            _("Generate and download bills for %(month)s, %(rooms)s.")
+            % {"month": month, "rooms": room_label},
+        )
 
         year, month_num = map(int, month.split("-"))
         bill_month = date(year, month_num, 1)
@@ -809,6 +1077,15 @@ def bulk_download_view(request):
     if request.method == "POST":
         month = request.POST.get("month")
         room_ids = request.POST.getlist("rooms")
+        room_label = (
+            _("all rooms") if not room_ids else _("%(count)s room(s)") % {"count": len(room_ids)}
+        )
+        _admin_action_log(
+            request,
+            _("Download bills %(month)s") % {"month": month},
+            _("Download bills for %(month)s, %(rooms)s.")
+            % {"month": month, "rooms": room_label},
+        )
 
         year, month_num = map(int, month.split("-"))
         bill_month = date(year, month_num, 1)
