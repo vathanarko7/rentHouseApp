@@ -783,31 +783,61 @@
     position: fixed;
     inset: 0;
     z-index: 3000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: calc(10px + env(safe-area-inset-top))
+      10px calc(10px + env(safe-area-inset-bottom));
+  }
+  #invoice-preview-modal.is-open {
+    display: flex;
   }
   #invoice-preview-modal .preview-backdrop {
     position: absolute;
     inset: 0;
-    background: rgba(0, 0, 0, 0.55);
+    background: rgba(8, 12, 20, 0.62);
+    backdrop-filter: blur(8px);
   }
   #invoice-preview-modal .preview-panel {
     position: relative;
-    margin: 5vh auto;
-    width: min(900px, 90vw);
-    background: var(--body-bg, #fff);
-    border: 1px solid var(--border-color, #ddd);
-    border-radius: 8px;
-    padding: 12px;
-    max-height: 90vh;
+    width: min(1100px, 96vw);
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 14px;
+    max-height: 92vh;
     overflow: auto;
+    box-shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
   }
   #invoice-preview-modal img {
     width: 100%;
     height: auto;
     display: block;
+    border-radius: 10px;
   }
   #invoice-preview-modal .preview-close {
+    position: sticky;
+    top: 0;
     float: right;
-    margin-bottom: 8px;
+    margin: 0 0 10px 0;
+    background: #111827;
+    color: #fff;
+    border: 1px solid #1f2937;
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 600;
+  }
+  @media (max-width: 768px) {
+    #invoice-preview-modal .preview-panel {
+      width: calc(100vw - 12px);
+      max-height: calc(100vh - 12px);
+      padding: 10px;
+      border-radius: 12px;
+    }
+    #invoice-preview-modal .preview-close {
+      width: 100%;
+      text-align: center;
+    }
   }
 
   .preview-btn {
@@ -917,14 +947,18 @@
     var backdrop = modal.querySelector(".preview-backdrop");
 
     function close() {
+      modal.classList.remove("is-open");
       modal.style.display = "none";
+      document.body.classList.remove("preview-open");
       if (img) img.src = "";
     }
 
     function open(url) {
       if (!url || !img) return;
       img.src = url;
-      modal.style.display = "block";
+      modal.style.display = "flex";
+      modal.classList.add("is-open");
+      document.body.classList.add("preview-open");
     }
 
     document.addEventListener("click", function (e) {

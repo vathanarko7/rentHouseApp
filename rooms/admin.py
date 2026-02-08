@@ -243,14 +243,14 @@ class ClientProfileAdmin(admin.ModelAdmin):
         return actions
 
     def delete_queryset(self, request, queryset):
-        paid_qs = queryset.filter(status=MonthlyBill.Status.PAID)
-        if paid_qs.exists():
+        non_draft = queryset.exclude(status=MonthlyBill.Status.DRAFT)
+        if non_draft.exists():
             self.message_user(
                 request,
-                _("Paid invoices cannot be deleted."),
+                _("Only draft invoices can be deleted."),
                 level=messages.ERROR,
             )
-            queryset = queryset.exclude(status=MonthlyBill.Status.PAID)
+        queryset = queryset.filter(status=MonthlyBill.Status.DRAFT)
         super().delete_queryset(request, queryset)
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
@@ -1128,7 +1128,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return obj.status == MonthlyBill.Status.DRAFT
 
     def has_delete_permission(self, request, obj=None):
-        return not _is_tenant(request.user)
+        if _is_tenant(request.user):
+            return False
+        if obj is None:
+            return True
+        return obj.status == MonthlyBill.Status.DRAFT
 
     def response_delete(self, request, obj_display, obj_id):
         return redirect(reverse("admin:rooms_monthlybill_changelist"))

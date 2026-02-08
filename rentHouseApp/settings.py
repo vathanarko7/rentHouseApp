@@ -234,6 +234,6 @@ TELEGRAM_TEST_MESSAGE_TEMPLATE = "សួស្តីពីបន្ទប់ជ�
 # INVOICE_TEMPLATE_PATH = BASE_DIR / "rooms" / "templates" / "rooms" / "invoice_template.html"
 # INVOICE_OUTPUT_DIR = MEDIA_ROOT / "invoices"
 
-DEFAULT_KH_FONT_PATH = BASE_DIR / "rooms" / "fonts" / "Battambang-Regular.ttf"
+DEFAULT_KH_FONT_PATH = BASE_DIR / "rooms" / "fonts" / "NotoSansKhmer-Regular.ttf"
 
 
