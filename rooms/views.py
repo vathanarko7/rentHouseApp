@@ -627,12 +627,14 @@ def send_group_invoices_telegram_view(request):
         return _redirect_back(request)
 
     room_ids = request.POST.getlist("rooms")
-    bills = MonthlyBill.objects.filter(month=bill_month)
+    rooms_qs = Room.objects.all()
     if room_ids:
-        bills = bills.filter(room__id__in=room_ids)
+        rooms_qs = rooms_qs.filter(id__in=room_ids)
+    rooms = list(rooms_qs)
+    bills = MonthlyBill.objects.filter(month=bill_month, room__in=rooms)
 
-    if not bills.exists():
-        messages.warning(request, "No invoices found for the selected month.")
+    if not rooms:
+        messages.warning(request, _("No rooms found for the selected month."))
         return _redirect_back(request)
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
@@ -645,19 +647,47 @@ def send_group_invoices_telegram_view(request):
         return _redirect_back(request)
 
     items = []
-    skipped = 0
-    for bill in bills:
+    missing = []
+    draft_rooms = []
+
+    bills_by_room = {b.room_id: b for b in bills}
+    for room in rooms:
+        bill = bills_by_room.get(room.id)
+        if not bill:
+            missing.append(room.room_number)
+            continue
+        if bill.status == MonthlyBill.Status.DRAFT:
+            draft_rooms.append(room.room_number)
+            continue
         filename = _invoice_filename(bill, "kh")
         storage_path = _invoice_storage_path(bill, filename) if filename else ""
         if not filename or not default_storage.exists(storage_path):
-            skipped += 1
+            missing.append(room.room_number)
             continue
         with default_storage.open(storage_path, "rb") as f:
             data = f.read()
         items.append({"filename": filename, "bytes": data, "caption": ""})
 
+    if missing or draft_rooms:
+        if draft_rooms:
+            messages.error(
+                request,
+                _("Draft invoices found for rooms: %(rooms)s")
+                % {"rooms": ", ".join(draft_rooms)},
+            )
+        if missing:
+            messages.error(
+                request,
+                _("Missing invoice files for rooms: %(rooms)s")
+                % {"rooms": ", ".join(missing)},
+            )
+        messages.error(
+            request, _("No invoices were sent. Fix issues and try again.")
+        )
+        return _redirect_back(request)
+
     if not items:
-        messages.warning(request, "No invoice files found to send.")
+        messages.warning(request, _("No invoice files found to send."))
         return _redirect_back(request)
 
     with override("km"):
@@ -700,16 +730,12 @@ def send_group_invoices_telegram_view(request):
             args=(job.id, chat_id, token, items),
             daemon=True,
         ).start()
-        messages.success(request, "Sending invoices to Telegram group in background.")
-        if skipped:
-            messages.warning(
-                request, f"Skipped {skipped} invoice(s) with missing files."
-            )
+        messages.success(
+            request, _("Sending invoices to Telegram group in background.")
+        )
         return _redirect_back(request)
 
     _send_group_invoices_worker(job.id, chat_id, token, items)
-    if skipped:
-        messages.warning(request, f"Skipped {skipped} invoice(s) with missing files.")
     return _redirect_back(request)
 
 

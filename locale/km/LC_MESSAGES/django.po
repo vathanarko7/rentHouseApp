@@ -252,13 +252,39 @@ msgstr "ទាញយកវិក្កយបត្រ %(month)s"
 msgid "Download bills for %(month)s, %(rooms)s."
 msgstr "ទាញយកវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
 
+#: .\rooms\views.py
+msgid "No rooms found for the selected month."
+msgstr "រកមិនឃើញបន្ទប់សម្រាប់ខែដែលបានជ្រើសរើស"
+
+#: .\rooms\views.py
+#, python-format
+msgid "Draft invoices found for rooms: %(rooms)s"
+msgstr "មានវិក្កយបត្រព្រាងសម្រាប់បន្ទប់៖ %(rooms)s"
+
+#: .\rooms\views.py
+#, python-format
+msgid "Missing invoice files for rooms: %(rooms)s"
+msgstr "ខ្វះឯកសារវិក្កយបត្រសម្រាប់បន្ទប់៖ %(rooms)s"
+
+#: .\rooms\views.py
+msgid "No invoices were sent. Fix issues and try again."
+msgstr "មិនបានផ្ញើវិក្កយបត្របានទេ សូមផ្ទៀងផ្ទាត់ ហើយសាកល្បងម្តងទៀត"
+
+#: .\rooms\views.py
+msgid "No invoice files found to send."
+msgstr "រកមិនឃើញឯកសារវិក្កយបត្រសម្រាប់ផ្ញើ"
+
+#: .\rooms\views.py
+msgid "Sending invoices to Telegram group in background."
+msgstr "កំពុងផ្ញើវិក្កយបត្រទៅក្រុម Telegram នៅផ្ទៃខាងក្រោយ"
+
 #: .\rooms\admin.py:1236
 msgid "Alert / Job"
-msgstr ""
+msgstr "ព្រមាន / ការងារ"
 
 #: .\rooms\admin.py:1268
 msgid "Job"
-msgstr ""
+msgstr "ការងារផ្ទៃក្រោយ"
 
 #: .\rooms\admin.py:1273 .\rooms\models.py:28 .\rooms\models.py:57
 #: .\rooms\models.py:87
@@ -307,7 +333,7 @@ msgstr "ចេញវិក្កយបត្រនេះមែនទេ? រា�
 
 #: .\rooms\admin.py:1411
 msgid "Issue"
-msgstr "ចេញ"
+msgstr "ដាក់ចេញ"
 
 #: .\rooms\admin.py:1435
 msgid "Send this invoice to the tenant?"
@@ -331,7 +357,7 @@ msgstr "សម្គាល់វិក្កយបត្រនេះថាបា
 
 #: .\rooms\admin.py:1481
 msgid "Mark Paid"
-msgstr "សម្គាល់ថាបានបង់"
+msgstr "បង់លុយ"
 
 #: .\rooms\admin.py:1511 .\rooms\admin.py:1689
 #: .\templates\admin\app_list.html:7
@@ -824,7 +850,7 @@ msgstr "បង្កើត"
 #: .\templates\admin\rooms\change_list.html:254
 #: .\templates\admin\rooms\change_list.html:257
 msgid "Download Bills"
-msgstr "ទាញយកក្រុម"
+msgstr "ទាញយកម្តងច្រើន"
 
 #: .\templates\admin\rooms\change_list.html:255
 msgid "Download ZIP"
@@ -832,7 +858,7 @@ msgstr "ទាញយក ZIP"
 
 #: .\templates\admin\rooms\change_list.html:262
 msgid "Send via Telegram"
-msgstr "ផ្ញើក្រុម Telegram"
+msgstr "ផ្ញើទៅក្រុម Telegram"
 
 #: .\templates\admin\rooms\change_list.html:320
 msgid "Bulk Send"
@@ -1008,4 +1034,4 @@ msgstr "ភាសា"
 
 #: .\rooms\admin.py:212
 msgid "The tenant \"%(name)s\" was added successfully."
-msgstr "អ្នកជួល \"%(name)s\" ត្រូវបានបន្ថែមដោយជោគជ័យ។"
+msgstr "អ្នកជួល \"%(name)s\" ត្រូវបានបន្ថែមដោយជោគជ័យ"
