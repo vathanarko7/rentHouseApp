@@ -188,29 +188,53 @@ class MonthlyBill(models.Model):
         SENT = "sent", _("Sent")
         PAID = "paid", _("Paid")
 
-    room = models.ForeignKey(Room, on_delete=models.CASCADE, related_name="bills")
+    room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, related_name="bills", verbose_name=_("Room")
+    )
 
-    month = models.DateField()
+    month = models.DateField(verbose_name=_("Month"))
 
-    room_cost = models.DecimalField(max_digits=12, decimal_places=2)
-    water_cost = models.DecimalField(max_digits=12, decimal_places=2)
-    electricity_cost = models.DecimalField(max_digits=12, decimal_places=2)
-    total = models.DecimalField(max_digits=14, decimal_places=2)
+    room_cost = models.DecimalField(
+        max_digits=12, decimal_places=2, verbose_name=_("Room cost")
+    )
+    water_cost = models.DecimalField(
+        max_digits=12, decimal_places=2, verbose_name=_("Water cost")
+    )
+    electricity_cost = models.DecimalField(
+        max_digits=12, decimal_places=2, verbose_name=_("Electricity cost")
+    )
+    total = models.DecimalField(
+        max_digits=14, decimal_places=2, verbose_name=_("Total")
+    )
     status = models.CharField(
         max_length=10, choices=Status.choices, default=Status.DRAFT, verbose_name=_("Status")
     )
-    issued_at = models.DateTimeField(null=True, blank=True)
-    sent_at = models.DateTimeField(null=True, blank=True)
-    paid_at = models.DateTimeField(null=True, blank=True)
-    async_job_pending = models.BooleanField(default=False)
-    async_job_type = models.CharField(max_length=32, blank=True, default="")
-    data_note = models.CharField(max_length=100, blank=True, default="")
-    tenant_name_snapshot = models.CharField(max_length=150, blank=True, default="")
-    last_job_status = models.CharField(max_length=12, blank=True, default="")
-    last_job_message = models.CharField(max_length=255, blank=True, default="")
-    last_job_at = models.DateTimeField(null=True, blank=True)
+    issued_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Issued at"))
+    sent_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Sent at"))
+    paid_at = models.DateTimeField(null=True, blank=True, verbose_name=_("Paid at"))
+    async_job_pending = models.BooleanField(
+        default=False, verbose_name=_("Async job pending")
+    )
+    async_job_type = models.CharField(
+        max_length=32, blank=True, default="", verbose_name=_("Async job type")
+    )
+    data_note = models.CharField(
+        max_length=100, blank=True, default="", verbose_name=_("Data note")
+    )
+    tenant_name_snapshot = models.CharField(
+        max_length=150, blank=True, default="", verbose_name=_("Tenant name snapshot")
+    )
+    last_job_status = models.CharField(
+        max_length=12, blank=True, default="", verbose_name=_("Last job status")
+    )
+    last_job_message = models.CharField(
+        max_length=255, blank=True, default="", verbose_name=_("Last job message")
+    )
+    last_job_at = models.DateTimeField(
+        null=True, blank=True, verbose_name=_("Last job at")
+    )
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name=_("Created at"))
 
     class Meta:
         unique_together = ("room", "month")

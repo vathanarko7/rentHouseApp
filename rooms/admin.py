@@ -192,14 +192,14 @@ class ClientProfileAdmin(admin.ModelAdmin):
         ),
     )
     list_display = (
-        "user",
-        "sex",
-        "email",
-        "phone",
+        "user_col",
+        "sex_col",
+        "email_col",
+        "phone_col",
         "telegram_test_action",
-        "id_card_number",
-        "enter_date",
-        "exit_date",
+        "id_card_number_col",
+        "enter_date_col",
+        "exit_date_col",
     )
     search_fields = ("user__username", "phone", "id_card_number")
 
@@ -269,6 +269,34 @@ class ClientProfileAdmin(admin.ModelAdmin):
         return user.email if user else ""
 
     email.short_description = _("Email")
+
+    @admin.display(description=_("User"))
+    def user_col(self, obj):
+        return obj.user.username if obj.user else ""
+
+    @admin.display(description=_("Sex"))
+    def sex_col(self, obj):
+        return obj.get_sex_display() if obj.sex else ""
+
+    @admin.display(description=_("Email"))
+    def email_col(self, obj):
+        return self.email(obj)
+
+    @admin.display(description=_("Phone"))
+    def phone_col(self, obj):
+        return obj.phone or ""
+
+    @admin.display(description=_("Id card number"))
+    def id_card_number_col(self, obj):
+        return obj.id_card_number or ""
+
+    @admin.display(description=_("Enter date"))
+    def enter_date_col(self, obj):
+        return obj.enter_date
+
+    @admin.display(description=_("Exit date"))
+    def exit_date_col(self, obj):
+        return obj.exit_date
 
     def telegram_test_action(self, obj):
         request = getattr(self, "_request", None)
@@ -612,7 +640,7 @@ class UnitPriceAdmin(admin.ModelAdmin):
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
 
-    month_year.short_description = "Month"
+    month_year.short_description = _("Month")
 
     def has_module_permission(self, request):
         return not _is_tenant(request.user)
@@ -650,12 +678,12 @@ class WaterAdmin(admin.ModelAdmin):
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
 
-    month_year.short_description = "Month"
+    month_year.short_description = _("Month")
 
     def room_name(self, obj):
         return obj.room.room_number
 
-    room_name.short_description = "Room"
+    room_name.short_description = _("Room")
 
     def get_list_filter(self, request):
         if _is_tenant(request.user):
@@ -762,12 +790,12 @@ class ElectricityAdmin(admin.ModelAdmin):
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
 
-    month_year.short_description = "Month"
+    month_year.short_description = _("Month")
 
     def room_name(self, obj):
         return obj.room.room_number
 
-    room_name.short_description = "Room"
+    room_name.short_description = _("Room")
 
     def get_list_filter(self, request):
         if _is_tenant(request.user):
@@ -867,7 +895,7 @@ class ElectricityAdmin(admin.ModelAdmin):
 class MonthlyBillAdmin(admin.ModelAdmin):
     list_display = (
         "month_year",
-        "room",
+        "room_col",
         "renter",
         "alert_job",
         "status_badge",
@@ -1208,7 +1236,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             )
         return format_html(
             '<span class="alert-badge" title="{}" data-alert-details="{}">{}</span>{}',
-            tooltip,
+            _("Click to see details"),
             detail_text,
             summary,
             format_html(icon_html, tooltip, detail_text) if icon_html else "",
@@ -1305,7 +1333,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     def status_badge(self, obj):
         color_map = {
-            MonthlyBill.Status.DRAFT: "#f59e0b",
+            MonthlyBill.Status.DRAFT: "#9ca3af",
             MonthlyBill.Status.ISSUED: "#3b82f6",
             MonthlyBill.Status.SENT: "#8b5cf6",
             MonthlyBill.Status.PAID: "#10b981",
@@ -1329,11 +1357,17 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     def status_date(self, obj):
         if obj.status == MonthlyBill.Status.ISSUED and obj.issued_at:
-            return date_format(obj.issued_at, "SHORT_DATETIME_FORMAT")
+            return date_format(
+                timezone.localtime(obj.issued_at), "SHORT_DATETIME_FORMAT"
+            )
         if obj.status == MonthlyBill.Status.SENT and obj.sent_at:
-            return date_format(obj.sent_at, "SHORT_DATETIME_FORMAT")
+            return date_format(
+                timezone.localtime(obj.sent_at), "SHORT_DATETIME_FORMAT"
+            )
         if obj.status == MonthlyBill.Status.PAID and obj.paid_at:
-            return date_format(obj.paid_at, "SHORT_DATETIME_FORMAT")
+            return date_format(
+                timezone.localtime(obj.paid_at), "SHORT_DATETIME_FORMAT"
+            )
         return ""
 
     status_date.short_description = _("Status date")
@@ -1342,6 +1376,10 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return date_format(obj.month, "F Y")
 
     month_year.short_description = _("Month")
+
+    @admin.display(description=_("Room"))
+    def room_col(self, obj):
+        return obj.room
 
     def get_urls(self):
         urls = super().get_urls()
@@ -1419,17 +1457,24 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             and not missing_data
             and obj.status == MonthlyBill.Status.DRAFT
         ):
+            regen_confirm = _("Re-generate this invoice? This will overwrite the current draft.")
+            regen_label = _("Re-generate")
             regen_link = format_html(
-                '<a class="button regen-btn btn-sm" href="{}" aria-label="{}" title="{}">'
+                '<a class="button regen-btn btn-sm" href="{}" '
+                'data-confirm-message="{}" data-confirm-kind="regen" data-confirm-label="{}" '
+                'aria-label="{}" title="{}">'
                 '<span class="btn-icon" aria-hidden="true">'
                 '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
                 '</span>'
                 '<span class="btn-label">{}</span>'
                 '</a> ',
                 reverse("admin:rooms_monthlybill_regenerate_invoice", args=[obj.id]),
-                _("Re-generate"),
-                _("Re-generate"),
-                _("Re-generate"),
+                regen_confirm,
+                regen_label,
+                regen_label,
+                regen_label,
+                regen_label,
+                regen_label,
             )
         issue_link = ""
         if (

@@ -1,5 +1,6 @@
 from playwright.sync_api import sync_playwright
 from rooms.invoice_i18n import INVOICE_LANGUAGES
+from django.utils.formats import number_format
 
 # from PIL import Image, ImageDraw, ImageFont
 from datetime import date
@@ -58,6 +59,9 @@ def generate_invoice_image(
     # A4 landscape at 96 DPI
     a4_width = 1123
     a4_height = 794
+
+    def fmt_money(value, decimals=0):
+        return number_format(value, decimal_pos=decimals, use_l10n=True, force_grouping=True)
 
     html_content = f"""
     <!DOCTYPE html>
@@ -210,8 +214,8 @@ def generate_invoice_image(
             <td>{T["room_fee"]}</td>
             <td></td><td></td>
             <td class="right">1</td>
-            <td class="right">{bill.room.price}$</td>
-            <td class="right">{bill.room.price}$</td>
+            <td class="right">{fmt_money(bill.room.price, 2)}$</td>
+            <td class="right">{fmt_money(bill.room.price, 2)}$</td>
         </tr>
 
         <tr>
@@ -219,8 +223,8 @@ def generate_invoice_image(
             <td class="right">{water_previous.meter_value:04}</td>
             <td class="right">{water_current.meter_value:04}</td>
             <td class="right">{water_usage:04}</td>
-            <td class="right">{unit_price.water_unit_price:,.0f}៛</td>
-            <td class="right">{bill.water_cost:,.0f}៛</td>
+            <td class="right">{fmt_money(unit_price.water_unit_price, 0)}៛</td>
+            <td class="right">{fmt_money(bill.water_cost, 0)}៛</td>
         </tr>
 
         <tr>
@@ -228,8 +232,8 @@ def generate_invoice_image(
             <td class="right">{elec_previous.meter_value:05}</td>
             <td class="right">{elec_current.meter_value:05}</td>
             <td class="right">{elec_usage:05}</td>
-            <td class="right">{unit_price.electricity_unit_price:,.0f}៛</td>
-            <td class="right">{bill.electricity_cost:,.0f}៛</td>
+            <td class="right">{fmt_money(unit_price.electricity_unit_price, 0)}៛</td>
+            <td class="right">{fmt_money(bill.electricity_cost, 0)}៛</td>
         </tr>
     </table>
 
@@ -245,13 +249,13 @@ def generate_invoice_image(
         <tr>
             <td colspan="4" style="font-style: italic;">{T["note"]}</td>
             <td class="right total">{T["total"]}</td>
-            <td class="right total">{bill.total/unit_price.exchange_rate:,.2f}$</td>
+            <td class="right total">{fmt_money(bill.total/unit_price.exchange_rate, 2)}$</td>
         </tr>
 
         <tr>
             <td colspan="4"></td>
             <td class="right total">{T["total_khr"]}</td>
-            <td class="right total">{bill.total:,.0f}៛</td>
+            <td class="right total">{fmt_money(bill.total, 0)}៛</td>
         </tr>
     </table>
 

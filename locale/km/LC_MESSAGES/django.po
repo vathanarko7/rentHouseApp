@@ -213,6 +213,10 @@ msgstr "ផ្ញើអស់"
 msgid "Completed with errors"
 msgstr "ផ្ញើអស់តែមានបញ្ហា"
 
+#: .\rooms\admin.py
+msgid "Re-generate this invoice? This will overwrite the current draft."
+msgstr "បង្កើតវិក្កយបត្រឡើងវិញ? វានឹងជំនួសវិក្កយបត្រព្រាងបច្ចុប្បន្ន។"
+
 #: .\rooms\views.py
 msgid "all rooms"
 msgstr "បន្ទប់ទាំងអស់"
@@ -953,6 +957,71 @@ msgstr "បន្ថែមបន្ទប់"
 msgid "Select water to change"
 msgstr "ជ្រើសរើស​ អំនានទឹក ដើម្បីកែ"
 
+#: .\django\contrib\admin\views\main.py:152
+#, python-format
+msgid "Select %s to view"
+msgstr "ជ្រើសរើស %s ដើម្បីមើល"
+
+#: .\rooms\admin.py
+msgid "Click to see details"
+msgstr "ចុចដើម្បីមើលព័ត៌មានលម្អិត"
+
+#: .\rooms\models.py
+msgid "Room cost"
+msgstr "ថ្លៃបន្ទប់"
+
+#: .\rooms\models.py
+msgid "Water cost"
+msgstr "ថ្លៃទឹក"
+
+#: .\rooms\models.py
+msgid "Electricity cost"
+msgstr "ថ្លៃអគ្គិសនី"
+
+#: .\rooms\models.py
+msgid "Issued at"
+msgstr "បានចេញនៅ"
+
+#: .\rooms\models.py
+msgid "Sent at"
+msgstr "បានផ្ញើនៅ"
+
+#: .\rooms\models.py
+msgid "Paid at"
+msgstr "បានបង់នៅ"
+
+#: .\rooms\models.py
+msgid "Async job pending"
+msgstr "ការងារ async កំពុងរង់ចាំ"
+
+#: .\rooms\models.py
+msgid "Async job type"
+msgstr "ប្រភេទការងារ async"
+
+#: .\rooms\models.py
+msgid "Data note"
+msgstr "កំណត់ចំណាំទិន្នន័យ"
+
+#: .\rooms\models.py
+msgid "Tenant name snapshot"
+msgstr "ឈ្មោះអ្នកជួល (ថតទុក)"
+
+#: .\rooms\models.py
+msgid "Last job status"
+msgstr "ស្ថានភាពការងារចុងក្រោយ"
+
+#: .\rooms\models.py
+msgid "Last job message"
+msgstr "សារការងារចុងក្រោយ"
+
+#: .\rooms\models.py
+msgid "Last job at"
+msgstr "ពេលវេលាការងារចុងក្រោយ"
+
+#: .\rooms\models.py
+msgid "Created at"
+msgstr "បានបង្កើតនៅ"
+
 #: .\templates\admin\rooms\water\change_list.html:12
 msgid "Add water"
 msgstr "បន្ថែមអំនានទឹក"
@@ -989,48 +1058,6 @@ msgstr "ភាសា"
 
 #~ msgid "ID"
 #~ msgstr "លេខសម្គាល់"
-
-#~ msgid "Room cost"
-#~ msgstr "ថ្លៃបន្ទប់សរុប"
-
-#~ msgid "Water cost"
-#~ msgstr "តម្លៃទឹកសរុប"
-
-#~ msgid "Electricity cost"
-#~ msgstr "ថ្លៃអគ្គិសនីសរុប"
-
-#~ msgid "Issued at"
-#~ msgstr "កាលបរិច្ឆេទចេញបញ្ជី"
-
-#~ msgid "Sent at"
-#~ msgstr "កាលបរិច្ឆេទផ្ញើ"
-
-#~ msgid "Paid at"
-#~ msgstr "កាលបរិច្ឆេទបង់"
-
-#~ msgid "Async job pending"
-#~ msgstr "ការងារប្រព័ន្ធកំពុងរង់ចាំ"
-
-#~ msgid "Async job type"
-#~ msgstr "ប្រភេទការងារប្រព័ន្ធ"
-
-#~ msgid "Data note"
-#~ msgstr "កំណត់សម្គាល់ទិន្នន័យ"
-
-#~ msgid "Tenant name snapshot"
-#~ msgstr "ឈ្មោះអ្នកជួល (បានរក្សាទុក)"
-
-#~ msgid "Last job status"
-#~ msgstr "ស្ថានភាពប្រតិបត្តិការចុងក្រោយ"
-
-#~ msgid "Last job message"
-#~ msgstr "សារប្រតិបត្តិការចុងក្រោយ"
-
-#~ msgid "Last job at"
-#~ msgstr "ប្រតិបត្តិការចុងក្រោយ"
-
-#~ msgid "Created at"
-#~ msgstr "ថ្ងៃបង្កើត"
 
 #: .\rooms\admin.py:212
 msgid "The tenant \"%(name)s\" was added successfully."

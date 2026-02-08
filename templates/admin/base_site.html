@@ -499,19 +499,40 @@
     color: #fff;
   }
   .confirm-modal__actions .confirm-ok.confirm-issue {
-    background: #f59e0b;
-    border-color: #d97706;
+    background: #3b82f6;
+    border-color: #1d4ed8;
     color: #fff;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-issue:hover {
+    background: #2563eb;
+    border-color: #1d4ed8;
   }
   .confirm-modal__actions .confirm-ok.confirm-send {
     background: #8b5cf6;
     border-color: #7c3aed;
     color: #fff;
   }
+  .confirm-modal__actions .confirm-ok.confirm-send:hover {
+    background: #7c3aed;
+    border-color: #6d28d9;
+  }
   .confirm-modal__actions .confirm-ok.confirm-paid {
     background: #10b981;
     border-color: #059669;
     color: #fff;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-paid:hover {
+    background: #059669;
+    border-color: #047857;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-regen {
+    background: #f59e0b;
+    border-color: #d97706;
+    color: #fff;
+  }
+  .confirm-modal__actions .confirm-ok.confirm-regen:hover {
+    background: #d97706;
+    border-color: #b45309;
   }
   .mobile-bottom-nav {
     display: none;
@@ -600,6 +621,7 @@
     color: #fff;
     font-size: 12px;
     line-height: 1.2;
+    cursor: pointer;
   }
   .alert-info-icon {
     display: none;
@@ -1295,7 +1317,12 @@
       var customLabel = opts && opts.label;
       okBtn.textContent = customLabel ? customLabel : (isDelete ? deleteLabel : confirmLabel);
       okBtn.classList.toggle("confirm-delete", !!isDelete);
-      okBtn.classList.remove("confirm-issue", "confirm-send", "confirm-paid");
+      okBtn.classList.remove(
+        "confirm-issue",
+        "confirm-send",
+        "confirm-paid",
+        "confirm-regen"
+      );
       if (opts && opts.kind) {
         okBtn.classList.add("confirm-" + opts.kind);
       }
