@@ -1,8 +1,8 @@
 INVOICE_LANGUAGES = {
     "kh": {
         "suffix": "kh",
-        "font": "KhmerOS",
-        "font_fallback": "sans-serif",
+        "font": "NotoSansKhmer-Regular",
+        "font_fallback": "'Noto Sans Khmer', sans-serif",
         "texts": {
             "invoice": "វិក័យប័ត្រ",
             "from_date": "ពីថ្ងៃ :",

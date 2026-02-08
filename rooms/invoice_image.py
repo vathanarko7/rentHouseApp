@@ -66,7 +66,7 @@ def generate_invoice_image(
     <meta charset="utf-8">
     <style>
         @font-face {{
-            font-family: 'InvoiceFont';
+            font-family: '{lang["font"]}';
             src: url("file:///{font_url}");
         }}
         @page {{
@@ -80,7 +80,7 @@ def generate_invoice_image(
             padding: 0;
         }}
         body {{
-            font-family: 'InvoiceFont', {lang["font_fallback"]};
+            font-family: '{lang["font"]}', {lang["font_fallback"]};
             font-size: 16px;
             padding: 40px;
             box-sizing: border-box;
