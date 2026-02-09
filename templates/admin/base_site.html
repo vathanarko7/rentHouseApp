@@ -428,33 +428,22 @@
   #header a:hover {
     color: #ffffff;
   }
-  .submit-row a.close-btn {
-    margin-right: auto;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: #6b7280 !important;
-    border-color: #4b5563 !important;
-    color: #fff !important;
-    text-align: center;
-    line-height: 1;
-  }
-  .submit-row a.close-btn:hover,
-  .submit-row a.close-btn:focus,
-  .submit-row a.close-btn:active {
-    background: #4b5563 !important;
-    border-color: #4b5563 !important;
-    color: #fff !important;
-  }
   @media (max-width: 640px) {
-    .submit-row .close-btn {
-      order: -1;
-      width: 100%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 0 8px 0;
+    .submit-row {
+      overflow: visible;
     }
+  }
+  .submit-row .close-btn {
+    background: #333333 !important;
+    border-color: #333333 !important;
+    color: #fff !important;
+  }
+  .submit-row .close-btn:hover,
+  .submit-row .close-btn:focus,
+  .submit-row .close-btn:active {
+    background: #1f1f1f !important;
+    border-color: #1f1f1f !important;
+    color: #fff !important;
   }
   #user-tools {
     color: #e8f1f6;
