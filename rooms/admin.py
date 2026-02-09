@@ -15,6 +15,7 @@ from django.utils.formats import date_format
 from django.shortcuts import redirect
 from django.conf import settings
 from django.utils import timezone
+from django.utils.formats import number_format
 import os
 from django import forms
 from rooms.models import (
@@ -429,7 +430,14 @@ class RoomHistoryInline(admin.TabularInline):
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
     inlines = (RoomHistoryInline,)
-    list_display = ("room_number", "renter_name", "price")
+    list_display = (
+        "room_number",
+        "occupancy_status",
+        "renter_name",
+        "tenant_phone",
+        "current_bill_status",
+        "price_usd",
+    )
     search_fields = (
         "room_number",
         "renter__username",
@@ -502,6 +510,33 @@ class RoomAdmin(admin.ModelAdmin):
         return "-"
 
     renter_name.short_description = _("Renter")
+
+    @admin.display(description=_("Status"))
+    def occupancy_status(self, obj):
+        return _("Occupied") if obj.renter else _("Vacant")
+
+    @admin.display(description=_("Phone"))
+    def tenant_phone(self, obj):
+        renter = obj.renter
+        if not renter:
+            return "-"
+        return getattr(getattr(renter, "client_profile", None), "phone", None) or "-"
+
+    @admin.display(description=_("Bill status"))
+    def current_bill_status(self, obj):
+        bill = (
+            MonthlyBill.objects.filter(room=obj)
+            .order_by("-month")
+            .only("status")
+            .first()
+        )
+        if not bill:
+            return "-"
+        return bill.get_status_display()
+
+    @admin.display(description=_("Price (USD)"))
+    def price_usd(self, obj):
+        return f"{number_format(obj.price, decimal_pos=2, use_l10n=True, force_grouping=True)} $"
 
     def has_module_permission(self, request):
         return not _is_tenant(request.user)
@@ -625,13 +660,63 @@ class ReadingMonthFilter(SimpleListFilter):
         return queryset.filter(date__year=year, date__month=month)
 
 
+class UnitPriceAdminForm(forms.ModelForm):
+    water_unit_price = forms.DecimalField(
+        decimal_places=0,
+        max_digits=10,
+        localize=False,
+        widget=forms.NumberInput(attrs={"step": "1"}),
+    )
+    electricity_unit_price = forms.DecimalField(
+        decimal_places=0,
+        max_digits=10,
+        localize=False,
+        widget=forms.NumberInput(attrs={"step": "1"}),
+    )
+    exchange_rate = forms.DecimalField(
+        decimal_places=0,
+        max_digits=10,
+        localize=False,
+        widget=forms.NumberInput(attrs={"step": "1"}),
+    )
+
+    class Meta:
+        model = UnitPrice
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name, field in self.fields.items():
+            model_field = UnitPrice._meta.get_field(name)
+            field.label = model_field.verbose_name
+        if self.instance and self.instance.pk:
+            for name in ("water_unit_price", "electricity_unit_price", "exchange_rate"):
+                value = getattr(self.instance, name, None)
+                if value is None:
+                    continue
+                self.initial[name] = int(value)
+
+    def clean_water_unit_price(self):
+        value = self.cleaned_data.get("water_unit_price")
+        return int(value) if value is not None else value
+
+    def clean_electricity_unit_price(self):
+        value = self.cleaned_data.get("electricity_unit_price")
+        return int(value) if value is not None else value
+
+    def clean_exchange_rate(self):
+        value = self.cleaned_data.get("exchange_rate")
+        return int(value) if value is not None else value
+
+
 @admin.register(UnitPrice)
 class UnitPriceAdmin(admin.ModelAdmin):
+    form = UnitPriceAdminForm
     list_display = (
         "month_year",
-        "water_unit_price",
-        "electricity_unit_price",
-        "exchange_rate",
+        "water_unit_price_khr",
+        "electricity_unit_price_khr",
+        "exchange_rate_fmt",
     )
     list_filter = (ReadingMonthFilter,)
     search_fields = ("date",)
@@ -641,6 +726,21 @@ class UnitPriceAdmin(admin.ModelAdmin):
         return date_format(obj.date, "F Y")
 
     month_year.short_description = _("Month")
+
+    def _format_khr(self, value, decimals=0):
+        return f"{number_format(value, decimal_pos=decimals, use_l10n=True, force_grouping=True)} ៛"
+
+    @admin.display(description=_("Water unit price"))
+    def water_unit_price_khr(self, obj):
+        return self._format_khr(obj.water_unit_price)
+
+    @admin.display(description=_("Electricity unit price"))
+    def electricity_unit_price_khr(self, obj):
+        return self._format_khr(obj.electricity_unit_price)
+
+    @admin.display(description=_("USD→KHR rate"))
+    def exchange_rate_fmt(self, obj):
+        return number_format(obj.exchange_rate, decimal_pos=0, use_l10n=True, force_grouping=True)
 
     def has_module_permission(self, request):
         return not _is_tenant(request.user)
@@ -669,7 +769,7 @@ class UnitPriceAdmin(admin.ModelAdmin):
 
 @admin.register(Water)
 class WaterAdmin(admin.ModelAdmin):
-    list_display = ("month_year", "room", "meter_value")
+    list_display = ("month_year", "room", "meter_value_m3")
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
@@ -679,6 +779,15 @@ class WaterAdmin(admin.ModelAdmin):
         return date_format(obj.date, "F Y")
 
     month_year.short_description = _("Month")
+
+    @admin.display(description=_("Meter value (m³)"))
+    def meter_value_m3(self, obj):
+        return obj.meter_value
+
+    def get_list_display(self, request):
+        if _is_tenant(request.user):
+            return ("month_year", "room_name", "meter_value_m3")
+        return ("month_year", "room", "meter_value_m3")
 
     def room_name(self, obj):
         return obj.room.room_number
@@ -781,7 +890,7 @@ class WaterAdmin(admin.ModelAdmin):
 
 @admin.register(Electricity)
 class ElectricityAdmin(admin.ModelAdmin):
-    list_display = ("month_year", "room", "meter_value")
+    list_display = ("month_year", "room", "meter_value_kwh")
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
@@ -791,6 +900,15 @@ class ElectricityAdmin(admin.ModelAdmin):
         return date_format(obj.date, "F Y")
 
     month_year.short_description = _("Month")
+
+    @admin.display(description=_("Meter value (kWh)"))
+    def meter_value_kwh(self, obj):
+        return obj.meter_value
+
+    def get_list_display(self, request):
+        if _is_tenant(request.user):
+            return ("month_year", "room_name", "meter_value_kwh")
+        return ("month_year", "room", "meter_value_kwh")
 
     def room_name(self, obj):
         return obj.room.room_number
@@ -930,7 +1048,36 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         return True
 
     def get_readonly_fields(self, request, obj=None):
-        return [field.name for field in self.model._meta.fields]
+        return self.get_fields(request, obj)
+
+    def _format_khr(self, value, decimals=0):
+        return f"{number_format(value, decimal_pos=decimals, use_l10n=True, force_grouping=True)} ៛"
+
+    @admin.display(description=_("Room cost"))
+    def room_cost_khr(self, obj):
+        return self._format_khr(obj.room_cost)
+
+    @admin.display(description=_("Water cost"))
+    def water_cost_khr(self, obj):
+        return self._format_khr(obj.water_cost)
+
+    @admin.display(description=_("Electricity cost"))
+    def electricity_cost_khr(self, obj):
+        return self._format_khr(obj.electricity_cost)
+
+    @admin.display(description=_("Total"))
+    def total_khr(self, obj):
+        return self._format_khr(obj.total)
+
+    def get_fields(self, request, obj=None):
+        fields = [field.name for field in self.model._meta.fields]
+        replacements = {
+            "room_cost": "room_cost_khr",
+            "water_cost": "water_cost_khr",
+            "electricity_cost": "electricity_cost_khr",
+            "total": "total_khr",
+        }
+        return [replacements.get(name, name) for name in fields]
 
     def changeform_view(self, request, object_id=None, form_url="", extra_context=None):
         extra_context = extra_context or {}
@@ -1325,9 +1472,9 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         if obj.data_note:
             return format_html(
                 '<span title="{}">N/A</span>',
-                "Missing data for this bill",
+                _("Missing data for this bill"),
             )
-        return obj.total
+        return self._format_khr(obj.total)
 
     total_display.short_description = _("Total")
 
@@ -1887,7 +2034,7 @@ def dashboard_view(request):
         for row in qs:
             if not row["m"]:
                 continue
-            labels.append(row["m"].strftime("%B %Y"))
+            labels.append(date_format(row["m"], "F Y"))
             values.append(float(row["total"] or 0))
         return labels, values
 

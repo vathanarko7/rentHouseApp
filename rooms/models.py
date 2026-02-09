@@ -58,7 +58,7 @@ class Water(models.Model):
         Room, on_delete=models.CASCADE, related_name="waters", verbose_name=_("Room")
     )
     date = models.DateField(default=first_day_of_current_month, verbose_name=_("Date"))
-    meter_value = models.PositiveIntegerField(verbose_name=_("Meter value"))
+    meter_value = models.PositiveIntegerField(verbose_name=_("Meter value (m³)"))
 
     is_initial = models.BooleanField(
         default=False,
@@ -88,7 +88,7 @@ class Electricity(models.Model):
         verbose_name=_("Room"),
     )
     date = models.DateField(default=first_day_of_current_month, verbose_name=_("Date"))
-    meter_value = models.PositiveIntegerField(verbose_name=_("Meter value"))
+    meter_value = models.PositiveIntegerField(verbose_name=_("Meter value (kWh)"))
 
     is_initial = models.BooleanField(
         default=False,
@@ -121,13 +121,13 @@ class UnitPrice(models.Model):
         max_digits=10,
         decimal_places=2,
         default=2000,
-        verbose_name=_("Water unit price"),
+        verbose_name=_("Water unit price (៛/m³)"),
     )
     electricity_unit_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         default=1000,
-        verbose_name=_("Electricity unit price"),
+        verbose_name=_("Electricity unit price (៛/kWh)"),
     )
 
     exchange_rate = models.DecimalField(
@@ -135,7 +135,7 @@ class UnitPrice(models.Model):
         decimal_places=6,
         default=4000,
         help_text=_("Exchange rate USD to KHR"),
-        verbose_name=_("Exchange rate"),
+        verbose_name=_("Exchange rate (USD→KHR)"),
     )
 
     class Meta:

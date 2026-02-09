@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from django.utils.translation import gettext_lazy as _
 import os
 
 
@@ -154,9 +155,9 @@ FORMAT_MODULE_PATH = ["rentHouseApp.formats"]
 USE_THOUSAND_SEPARATOR = True
 
 LANGUAGES = [
-    ("en", "English"),
-    ("fr", "Français"),
-    ("km", "Khmer"),
+    ("en", _("English")),
+    ("fr", _("French")),
+    ("km", _("Khmer")),
 ]
 
 LOCALE_PATHS = [

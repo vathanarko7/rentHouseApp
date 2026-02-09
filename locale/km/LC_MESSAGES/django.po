@@ -217,6 +217,10 @@ msgstr "ផ្ញើអស់តែមានបញ្ហា"
 msgid "Re-generate this invoice? This will overwrite the current draft."
 msgstr "បង្កើតវិក្កយបត្រឡើងវិញ? វានឹងជំនួសវិក្កយបត្រព្រាងបច្ចុប្បន្ន។"
 
+#: .\templates\admin\base_site.html
+msgid "Menu"
+msgstr "ម៉ឺនុយ"
+
 #: .\rooms\views.py
 msgid "all rooms"
 msgstr "បន្ទប់ទាំងអស់"
@@ -444,6 +448,14 @@ msgstr "កាលបរិច្ឆេទ"
 msgid "Meter value"
 msgstr "អំនានកុងទ័រ"
 
+#: .\rooms\admin.py
+msgid "Meter value (m³)"
+msgstr "អំនាន (m³)"
+
+#: .\rooms\admin.py
+msgid "Meter value (kWh)"
+msgstr "អំនាន (kWh)"
+
 #: .\rooms\models.py:64 .\rooms\models.py:94
 msgid "Initial meter reading at move-in"
 msgstr "ការអានម៉ែត្រដំបូងនៅពេលចូល"
@@ -478,9 +490,17 @@ msgstr "ថ្ងៃដំបូងនៃខែ"
 msgid "Water unit price"
 msgstr "តម្លៃឯកតាទឹក"
 
+#: .\rooms\models.py
+msgid "Water unit price (៛/m³)"
+msgstr "តម្លៃឯកតាទឹក (៛/m³)"
+
 #: .\rooms\models.py:129
 msgid "Electricity unit price"
 msgstr "តម្លៃឯកតាអគ្គិសនី"
+
+#: .\rooms\models.py
+msgid "Electricity unit price (៛/kWh)"
+msgstr "តម្លៃឯកតាអគ្គិសនី (៛/kWh)"
 
 #: .\rooms\models.py:136
 msgid "Exchange rate USD to KHR"
@@ -489,6 +509,14 @@ msgstr "អត្រាប្តូរប្រាក់ USD ទៅ KHR"
 #: .\rooms\models.py:137
 msgid "Exchange rate"
 msgstr "អត្រាប្តូរប្រាក់"
+
+#: .\rooms\models.py
+msgid "Exchange rate (USD→KHR)"
+msgstr "អត្រាប្តូរ USD→KHR"
+
+#: .\rooms\admin.py
+msgid "USD→KHR rate"
+msgstr "អត្រាប្តូរ USD→KHR"
 
 #: .\rooms\models.py:142
 msgid "Unit Price"
@@ -891,7 +919,7 @@ msgstr "បង្កើតវិក្កយបត្រប្រចាំខែ
 
 #: .\templates\admin\rooms\change_list.html:549
 msgid "Pick a month and rooms, then run the action."
-msgstr "ជ្រើសខែ និងបន្ទប់ រួចចុចបង្កើត ដើម្បីព្រាងវិក្កយបត្រ"
+msgstr "ជ្រើសខែ និងបន្ទប់ រួចចុចប៊ូតុង"
 
 #: .\templates\admin\rooms\change_list.html:556
 msgid "Month:"
@@ -965,6 +993,50 @@ msgstr "ជ្រើសរើស %s ដើម្បីមើល"
 #: .\rooms\admin.py
 msgid "Click to see details"
 msgstr "ចុចដើម្បីមើលព័ត៌មានលម្អិត"
+
+#: .\rooms\admin.py
+msgid "Missing data for this bill"
+msgstr "ខ្វះទិន្នន័យសម្រាប់វិក្កយបត្រនេះ"
+
+#: .\templates\admin\base_site.html
+msgid "Dashboard"
+msgstr "ផ្ទាំងគ្រប់គ្រង"
+
+#: .\rooms\admin.py
+msgid "Occupied"
+msgstr "មានអ្នកជួល"
+
+#: .\rooms\admin.py
+msgid "Vacant"
+msgstr "ទំនេរ"
+
+#: .\rooms\admin.py
+msgid "Bill status"
+msgstr "ស្ថានភាពវិក្កយបត្រ"
+
+#: .\rooms\admin.py
+msgid "Price (USD)"
+msgstr "តម្លៃ (USD)"
+
+#: .\rentHouseApp\settings.py
+msgid "English"
+msgstr "អង់គ្លេស"
+
+#: .\rentHouseApp\settings.py
+msgid "French"
+msgstr "បារាំង"
+
+#: .\rentHouseApp\settings.py
+msgid "Khmer"
+msgstr "ខ្មែរ"
+
+#: .\templates\admin\dashboard.html
+msgid "Expense per Month"
+msgstr "ចំណាយប្រចាំខែ"
+
+#: .\templates\admin\dashboard.html
+msgid "Expense"
+msgstr "ចំណាយ"
 
 #: .\rooms\models.py
 msgid "Room cost"
@@ -1059,6 +1131,64 @@ msgstr "ភាសា"
 #~ msgid "ID"
 #~ msgstr "លេខសម្គាល់"
 
+#: .\templates\admin\rooms\change_list.html:?
+msgid "Send Monthly Album"
+msgstr "ផ្ញើអាល់ប៊ុមប្រចាំខែ"
+
+#: .\templates\admin\rooms\change_list.html:?
+msgid "Send to Telegram"
+msgstr "ផ្ញើទៅ Telegram"
+
 #: .\rooms\admin.py:212
 msgid "The tenant \"%(name)s\" was added successfully."
 msgstr "អ្នកជួល \"%(name)s\" ត្រូវបានបន្ថែមដោយជោគជ័យ"
+
+#: .\templates\registration\password_change_form.html:24
+msgid "Please enter your old password, for security's sake, and then enter your new password twice so we can verify you typed it in correctly."
+msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ចាស់របស់អ្នក ដើម្បីសុវត្ថិភាព ហើយបញ្ចូលពាក្យសម្ងាត់ថ្មីពីរដង ដើម្បីអោយយើងអាចបញ្ជាក់ថាអ្នកវាយបានត្រឹមត្រូវ។"
+
+#: .\templates\registration\password_change_form.html:48
+msgid "Enter the same password as before, for verification."
+msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ដដែលម្តងទៀត ដើម្បីផ្ទៀងផ្ទាត់។"
+
+#: .\templates\registration\password_reset_form.html:15
+msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
+msgstr "ភ្លេចពាក្យសម្ងាត់មែនទេ? សូមបញ្ចូលអ៊ីមែលខាងក្រោម ហើយយើងនឹងផ្ញើវិធីសាស្ត្រកំណត់ពាក្យសម្ងាត់ថ្មី។"
+
+#: .\templates\registration\password_reset_confirm.html:19
+msgid "Please enter your new password twice so we can verify you typed it in correctly."
+msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ថ្មីពីរដង ដើម្បីអោយយើងអាចបញ្ជាក់ថាអ្នកវាយបានត្រឹមត្រូវ។"
+
+#: .\templates\registration\password_reset_confirm.html:33
+msgid "Confirm password:"
+msgstr "បញ្ជាក់ពាក្យសម្ងាត់៖"
+
+
+#: .\templates\registration\password_change_form.html:32
+msgid "Old password:"
+msgstr "លេខសម្ងាត់ចាស់"
+
+#: .\templates\registration\password_change_form.html:37
+#: .\templates\registration\password_reset_confirm.html:27
+msgid "New password:"
+msgstr "លេខសម្ងាត់ថ្មី"
+
+#: .\templates\registration\password_change_form.html:40
+msgid "Your password can't be too similar to your other personal information."
+msgstr "លេខសម្ងាត់មិនអាចស្រដៀងទៅនឹងព័ត៌មានផ្ទាល់ខ្លួនអ្នកទេ"
+
+#: .\templates\registration\password_change_form.html:41
+msgid "Your password must contain at least 8 characters."
+msgstr "លេខសម្ងាត់ត្រូវតែមានយ៉ាងហោច 8 តួអក្សរ"
+
+#: .\templates\registration\password_change_form.html:42
+msgid "Your password can't be a commonly used password."
+msgstr "លេខសម្ងាត់មិនអាចជាលេខឧស្សាហ៍ប្រើទេ"
+
+#: .\templates\registration\password_change_form.html:43
+msgid "Your password can't be entirely numeric."
+msgstr "លេខសម្ងាត់មិនអាចជាលេខទាំងអស់ទេ"
+
+#: .\templates\registration\password_change_form.html:45
+msgid "New password confirmation:"
+msgstr "ផ្ទៀតផ្ទាត់លេខសម្ងាត់ថ្មី"

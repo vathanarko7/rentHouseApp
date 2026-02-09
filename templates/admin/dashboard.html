@@ -67,7 +67,11 @@
 
 <section class="dashboard-section">
   <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">
-    {% translate "Income per Month" %}
+    {% if is_tenant %}
+      {% translate "Expense per Month" %}
+    {% else %}
+      {% translate "Income per Month" %}
+    {% endif %}
   </h2>
   <div class="chart-card">
     <div class="chart-wrap">
@@ -145,7 +149,7 @@
           labels: incomeLabels,
           datasets: [
             {
-              label: "{% translate "Income" %}",
+              label: "{% if is_tenant %}{% translate "Expense (៛)" %}{% else %}{% translate "Income (៛)" %}{% endif %}",
               data: incomeValues,
               borderColor: "#16a34a",
               backgroundColor: "rgba(22, 163, 74, 0.18)",
@@ -180,7 +184,11 @@
           },
           scales: {
             x: { grid: { color: gridColor }, ticks: { color: textColor } },
-            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: { color: textColor },
+            },
           },
         },
       });

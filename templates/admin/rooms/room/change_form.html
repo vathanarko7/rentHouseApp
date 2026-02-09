@@ -2,11 +2,6 @@
 {% load static %}
 {% load i18n %}
 
-{% block submit_buttons_top %}
-  {{ block.super }}
-  <a class="button cancel-btn submit-row-cancel" href="{% url 'admin:rooms_room_changelist' %}">{% trans "Cancel" %}</a>
-{% endblock %}
-
 {% block content %}
 {{ block.super }}
 

@@ -9,24 +9,46 @@
 </div>
 {% endblock %}
 
+{% block content_title %}
+<div class="module" style="display:flex; flex-direction:column; align-items:flex-start; gap:8px;">
+  <h1 style="margin:0;">{% translate "Tenants" %}</h1>
+  <div id="tenant-top-actions" style="display:flex; gap:8px; align-items:center; width:100%; justify-content:space-between;">
+    <a
+      id="test-telegram-top"
+      class="button"
+      href="{% url "admin:rooms_monthlybill_test_telegram" %}"
+    >
+      {% translate "Test Telegram" %}
+    </a>
+  </div>
+</div>
+{% endblock %}
+
 {% block object-tools %}
 {{ block.super }}
+<style>
+  #tenant-top-actions .object-tools {
+    margin: 0;
+    padding: 0;
+  }
+</style>
+<script>
+  (function () {
+    function moveActions() {
+      var wrap = document.getElementById("tenant-top-actions");
+      var tools = document.querySelector(".object-tools");
+      if (!wrap || !tools) return;
+      if (tools.parentNode !== wrap) wrap.insertBefore(tools, wrap.firstChild);
+    }
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", moveActions);
+    } else {
+      moveActions();
+    }
+  })();
+</script>
 {% endblock %}
 
 {% block search %}
 {{ block.super }}
-<script>
-  (function () {
-    const search = document.getElementById("changelist-search");
-    if (!search) return;
-    search.style.position = "relative";
-    const wrap = document.createElement("span");
-    wrap.style.position = "absolute";
-    wrap.style.right = "8px";
-    wrap.style.top = "50%";
-    wrap.style.transform = "translateY(-50%)";
-    wrap.innerHTML = '<a class="button" href="{% url "admin:rooms_monthlybill_test_telegram" %}">{% translate "Test Telegram" %}</a>';
-    search.appendChild(wrap);
-  })();
-</script>
 {% endblock %}

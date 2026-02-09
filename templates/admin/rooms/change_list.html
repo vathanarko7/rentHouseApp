@@ -340,7 +340,7 @@
 
     .rooms-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: 6px 12px;
       margin-top: 8px;
       max-height: 240px;
@@ -349,6 +349,12 @@
       border: 1px solid var(--invoice-panel-border);
       border-radius: 8px;
       background: var(--invoice-panel-bg);
+    }
+    @media (min-width: 900px) {
+      .rooms-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        max-height: 260px;
+      }
     }
 
     .room-option {
@@ -406,6 +412,61 @@
     }
     .btn-close:hover {
       background: var(--button-hover-bg, #4b5563);
+    }
+
+    @media (max-width: 768px) {
+      .invoice-card {
+        padding: 12px;
+        border-radius: 8px;
+      }
+      .invoice-header {
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+      .invoice-field {
+        margin: 8px 0 6px 0;
+      }
+      .month-input {
+        padding: 4px 8px;
+        font-size: 13px;
+      }
+      .month-picker-btn {
+        padding: 4px 8px;
+      }
+      .month-popover-panel {
+        width: 220px;
+        padding: 8px;
+      }
+      .month-popover-grid {
+        gap: 4px;
+      }
+      .month-popover-grid button {
+        padding: 4px 2px;
+      }
+      h3 {
+        margin: 10px 0 6px;
+      }
+      .rooms-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 4px 8px;
+        margin-top: 6px;
+        max-height: 180px;
+        padding: 6px;
+      }
+      @media (max-width: 380px) {
+        .rooms-grid {
+          grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        }
+      }
+      .room-option {
+        padding: 2px 6px;
+        min-height: 36px;
+      }
+      .btn-generate,
+      .btn-clear,
+      .btn-close {
+        padding: 6px 12px;
+      }
     }
   </style>
 
