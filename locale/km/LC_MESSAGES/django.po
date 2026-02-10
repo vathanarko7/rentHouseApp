@@ -1163,6 +1163,14 @@ msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ថ្ម
 msgid "Confirm password:"
 msgstr "បញ្ជាក់ពាក្យសម្ងាត់៖"
 
+#: .\templates\admin\base_site.html:?
+msgid "Processing…"
+msgstr "កំពុងដំណើរការ…"
+
+#: .\templates\admin\dashboard.html:?
+msgid "Your password was changed successfully."
+msgstr "ពាក្យសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ។"
+
 
 #: .\templates\registration\password_change_form.html:32
 msgid "Old password:"

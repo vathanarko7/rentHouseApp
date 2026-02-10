@@ -255,6 +255,34 @@
     }
   })();
 </script>
+<script>
+  (function () {
+    var params = new URLSearchParams(window.location.search);
+    if (!params.has("pw_changed")) return;
+    var message = "{% translate 'Your password was changed successfully.' %}";
+    var list = document.querySelector(".messagelist");
+    if (!list) {
+      list = document.createElement("ul");
+      list.className = "messagelist";
+      document.body.appendChild(list);
+    }
+    var li = document.createElement("li");
+    li.className = "success";
+    li.textContent = message;
+    list.appendChild(li);
+
+    params.delete("pw_changed");
+    var newUrl = window.location.pathname + (params.toString() ? "?" + params.toString() : "");
+    window.history.replaceState({}, "", newUrl);
+
+    setTimeout(function () {
+      li.classList.add("is-fading");
+      setTimeout(function () {
+        li.remove();
+      }, 400);
+    }, 3000);
+  })();
+</script>
 {% endblock %}
 
 
