@@ -1,7 +1,9 @@
 from decimal import Decimal
 from django.core.exceptions import ValidationError
+from django.core.files.storage import default_storage
 
 from rooms.invoice_image import generate_invoice_image
+from rooms.invoice_i18n import INVOICE_LANGUAGES
 from .models import UnitPrice, MonthlyBill, Water, Electricity
 
 # from rooms.invoice_pdf import generate_invoice_pdf, generate_khmer_invoice_pdf
@@ -99,6 +101,31 @@ def calculate_monthly_bill(room, month):
     return bill
 
 
+
+
+def _invoice_storage_path(bill, filename):
+    return (
+        f"invoices/images/{bill.month.strftime('%Y_%m')}/{filename}".replace("\\", "/")
+    )
+
+
+def _invoice_filename(bill, lang):
+    lang_cfg = INVOICE_LANGUAGES.get(lang)
+    if not lang_cfg:
+        return ""
+    room_number = bill.room.room_number
+    suffix = lang_cfg["suffix"]
+    return f"invoice_room_{room_number}_{bill.month.strftime('%Y_%m')}_{suffix}.png"
+
+
+def delete_invoice_images_for_bill(bill):
+    for lang in INVOICE_LANGUAGES.keys():
+        filename = _invoice_filename(bill, lang)
+        if not filename:
+            continue
+        storage_path = _invoice_storage_path(bill, filename)
+        if default_storage.exists(storage_path):
+            default_storage.delete(storage_path)
 # ---------- PDF INVOICE GENERATION ----------
 def generate_invoice_for_bill(bill, lang="kh"):
     renter = bill.room.renter

@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from .models import ClientProfile, MonthlyBill, Water, Electricity, UnitPrice
-from .services import calculate_monthly_bill
+from .services import calculate_monthly_bill, delete_invoice_images_for_bill
 
 
 @receiver(post_save, sender=User)
@@ -12,11 +12,14 @@ def create_client_profile(sender, instance, created, **kwargs):
 
 
 def _recalculate_draft(room, month):
-    if not MonthlyBill.objects.filter(
+    bills = MonthlyBill.objects.filter(
         room=room, month=month, status=MonthlyBill.Status.DRAFT
-    ).exists():
+    ).select_related("room")
+    if not bills.exists():
         return
-    calculate_monthly_bill(room=room, month=month)
+    for bill in bills:
+        calculate_monthly_bill(room=room, month=month)
+        delete_invoice_images_for_bill(bill)
 
 
 @receiver(post_save, sender=Water)
@@ -36,3 +39,4 @@ def recalc_draft_on_unitprice_save(sender, instance, **kwargs):
     ).select_related("room")
     for bill in bills:
         calculate_monthly_bill(room=bill.room, month=bill.month)
+        delete_invoice_images_for_bill(bill)

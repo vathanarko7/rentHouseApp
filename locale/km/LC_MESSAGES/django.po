@@ -201,17 +201,40 @@ msgstr ""
 msgid "Send to Telegram group"
 msgstr "ផ្ញើទៅក្រុម Telegram"
 
+#: rooms/templatetags/admin_log_format.py
+msgid "Telegram group"
+msgstr "ក្រុម Telegram"
+
+#: rooms/templatetags/admin_log_format.py
+msgid "Telegram group send"
+msgstr "ផ្ញើទៅក្រុម Telegram"
+
+#: rooms/templatetags/admin_log_format.py
+msgid "Generate bills"
+msgstr "បង្កើតវិក្កយបត្រ"
 #: templates/admin/rooms/change_list.html
 msgid "Sending"
 msgstr "កំពុងផ្ញើ"
 
 #: templates/admin/rooms/change_list.html
+msgid "Generating"
+msgstr "កំពុងបង្កើត"
+
+#: templates/admin/rooms/change_list.html
+msgid "Failed"
+msgstr "បរាជ័យ"
+
+#: templates/admin/rooms/change_list.html
+msgid "Done"
+msgstr "បានបញ្ចប់"
+
+#: templates/admin/rooms/change_list.html
 msgid "Completed"
-msgstr "ផ្ញើអស់"
+msgstr "បំពេញ"
 
 #: templates/admin/rooms/change_list.html
 msgid "Completed with errors"
-msgstr "ផ្ញើអស់តែមានបញ្ហា"
+msgstr "បំពេញ តែមានបញ្ហា"
 
 #: .\rooms\admin.py
 msgid "Re-generate this invoice? This will overwrite the current draft."
@@ -365,7 +388,7 @@ msgstr "សម្គាល់វិក្កយបត្រនេះថាបា
 
 #: .\rooms\admin.py:1481
 msgid "Mark Paid"
-msgstr "បង់លុយ"
+msgstr "ទូទាត់ប្រាក់"
 
 #: .\rooms\admin.py:1511 .\rooms\admin.py:1689
 #: .\templates\admin\app_list.html:7
@@ -1060,7 +1083,7 @@ msgstr "បានផ្ញើនៅ"
 
 #: .\rooms\models.py
 msgid "Paid at"
-msgstr "បានបង់នៅ"
+msgstr "ទូទាត់ប្រាក់នៅ"
 
 #: .\rooms\models.py
 msgid "Async job pending"
@@ -1168,8 +1191,36 @@ msgid "Processing…"
 msgstr "កំពុងដំណើរការ…"
 
 #: .\templates\admin\dashboard.html:?
+msgid "ago"
+msgstr "មុន"
+
+#: .\rooms\views.py:?
+msgid "Issue invoice %(room)s %(month)s"
+msgstr "ចេញវិក្កយបត្រ %(room)s %(month)s"
+
+#: .\rooms\views.py:?
+msgid "Issued invoice for %(room)s, %(month)s."
+msgstr "បានចេញវិក្កយបត្រ សម្រាប់ %(room)s, %(month)s"
+
+#: .\rooms\views.py:?
+msgid "Send invoice %(room)s %(month)s"
+msgstr "ផ្ញើវិក្កយបត្រ %(room)s %(month)s"
+
+#: .\rooms\views.py:?
+msgid "Send invoice to tenant for %(room)s, %(month)s."
+msgstr "ផ្ញើវិក្កយបត្រទៅអ្នកជួល សម្រាប់ %(room)s, %(month)s"
+
+#: .\rooms\views.py:?
+msgid "Mark paid %(room)s %(month)s"
+msgstr "បានទូទាត់ប្រាក់ %(room)s %(month)s"
+
+#: .\rooms\views.py:?
+msgid "Marked paid for %(room)s, %(month)s."
+msgstr "បានទូទាត់ប្រាក់សម្រាប់ %(room)s, %(month)s"
+
+#: .\templates\admin\dashboard.html:?
 msgid "Your password was changed successfully."
-msgstr "ពាក្យសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ។"
+msgstr "ពាក្យសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ"
 
 
 #: .\templates\registration\password_change_form.html:32

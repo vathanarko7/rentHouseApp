@@ -1,5 +1,5 @@
 ﻿{% extends "admin/base_site.html" %}
-{% load i18n log %}
+{% load i18n log admin_log_format %}
 
 {% block content_title %}{% endblock %}
 
@@ -40,6 +40,22 @@
     padding: 14px;
     box-shadow: 0 10px 26px rgba(0, 0, 0, 0.08);
   }
+  .recent-actions-status {
+    opacity: 0.85;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .recent-actions-status.status-success {
+    color: #16a34a;
+  }
+  .recent-actions-status.status-failed {
+    color: #dc2626;
+  }
+  @media (max-width: 768px) {
+    .recent-actions-list li:last-child {
+      margin-bottom: calc(var(--mobile-nav-space, 160px) + 12px);
+    }
+  }
   .chart-wrap {
     position: relative;
     width: 100%;
@@ -62,6 +78,52 @@
   #usage-chart {
     width: 100% !important;
     height: 100% !important;
+  }
+  .recent-actions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+  }
+  .recent-actions-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--body-bg, #fff) 92%, transparent);
+    border: 1px solid color-mix(in srgb, var(--border-color, #e5e7eb) 70%, transparent);
+  }
+  .recent-actions-main {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .recent-actions-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--body-quiet-color, #6b7280);
+    font-weight: 600;
+  }
+  .recent-actions-object a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .recent-actions-time {
+    font-size: 11px;
+    color: var(--body-quiet-color, #6b7280);
+    white-space: nowrap;
+  }
+  .recent-actions-item.is-add {
+    border-color: color-mix(in srgb, #10b981 30%, var(--border-color, #e5e7eb));
+  }
+  .recent-actions-item.is-change {
+    border-color: color-mix(in srgb, #3b82f6 30%, var(--border-color, #e5e7eb));
+  }
+  .recent-actions-item.is-delete {
+    border-color: color-mix(in srgb, #ef4444 30%, var(--border-color, #e5e7eb));
   }
 </style>
 
@@ -92,30 +154,45 @@
 </section>
 
 <details style="margin-top: 24px;">
-  <summary style="cursor:pointer; font-weight:600;">{% translate "Recent actions" %}</summary>
+  <summary style="cursor:pointer; font-weight:600;">
+    {% translate "Recent actions" %}
+  </summary>
   <div style="margin-top: 10px;">
-    {% get_admin_log 10 as admin_log for_user user %}
+    {% get_admin_log 5 as admin_log for_user user %}
     {% if not admin_log %}
       <p class="quiet">{% translate "None available" %}</p>
     {% else %}
-      <table class="actionlist" style="width:100%; border-collapse:collapse;">
-        <tbody>
-          {% for entry in admin_log %}
-            <tr class="{% if entry.is_addition %}addlink{% elif entry.is_change %}changelink{% elif entry.is_deletion %}deletelink{% endif %}">
-              <td style="padding:6px 8px;">
+      <ul class="recent-actions-list">
+        {% for entry in admin_log %}
+          <li class="recent-actions-item {% if entry.is_addition %}is-add{% elif entry.is_change %}is-change{% elif entry.is_deletion %}is-delete{% endif %}">
+            <div class="recent-actions-main">
+              <span class="recent-actions-label">
+                {% if entry.is_addition %}{% translate "Added" %}
+                {% elif entry.is_change %}{% translate "Updated" %}
+                {% elif entry.is_deletion %}{% translate "Deleted" %}
+                {% else %}{% translate "Action" %}{% endif %}
+              </span>
+              <span class="recent-actions-object">
                 {% if entry.is_deletion or not entry.get_admin_url %}
-                  {{ entry.object_repr }}
+                  {{ entry.object_repr|admin_log_title }}
                 {% else %}
-                  <a href="{{ entry.get_admin_url }}">{{ entry.object_repr }}</a>
+                  <a href="{{ entry.get_admin_url }}">{{ entry.object_repr|admin_log_title }}</a>
                 {% endif %}
-              </td>
-              <td class="mini quiet" style="padding:6px 8px; text-align:right;">
-                {% if entry.content_type %}{{ entry.content_type.name|capfirst }}{% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+              </span>
+            </div>
+            {% if entry.change_message and "ACTION:" in entry.change_message %}
+              {% with status_class=entry.change_message|admin_log_status %}
+                <div class="recent-actions-status {% if status_class %}status-{{ status_class }}{% endif %}">
+                  {{ entry.change_message|admin_log_line }}
+                </div>
+              {% endwith %}
+            {% endif %}
+            <div class="recent-actions-time">
+              {% if entry.action_time %}{{ entry.action_time|timesince }} {% translate "ago" %}{% endif %}
+            </div>
+          </li>
+        {% endfor %}
+      </ul>
     {% endif %}
   </div>
 </details>

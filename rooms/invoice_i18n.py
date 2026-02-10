@@ -4,10 +4,10 @@ INVOICE_LANGUAGES = {
         "font": "NotoSansKhmer-Regular",
         "font_fallback": "'Noto Sans Khmer', sans-serif",
         "texts": {
-            "invoice": "វិក័យប័ត្រ",
+            "invoice": "វិក្កយបត្រ",
             "from_date": "ពីថ្ងៃ :",
             "to_date": "ដល់ថ្ងៃ :",
-            "invoice_date": "ថ្ងៃចេញវិក័យប័ត្រ :",
+            "invoice_date": "ថ្ងៃចេញវិក្កយបត្រ :",
             "tel": "Tel :",
             "tenant_name": "ឈ្មោះអ្នកជួល :",
             "sex": "ភេទ :",

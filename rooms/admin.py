@@ -31,6 +31,7 @@ from django.utils.html import format_html, format_html_join
 from rooms.views import (
     download_invoice,
     generate_invoices_view,
+    generate_invoices_status_view,
     bulk_download_view,
     regenerate_invoice_view,
     issue_invoice_view,
@@ -59,6 +60,8 @@ admin.site.index_title = _("Welcome to Rent House Admin Portal")
 admin.ModelAdmin.save_on_top = True
 # admin.site.register(Room)
 # admin.site.register(MonthlyBill)
+
+
 
 
 def _is_tenant(user):
@@ -163,6 +166,7 @@ class ClientProfileAdminForm(forms.ModelForm):
 @admin.register(ClientProfile)
 class ClientProfileAdmin(admin.ModelAdmin):
     form = ClientProfileAdminForm
+    actions = None
     fieldsets = (
         (
             _("Account Info"),
@@ -430,6 +434,7 @@ class RoomHistoryInline(admin.TabularInline):
 @admin.register(Room)
 class RoomAdmin(admin.ModelAdmin):
     inlines = (RoomHistoryInline,)
+    actions = None
     list_display = (
         "room_number",
         "occupancy_status",
@@ -769,11 +774,12 @@ class UnitPriceAdmin(admin.ModelAdmin):
 
 @admin.register(Water)
 class WaterAdmin(admin.ModelAdmin):
-    list_display = ("month_year", "room", "meter_value_m3")
+    list_display = ("month_year", "room_name", "meter_value_m3")
+    actions = None
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
-    list_display_links = ("room",)
+    list_display_links = ("room_name",)
 
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
@@ -783,11 +789,6 @@ class WaterAdmin(admin.ModelAdmin):
     @admin.display(description=_("Meter value (m³)"))
     def meter_value_m3(self, obj):
         return obj.meter_value
-
-    def get_list_display(self, request):
-        if _is_tenant(request.user):
-            return ("month_year", "room_name", "meter_value_m3")
-        return ("month_year", "room", "meter_value_m3")
 
     def room_name(self, obj):
         return obj.room.room_number
@@ -890,11 +891,12 @@ class WaterAdmin(admin.ModelAdmin):
 
 @admin.register(Electricity)
 class ElectricityAdmin(admin.ModelAdmin):
-    list_display = ("month_year", "room", "meter_value_kwh")
+    list_display = ("month_year", "room_name", "meter_value_kwh")
+    actions = None
     list_filter = ("room", ReadingMonthFilter)
     search_fields = ("room__room_number",)
     ordering = ("-date", "room__room_number")
-    list_display_links = ("room",)
+    list_display_links = ("room_name",)
 
     def month_year(self, obj):
         return date_format(obj.date, "F Y")
@@ -904,11 +906,6 @@ class ElectricityAdmin(admin.ModelAdmin):
     @admin.display(description=_("Meter value (kWh)"))
     def meter_value_kwh(self, obj):
         return obj.meter_value
-
-    def get_list_display(self, request):
-        if _is_tenant(request.user):
-            return ("month_year", "room_name", "meter_value_kwh")
-        return ("month_year", "room", "meter_value_kwh")
 
     def room_name(self, obj):
         return obj.room.room_number
@@ -1031,7 +1028,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
     )
     ordering = ("-month", "room__room_number")
     list_per_page = 25
-    actions = ["bulk_send_telegram"]
+    actions = ["delete_selected"]
 
     def has_module_permission(self, request):
         return (
@@ -1494,8 +1491,9 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         color = color_map.get(obj.status, "#6b7280")
         label = label_map.get(obj.status, obj.status)
         return format_html(
-            '<span style="padding:2px 8px;border-radius:10px;'
+            '<span data-status="{}" style="padding:2px 8px;border-radius:10px;'
             'background:{};color:#fff;font-size:12px;">{}</span>',
+            obj.status,
             color,
             label,
         )
@@ -1526,7 +1524,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     @admin.display(description=_("Room"))
     def room_col(self, obj):
-        return obj.room
+        return obj.room.room_number
 
     def get_urls(self):
         urls = super().get_urls()
@@ -1572,6 +1570,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 name="rooms_generate_invoices",
             ),
             path(
+                "generate-invoices/status/",
+                self.admin_site.admin_view(generate_invoices_status_view),
+                name="rooms_generate_invoices_status",
+            ),
+            path(
                 "bulk-download/",
                 self.admin_site.admin_view(bulk_download_view),
                 name="rooms_bulk_download",
@@ -1597,32 +1600,6 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         if not renter or not hasattr(renter, "client_profile"):
             missing_profile = True
         missing_data = self._has_missing_utility_data(obj)
-        regen_link = ""
-        if (
-            not is_tenant
-            and not missing_profile
-            and not missing_data
-            and obj.status == MonthlyBill.Status.DRAFT
-        ):
-            regen_confirm = _("Re-generate this invoice? This will overwrite the current draft.")
-            regen_label = _("Re-generate")
-            regen_link = format_html(
-                '<a class="button regen-btn btn-sm" href="{}" '
-                'data-confirm-message="{}" data-confirm-kind="regen" data-confirm-label="{}" '
-                'aria-label="{}" title="{}">'
-                '<span class="btn-icon" aria-hidden="true">'
-                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
-                '</span>'
-                '<span class="btn-label">{}</span>'
-                '</a> ',
-                reverse("admin:rooms_monthlybill_regenerate_invoice", args=[obj.id]),
-                regen_confirm,
-                regen_label,
-                regen_label,
-                regen_label,
-                regen_label,
-                regen_label,
-            )
         issue_link = ""
         if (
             not is_tenant
@@ -1673,31 +1650,6 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 send_label,
                 send_label,
             )
-        resend_link = ""
-        if (
-            not is_tenant
-            and not missing_profile
-            and not missing_data
-            and obj.status == MonthlyBill.Status.SENT
-        ):
-            resend_confirm = _("Re-send this invoice to the tenant?")
-            resend_label = _("Re-send")
-            resend_link = format_html(
-                '<a class="button send-btn btn-sm" href="{}" '
-                'data-confirm-message="{}" data-confirm-kind="send" data-confirm-label="{}" '
-                'aria-label="{}" title="{}">'
-                '<span class="btn-icon" aria-hidden="true">'
-                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
-                '</span>'
-                '<span class="btn-label">{}</span>'
-                '</a> ',
-                reverse("admin:rooms_monthlybill_send_invoice_telegram", args=[obj.id]),
-                resend_confirm,
-                resend_label,
-                resend_label,
-                resend_label,
-                resend_label,
-            )
         paid_link = ""
         if not is_tenant and not missing_profile and obj.status == MonthlyBill.Status.SENT:
             paid_confirm = _("Mark this invoice as paid?")
@@ -1719,14 +1671,12 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 paid_label,
             )
         test_link = ""
-        if not (regen_link or issue_link or send_link or resend_link or paid_link or test_link):
+        if not (issue_link or send_link or paid_link or test_link):
             return "-"
         return format_html(
-            "{}{}{}{}{}{}",
-            regen_link,
+            "{}{}{}{}",
             issue_link,
             send_link,
-            resend_link,
             paid_link,
             test_link,
         )
@@ -1749,7 +1699,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             MonthlyBill.Status.SENT,
         ):
             show_preview = False
-        if not is_tenant and (missing_profile or missing_data):
+        if not is_tenant and missing_data:
             show_preview = False
         if not show_preview:
             return "-"
@@ -1850,6 +1800,9 @@ class MonthlyBillAdmin(admin.ModelAdmin):
             extra_context.update(
                 {
                     "generate_invoice_url": reverse("admin:rooms_generate_invoices"),
+                    "generate_invoice_status_url": reverse(
+                        "admin:rooms_generate_invoices_status"
+                    ),
                     "bulk_download_url": reverse("admin:rooms_bulk_download"),
                     "bulk_send_group_url": reverse(
                         "admin:rooms_monthlybill_send_group_telegram"

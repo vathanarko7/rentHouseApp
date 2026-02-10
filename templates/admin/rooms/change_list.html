@@ -181,6 +181,7 @@
         type="button"
         class="button"
         data-action="{{ generate_invoice_url }}"
+        data-generate-status="{{ generate_invoice_status_url }}"
         data-title="{% translate "Generate Bills" %}"
         data-submit="{% translate "Generate" %}"
       >
@@ -195,8 +196,6 @@
       >
         {% translate "Download Bills" %}
       </button>
-    </div>
-    <div style="display:flex; gap:8px; align-items:center;">
       <button
         type="button"
         class="button"
@@ -412,6 +411,15 @@
     }
     .btn-close:hover {
       background: var(--button-hover-bg, #4b5563);
+    }
+    .object-tools .button,
+    .btn-generate,
+    .btn-clear,
+    .btn-close {
+      cursor: pointer;
+    }
+    .btn-clear:disabled {
+      cursor: not-allowed;
     }
 
     @media (max-width: 768px) {
@@ -638,6 +646,22 @@
       monthPopover.classList.remove("is-open");
       monthPopover.setAttribute("aria-hidden", "true");
     }
+    function closeInvoiceForm() {
+      closeMonthPopover();
+      if (form) {
+        form.reset();
+        form.pristine = true;
+        clearBtn.disabled = true;
+      }
+      formWrapper.style.display = "none";
+      note.textContent = "{% translate 'Select a billing action to show the form.' %}";
+      buttons.forEach(function (btn) {
+        btn.setAttribute("aria-pressed", "false");
+        btn.classList.remove("is-selected");
+      });
+    }
+    window.closeInvoiceForm = closeInvoiceForm;
+    window.closeInvoiceMonthPopover = closeMonthPopover;
 
     if (monthPickBtn) {
       monthPickBtn.addEventListener("click", function () {
@@ -687,17 +711,7 @@
     });
 
     closeBtn.addEventListener("click", function () {
-      if (form) {
-        form.reset();
-        form.pristine = true;
-        clearBtn.disabled = true;
-      }
-      formWrapper.style.display = "none";
-      note.textContent = "{% translate 'Select a billing action to show the form.' %}";
-      buttons.forEach(function (btn) {
-        btn.setAttribute("aria-pressed", "false");
-        btn.classList.remove("is-selected");
-      });
+      closeInvoiceForm();
     });
   })();
 </script>
@@ -760,6 +774,114 @@
 </style>
 <script>
   (function () {
+    var genBtn = document.querySelector('.object-tools [data-generate-status]');
+    if (!genBtn) return;
+    var statusUrl = genBtn.getAttribute("data-generate-status") || "";
+    if (!statusUrl) return;
+
+    var toast = null;
+    var lastSignature = "";
+
+    function ensureToast() {
+      if (toast) return toast;
+      toast = document.createElement("div");
+      toast.className = "progress-toast";
+      toast.innerHTML =
+        '<div class="pt-title">{% translate "Generate Bills" %}</div>' +
+        '<button class="pt-close" aria-label="{% translate "Close" %}">×</button>' +
+        '<div class="pt-message">{% translate "Generating" %}</div>' +
+        '<div class="pt-bar"><div class="pt-bar-fill"></div></div>';
+      document.body.appendChild(toast);
+      toast.querySelector(".pt-close").addEventListener("click", function () {
+        toast.classList.remove("show");
+      });
+      return toast;
+    }
+
+    function setToast(status, message, percent) {
+      var el = ensureToast();
+      el.classList.add("show");
+      el.classList.toggle("failed", status === "failed");
+      el.classList.toggle("success", status === "success");
+      var msgEl = el.querySelector(".pt-message");
+      var bar = el.querySelector(".pt-bar-fill");
+      if (msgEl) msgEl.textContent = message;
+      if (bar) bar.style.width = percent + "%";
+    }
+
+    function poll() {
+      fetch(statusUrl, { credentials: "same-origin" })
+        .then(function (resp) {
+          return resp.json();
+        })
+        .then(function (data) {
+          if (!data || !data.active) return;
+          var total = data.total || 0;
+          var completed = data.completed || 0;
+          var failed = data.failed || 0;
+          var status = (data.status || "").toLowerCase();
+          var percent =
+            total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 0;
+          var successCount = Math.max(0, total - failed);
+          var msg =
+            data.message ||
+            ("{% translate "Generating" %}: " +
+              completed +
+              "/" +
+              total +
+              ". " +
+              "{% translate "Failed" %}: " +
+              failed);
+          if (data.errors && data.errors.length) {
+            msg += " — " + data.errors.slice(0, 3).join(", ");
+            if (data.errors.length > 3) msg += "…";
+          }
+          var percentText = " " + percent + "%";
+          var signature =
+            status + "|" + completed + "|" + failed + "|" + total + "|" + msg;
+          if (signature !== lastSignature) {
+            lastSignature = signature;
+            setToast(
+              status,
+              msg + " (" + completed + "/" + total + ")" + percentText,
+              percent
+            );
+          }
+          if (!data.done) {
+            setTimeout(poll, 3000);
+          } else {
+            setToast(
+              status,
+              (status === "success"
+                ? "{% translate "Completed" %}"
+                : "{% translate "Completed with errors" %}") +
+                ": " +
+                "{% translate "Done" %} " +
+                successCount +
+                "/" +
+                total +
+                ". " +
+                "{% translate "Failed" %}: " +
+                failed,
+              100
+            );
+            setTimeout(function () {
+              if (toast) toast.classList.remove("show");
+              if (status === "success" || status === "failed") {
+                window.location.reload();
+              }
+            }, 5000);
+          }
+        })
+        .catch(function () {
+          setTimeout(poll, 4000);
+        });
+    }
+
+    poll();
+  })();
+
+  (function () {
     var statusBtn = document.querySelector('.object-tools [data-status]');
     if (!statusBtn) return;
     var statusUrl = statusBtn.getAttribute("data-status") || "";
@@ -811,6 +933,10 @@
           var msg =
             data.message ||
             ("{% translate "Sending" %}: " + completed + "/" + total);
+          if (data.errors && data.errors.length) {
+            msg += " — " + data.errors.slice(0, 3).join(", ");
+            if (data.errors.length > 3) msg += "…";
+          }
           var percentText = " " + percent + "%";
           var signature =
             status + "|" + completed + "|" + failed + "|" + total + "|" + msg;
@@ -825,15 +951,24 @@
           if (!data.done) {
             setTimeout(poll, 3000);
           } else {
-            setToast(
-              status,
+            var doneMsg =
               (status === "success"
                 ? "{% translate "Completed" %}"
-                : "{% translate "Completed with errors" %}") + " 100%",
-              100
-            );
+                : "{% translate "Completed with errors" %}") +
+              " " +
+              completed +
+              "/" +
+              total;
+            if (data.errors && data.errors.length) {
+              doneMsg += " — " + data.errors.slice(0, 3).join(", ");
+              if (data.errors.length > 3) doneMsg += "…";
+            }
+            setToast(status, doneMsg, 100);
             setTimeout(function () {
               if (toast) toast.classList.remove("show");
+              if (status === "success" || status === "failed") {
+                window.location.reload();
+              }
             }, 5000);
           }
         })
@@ -905,6 +1040,15 @@
     border-radius: 999px;
     padding: 6px 12px;
     font-weight: 600;
+    cursor: pointer;
+  }
+  body.preview-open .month-popover-panel {
+    display: none !important;
+  }
+  body.preview-open .calendarbox,
+  body.preview-open .clockbox,
+  body.preview-open .datetimeshortcuts {
+    display: none !important;
   }
   @media (max-width: 768px) {
     #invoice-preview-modal .preview-panel {
@@ -1024,16 +1168,36 @@
     var img = document.getElementById("invoice-preview-image");
     var closeBtn = modal.querySelector(".preview-close");
     var backdrop = modal.querySelector(".preview-backdrop");
+    var monthInput = document.querySelector('#invoice-form input[name="month"]');
+    var formWrapper = document.getElementById("invoice-form-wrapper");
+    var formWasVisible = false;
 
     function close() {
       modal.classList.remove("is-open");
       modal.style.display = "none";
       document.body.classList.remove("preview-open");
       if (img) img.src = "";
+      if (monthInput) monthInput.disabled = false;
+      if (formWrapper && formWasVisible) {
+        formWrapper.style.display = "block";
+      }
     }
 
     function open(url) {
       if (!url || !img) return;
+      if (document.activeElement && typeof document.activeElement.blur === "function") {
+        document.activeElement.blur();
+      }
+      if (typeof window.closeInvoiceMonthPopover === "function") {
+        window.closeInvoiceMonthPopover();
+      }
+      if (formWrapper) {
+        formWasVisible = formWrapper.style.display !== "none";
+        if (formWasVisible) {
+          formWrapper.style.display = "none";
+        }
+      }
+      if (monthInput) monthInput.disabled = true;
       img.src = url;
       modal.style.display = "flex";
       modal.classList.add("is-open");

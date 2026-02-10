@@ -10,6 +10,17 @@
   .filter .viewlink,
   #changelist-filter details > summary > a,
   #changelist-filter .hidelink { display: none !important; }
+
+  /* Align Month column text with header/other columns */
+  .model-monthlybill .column-month_year,
+  .model-monthlybill .field-month_year {
+    padding-left: 12px;
+    vertical-align: middle;
+  }
+  .model-monthlybill .field-month_year a {
+    display: inline-block;
+    line-height: 1.2;
+  }
 </style>
 <script>
   (function () {

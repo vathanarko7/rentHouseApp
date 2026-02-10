@@ -33,6 +33,7 @@ from django.utils import timezone
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.core.cache import cache
 from .services import calculate_monthly_bill, generate_invoice_for_bill
 from rooms.invoice_i18n import INVOICE_LANGUAGES
 import json
@@ -108,7 +109,7 @@ def _set_job_result(bill, status, message):
 def _admin_action_log(request, title, message):
     try:
         ct = ContentType.objects.get_for_model(MonthlyBill)
-        LogEntry.objects.log_action(
+        entry = LogEntry.objects.log_action(
             user_id=request.user.pk,
             content_type_id=ct.pk,
             object_id="",
@@ -116,8 +117,9 @@ def _admin_action_log(request, title, message):
             action_flag=CHANGE,
             change_message=message,
         )
+        return entry.pk if entry else None
     except Exception:
-        pass
+        return None
 
 
 def download_invoice(request, bill_id, lang):
@@ -160,6 +162,7 @@ def download_invoice(request, bill_id, lang):
     if not filename or not default_storage.exists(storage_path):
         if bill.status == MonthlyBill.Status.DRAFT:
             try:
+                calculate_monthly_bill(room=bill.room, month=bill.month)
                 generate_invoice_for_bill(bill=bill, lang=lang)
             except ValidationError as e:
                 messages.error(request, "; ".join(e.messages))
@@ -168,7 +171,7 @@ def download_invoice(request, bill_id, lang):
         if not filename or not default_storage.exists(storage_path):
             messages.error(
                 request,
-                "Invoice is locked; re-generate is only allowed in Draft status.",
+                "Invoice file is not available yet.",
             )
             return _redirect_back(request)
 
@@ -218,6 +221,7 @@ def preview_invoice(request, bill_id):
     if not filename or not default_storage.exists(storage_path):
         if bill.status == MonthlyBill.Status.DRAFT:
             try:
+                calculate_monthly_bill(room=bill.room, month=bill.month)
                 generate_invoice_for_bill(bill=bill, lang="kh")
             except ValidationError as e:
                 messages.error(request, "; ".join(e.messages))
@@ -226,7 +230,7 @@ def preview_invoice(request, bill_id):
         if not filename or not default_storage.exists(storage_path):
             messages.error(
                 request,
-                "Invoice is locked; re-generate is only allowed in Draft status.",
+                "Invoice file is not available yet.",
             )
             return _redirect_back(request)
 
@@ -308,6 +312,13 @@ def issue_invoice_view(request, bill_id):
     bill.status = MonthlyBill.Status.ISSUED
     bill.issued_at = timezone.now()
     bill.save(update_fields=["status", "issued_at"])
+    _admin_action_log(
+        request,
+        _("Issue invoice %(room)s %(month)s")
+        % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+        _("Issued invoice for %(room)s, %(month)s.")
+        % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+    )
 
     def _generate_issue_invoice():
         close_old_connections()
@@ -345,6 +356,13 @@ def mark_paid_view(request, bill_id):
     bill.status = MonthlyBill.Status.PAID
     bill.paid_at = timezone.now()
     bill.save(update_fields=["status", "paid_at"])
+    _admin_action_log(
+        request,
+        _("Mark paid %(room)s %(month)s")
+        % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+        _("Marked paid for %(room)s, %(month)s.")
+        % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+    )
     messages.success(request, "Invoice marked as Paid.")
     return _redirect_back(request)
 
@@ -448,8 +466,8 @@ def send_invoice_telegram_view(request, bill_id):
             "Cannot send invoice: required utility data is missing.",
         )
         return _redirect_back(request)
-    if bill.status not in (MonthlyBill.Status.ISSUED, MonthlyBill.Status.SENT):
-        messages.error(request, "Invoice can only be sent when status is Issued or Sent.")
+    if bill.status != MonthlyBill.Status.ISSUED:
+        messages.error(request, "Invoice can only be sent when status is Issued.")
         return _redirect_back(request)
 
     renter = bill.room.renter
@@ -468,6 +486,13 @@ def send_invoice_telegram_view(request, bill_id):
         return _redirect_back(request)
 
     if getattr(settings, "ASYNC_TASKS", True):
+        _admin_action_log(
+            request,
+            _("Send invoice %(room)s %(month)s")
+            % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+            _("Send invoice to tenant for %(room)s, %(month)s.")
+            % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+        )
         threading.Thread(
             target=_send_invoice_telegram_worker,
             args=(bill, chat_id, token),
@@ -485,7 +510,7 @@ def send_invoice_telegram_view(request, bill_id):
     if not filename or not default_storage.exists(storage_path):
         messages.error(
             request,
-            "Invoice file not generated. Use Issue or Re-generate first.",
+            "Invoice file not generated yet. Please issue the invoice first.",
         )
         return _redirect_back(request)
 
@@ -524,6 +549,13 @@ def send_invoice_telegram_view(request, bill_id):
     bill.sent_at = timezone.now()
     bill.save(update_fields=["status", "sent_at"])
     _set_job_result(bill, "success", "Sent via Telegram.")
+    _admin_action_log(
+        request,
+        _("Send invoice %(room)s %(month)s")
+        % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+        _("Send invoice to tenant for %(room)s, %(month)s.")
+        % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
+    )
     messages.success(request, "Invoice sent via Telegram.")
     return _redirect_back(request)
 
@@ -550,6 +582,52 @@ def _send_telegram_album(chat_id, token, items):
     )
 
 
+def _set_generate_job(
+    job_id,
+    status=None,
+    message=None,
+    completed=None,
+    failed=None,
+    total=None,
+    errors=None,
+    log_id=None,
+    month=None,
+    room_label=None,
+    lang_code=None,
+):
+    key = f"generate_bills_job:{job_id}"
+    job = cache.get(key, {}) or {}
+    if status is not None:
+        job["status"] = status
+    if message is not None:
+        job["message"] = message
+    if completed is not None:
+        job["completed"] = completed
+    if failed is not None:
+        job["failed"] = failed
+    if total is not None:
+        job["total"] = total
+    if errors is not None:
+        job["errors"] = errors
+    if log_id is not None:
+        job["log_id"] = log_id
+    if month is not None:
+        job["month"] = month
+    if room_label is not None:
+        job["room_label"] = room_label
+    if lang_code is not None:
+        job["lang_code"] = lang_code
+    cache.set(key, job, timeout=3600)
+
+def _update_admin_log(log_id, message):
+    if not log_id:
+        return
+    try:
+        LogEntry.objects.filter(pk=log_id).update(change_message=message[:255])
+    except Exception:
+        return
+
+
 def _set_batch_job(job_id, status, message=None, completed=None, failed=None):
     job = TelegramBatchJob.objects.filter(pk=job_id).first()
     if not job:
@@ -573,26 +651,50 @@ def _set_batch_job(job_id, status, message=None, completed=None, failed=None):
     )
 
 
-def _send_group_invoices_worker(job_id, chat_id, token, items):
+def _set_group_send_cache(job_id, errors=None, log_id=None, lang_code=None):
+    key = f"telegram_group_job:{job_id}"
+    job = cache.get(key, {}) or {}
+    if errors is not None:
+        job["errors"] = errors
+    if log_id is not None:
+        job["log_id"] = log_id
+    if lang_code is not None:
+        job["lang_code"] = lang_code
+    cache.set(key, job, timeout=3600)
+
+
+def _send_group_invoices_worker(job_id, chat_id, token, items, bill_ids):
     close_old_connections()
     total_batches = (len(items) + 9) // 10
     _set_batch_job(job_id, TelegramBatchJob.Status.RUNNING, "Sending albums...")
+    cache_job = cache.get(f"telegram_group_job:{job_id}") or {}
+    _set_group_send_cache(job_id, errors=cache_job.get("errors") or [])
     completed = 0
     failed = 0
+    errors = []
     for i in range(0, len(items), 10):
         batch = items[i : i + 10]
         try:
             resp = _send_telegram_album(chat_id, token, batch)
             if not resp.get("ok"):
                 failed += 1
+                errors.extend([item.get("room", "") for item in batch if item.get("room")])
             else:
                 completed += 1
-        except Exception:
+        except Exception as e:
             failed += 1
+            errors.extend([item.get("room", "") for item in batch if item.get("room")])
+        errors = list(dict.fromkeys([e for e in errors if e]))
+        _set_group_send_cache(job_id, errors=errors[:20])
         _set_batch_job(job_id, None, None, completed=completed, failed=failed)
 
     if completed == total_batches and failed == 0:
-        _set_batch_job(job_id, TelegramBatchJob.Status.SUCCESS, "All albums sent.")
+        MonthlyBill.objects.filter(
+            id__in=bill_ids, status=MonthlyBill.Status.ISSUED
+        ).update(status=MonthlyBill.Status.SENT, sent_at=timezone.now())
+        _set_batch_job(
+            job_id, TelegramBatchJob.Status.SUCCESS, "All albums sent."
+        )
     elif completed > 0:
         _set_batch_job(
             job_id,
@@ -601,6 +703,20 @@ def _send_group_invoices_worker(job_id, chat_id, token, items):
         )
     else:
         _set_batch_job(job_id, TelegramBatchJob.Status.FAILED, "All albums failed.")
+    try:
+        job = TelegramBatchJob.objects.filter(pk=job_id).first()
+        if job:
+            cache_job = cache.get(f"telegram_group_job:{job_id}") or {}
+            log_id = cache_job.get("log_id")
+            status_label = job.status
+            err_text = ", ".join(errors[:6])
+            done_count = max(0, int(completed))
+            msg = f"ACTION:telegram_group;STATUS:{status_label};DONE:{done_count};TOTAL:{total_batches};FAILED:{failed}"
+            if err_text:
+                msg = f"{msg};ROOMS:{err_text}"
+            _update_admin_log(log_id, msg)
+    except Exception:
+        pass
 
 
 def send_group_invoices_telegram_view(request):
@@ -647,6 +763,7 @@ def send_group_invoices_telegram_view(request):
         return _redirect_back(request)
 
     items = []
+    bill_ids = []
     missing = []
     draft_rooms = []
 
@@ -666,7 +783,10 @@ def send_group_invoices_telegram_view(request):
             continue
         with default_storage.open(storage_path, "rb") as f:
             data = f.read()
-        items.append({"filename": filename, "bytes": data, "caption": ""})
+        items.append(
+            {"filename": filename, "bytes": data, "caption": "", "room": room.room_number}
+        )
+        bill_ids.append(bill.id)
 
     if missing or draft_rooms:
         if draft_rooms:
@@ -710,24 +830,23 @@ def send_group_invoices_telegram_view(request):
         message="Queued.",
     )
     request.session["telegram_group_job_id"] = job.id
-    try:
-        ct = ContentType.objects.get_for_model(MonthlyBill)
-        room_label = "all rooms" if not room_ids else f"{len(room_ids)} room(s)"
-        LogEntry.objects.log_action(
-            user_id=request.user.pk,
-            content_type_id=ct.pk,
-            object_id=str(job.id),
-            object_repr=f"Telegram group send {bill_month.strftime('%Y-%m')}",
-            action_flag=CHANGE,
-            change_message=f"Send to Telegram group ({bill_month.strftime('%Y-%m')}), {room_label}.",
-        )
-    except Exception:
-        pass
+    room_label = "all rooms" if not room_ids else f"{len(room_ids)} room(s)"
+    log_id = _admin_action_log(
+        request,
+        f"ACTION:telegram_group;MONTH:{bill_month.strftime('%Y-%m')}",
+        f"Send to Telegram group ({bill_month.strftime('%Y-%m')}), {room_label}.",
+    )
+    _set_group_send_cache(
+        job.id,
+        errors=[],
+        log_id=log_id,
+        lang_code=getattr(request, "LANGUAGE_CODE", None),
+    )
 
     if getattr(settings, "ASYNC_TASKS", True):
         threading.Thread(
             target=_send_group_invoices_worker,
-            args=(job.id, chat_id, token, items),
+            args=(job.id, chat_id, token, items, bill_ids),
             daemon=True,
         ).start()
         messages.success(
@@ -735,7 +854,7 @@ def send_group_invoices_telegram_view(request):
         )
         return _redirect_back(request)
 
-    _send_group_invoices_worker(job.id, chat_id, token, items)
+    _send_group_invoices_worker(job.id, chat_id, token, items, bill_ids)
     return _redirect_back(request)
 
 
@@ -759,6 +878,10 @@ def telegram_group_status_view(request):
     done = job.status in (TelegramBatchJob.Status.SUCCESS, TelegramBatchJob.Status.FAILED)
     if done:
         request.session.pop("telegram_group_job_id", None)
+        cache.delete(f"telegram_group_job:{job_id}")
+
+    cache_job = cache.get(f"telegram_group_job:{job_id}") or {}
+    errors = cache_job.get("errors") or []
 
     return JsonResponse(
         {
@@ -768,6 +891,7 @@ def telegram_group_status_view(request):
             "total": job.total_batches,
             "completed": job.completed_batches,
             "failed": job.failed_batches,
+            "errors": errors,
             "done": done,
         }
     )
@@ -940,6 +1064,72 @@ def test_clientprofile_telegram_view(request, profile_id):
 
 
 # View to generate invoices for selected rooms and month
+def _generate_invoices_worker(job_id, bill_month, room_ids):
+    close_old_connections()
+    rooms_qs = Room.objects.all()
+    if room_ids:
+        rooms_qs = rooms_qs.filter(id__in=room_ids)
+    rooms = list(rooms_qs)
+    total = len(rooms)
+    completed = 0
+    failed = 0
+    errors = []
+    _set_generate_job(
+        job_id,
+        status="running",
+        message="Generating invoices...",
+        total=total,
+        errors=errors,
+    )
+    for room in rooms:
+        try:
+            bill = calculate_monthly_bill(room, bill_month)
+            generate_invoice_for_bill(bill=bill, lang="kh")
+        except ValidationError as e:
+            failed += 1
+            msg = "; ".join(e.messages)
+            errors.append(f"{room.room_number}: {msg}")
+        except Exception as e:
+            failed += 1
+            errors.append(f"{room.room_number}: {str(e)}")
+        completed += 1
+        _set_generate_job(
+            job_id,
+            completed=completed,
+            failed=failed,
+            message=f"Generating {completed}/{total}",
+            errors=errors[:12],
+        )
+    final_status = "success" if failed == 0 else "failed"
+    _set_generate_job(
+        job_id,
+        status=final_status,
+        message="Completed",
+        completed=completed,
+        failed=failed,
+        total=total,
+        errors=errors[:12],
+    )
+    key = f"generate_bills_job:{job_id}"
+    meta = cache.get(key) or {}
+    month_label = meta.get("month") or bill_month.strftime("%Y-%m")
+    room_label = meta.get("room_label") or ""
+    log_id = meta.get("log_id")
+    err_rooms = []
+    for err in errors:
+        room = (err.split(":", 1)[0] or "").strip()
+        if room:
+            err_rooms.append(room)
+    err_rooms = list(dict.fromkeys(err_rooms))
+    err_text = ", ".join(err_rooms[:6])
+    status_label = "success" if failed == 0 else "failed"
+    done_count = max(0, int(completed))
+    msg = f"ACTION:generate;STATUS:{status_label};DONE:{done_count};TOTAL:{total};FAILED:{failed}"
+    if err_text:
+        msg = f"{msg};ROOMS:{err_text}"
+    _update_admin_log(log_id, msg)
+
+
 def generate_invoices_view(request):
     if (
         request.user.is_active
@@ -953,23 +1143,61 @@ def generate_invoices_view(request):
         room_label = (
             _("all rooms") if not room_ids else _("%(count)s room(s)") % {"count": len(room_ids)}
         )
-        _admin_action_log(
-            request,
-            _("Generate bills %(month)s") % {"month": month},
-            _("Generate bills for %(month)s, %(rooms)s.")
-            % {"month": month, "rooms": room_label},
-        )
+        if not getattr(settings, "ASYNC_TASKS", True):
+            _admin_action_log(
+                request,
+                f"ACTION:generate;MONTH:{month}",
+                _("Generate bills for %(month)s, %(rooms)s.")
+                % {"month": month, "rooms": room_label},
+            )
 
         year, month_num = map(int, month.split("-"))
         bill_month = date(year, month_num, 1)
         generated_count = 0
+
+        if getattr(settings, "ASYNC_TASKS", True):
+            log_id = _admin_action_log(
+                request,
+                f"ACTION:generate;MONTH:{month}",
+                _("Generate bills for %(month)s, %(rooms)s.")
+                % {"month": month, "rooms": room_label},
+            )
+            job_id = str(uuid.uuid4())
+            rooms_qs = (
+                Room.objects.all()
+                if not room_ids
+                else Room.objects.filter(id__in=room_ids)
+            )
+            total = rooms_qs.count()
+            if total == 0:
+                messages.warning(request, _("No rooms found for the selected month."))
+                return _redirect_back(request)
+            _set_generate_job(
+                job_id,
+                status="pending",
+                message="Queued.",
+                total=total,
+                completed=0,
+                failed=0,
+                log_id=log_id,
+                month=month,
+                room_label=room_label,
+                lang_code=getattr(request, "LANGUAGE_CODE", None),
+            )
+            request.session["generate_invoices_job_id"] = job_id
+            threading.Thread(
+                target=_generate_invoices_worker,
+                args=(job_id, bill_month, room_ids),
+                daemon=True,
+            ).start()
+            messages.success(request, _("Generating invoices in background."))
+            return _redirect_back(request)
 
         rooms_qs = (
             Room.objects.all() if not room_ids else Room.objects.filter(id__in=room_ids)
         )
         for room in rooms_qs:
             try:
-                # now generate invoice
                 bill = calculate_monthly_bill(room, bill_month)
                 try:
                     generate_invoice_for_bill(
@@ -982,12 +1210,10 @@ def generate_invoices_view(request):
                         request, f"Room {room.room_number}: {'; '.join(e.messages)}"
                     )
             except ValidationError as e:
-                # Show a friendly error message in the admin UI
                 messages.error(
                     request, f"Room {room.room_number}: {'; '.join(e.messages)}"
                 )
             except Exception as e:
-                # catch-all for unexpected errors
                 messages.error(
                     request, f"Room {room.room_number}: Unexpected error: {str(e)}"
                 )
@@ -1004,6 +1230,43 @@ def generate_invoices_view(request):
         {
             "rooms": rooms,
         },
+    )
+
+
+def generate_invoices_status_view(request):
+    if (
+        request.user.is_active
+        and not request.user.is_staff
+        and not request.user.is_superuser
+    ):
+        return HttpResponseForbidden("Not allowed")
+
+    job_id = request.session.get("generate_invoices_job_id")
+    if not job_id:
+        return JsonResponse({"active": False})
+
+    key = f"generate_bills_job:{job_id}"
+    job = cache.get(key)
+    if not job:
+        request.session.pop("generate_invoices_job_id", None)
+        return JsonResponse({"active": False})
+
+    status = (job.get("status") or "").lower()
+    done = status in ("success", "failed")
+    if done:
+        request.session.pop("generate_invoices_job_id", None)
+
+    return JsonResponse(
+        {
+            "active": True,
+            "status": status or "pending",
+            "message": job.get("message") or "",
+            "total": job.get("total") or 0,
+            "completed": job.get("completed") or 0,
+            "failed": job.get("failed") or 0,
+            "errors": job.get("errors") or [],
+            "done": done,
+        }
     )
 
 
