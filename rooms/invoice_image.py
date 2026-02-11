@@ -4,6 +4,7 @@ from django.utils.formats import number_format
 
 # from PIL import Image, ImageDraw, ImageFont
 from datetime import date
+import base64
 from dateutil.relativedelta import relativedelta
 from rentHouseApp import settings
 import os
@@ -56,6 +57,13 @@ def generate_invoice_image(
     room_number = bill.room.room_number
 
     font_url = str(font_path).replace("\\", "/")
+    font_data_url = ""
+    try:
+        with open(font_path, "rb") as f:
+            font_b64 = base64.b64encode(f.read()).decode("ascii")
+        font_data_url = f"data:font/ttf;base64,{font_b64}"
+    except Exception:
+        font_data_url = ""
     # A4 landscape at 96 DPI
     a4_width = 1123
     a4_height = 794
@@ -71,7 +79,7 @@ def generate_invoice_image(
     <style>
         @font-face {{
             font-family: '{lang["font"]}';
-            src: url("file:///{font_url}");
+            src: url("{font_data_url if font_data_url else f'file:///{font_url}'}") format("truetype");
         }}
         @page {{
             size: A4 landscape;
