@@ -293,7 +293,9 @@ def generate_invoice_image(
     tmp_path = tmp_file.name
     tmp_file.close()
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(
+            args=["--allow-file-access-from-files"]
+        )
         page = browser.new_page(
             viewport={"width": a4_width, "height": a4_height},
             device_scale_factor=1,
