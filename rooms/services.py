@@ -186,5 +186,4 @@ def generate_invoice_for_bill(bill, lang="kh"):
         unit_price=unit_price,
         language=lang,
     )
-
     return image_invoice

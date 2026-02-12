@@ -195,6 +195,12 @@ msgstr[1] "DonnÃ©es manquantes (%(count)d)"
 msgid " • "
 msgstr ""
 
+msgid "Added"
+msgstr "Ajouté"
+
+msgid "Updated"
+msgstr "Mis à jour"
+
 #: .\rooms\admin.py:1196
 msgid "Alert"
 msgstr ""

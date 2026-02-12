@@ -71,6 +71,12 @@ def generate_invoice_image(
     def fmt_money(value, decimals=0):
         return number_format(value, decimal_pos=decimals, use_l10n=True, force_grouping=True)
 
+    water_total_khr = water_usage * unit_price.water_unit_price
+    elec_total_khr = elec_usage * unit_price.electricity_unit_price
+    room_total_khr = bill.room.price * unit_price.exchange_rate
+    total_khr = room_total_khr + water_total_khr + elec_total_khr
+    total_usd = total_khr / unit_price.exchange_rate
+
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -232,7 +238,7 @@ def generate_invoice_image(
             <td class="right">{water_current.meter_value:04}</td>
             <td class="right">{water_usage:04}</td>
             <td class="right">{fmt_money(unit_price.water_unit_price, 0)}៛</td>
-            <td class="right">{fmt_money(bill.water_cost, 0)}៛</td>
+            <td class="right">{fmt_money(water_total_khr, 0)}៛</td>
         </tr>
 
         <tr>
@@ -241,7 +247,7 @@ def generate_invoice_image(
             <td class="right">{elec_current.meter_value:05}</td>
             <td class="right">{elec_usage:05}</td>
             <td class="right">{fmt_money(unit_price.electricity_unit_price, 0)}៛</td>
-            <td class="right">{fmt_money(bill.electricity_cost, 0)}៛</td>
+            <td class="right">{fmt_money(elec_total_khr, 0)}៛</td>
         </tr>
     </table>
 
@@ -257,13 +263,13 @@ def generate_invoice_image(
         <tr>
             <td colspan="4" style="font-style: italic;">{T["note"]}</td>
             <td class="right total">{T["total"]}</td>
-            <td class="right total">{fmt_money(bill.total/unit_price.exchange_rate, 2)}$</td>
+            <td class="right total">{fmt_money(total_usd, 2)}$</td>
         </tr>
 
         <tr>
             <td colspan="4"></td>
             <td class="right total">{T["total_khr"]}</td>
-            <td class="right total">{fmt_money(bill.total, 0)}៛</td>
+            <td class="right total">{fmt_money(total_khr, 0)}៛</td>
         </tr>
     </table>
 

@@ -197,6 +197,15 @@ msgstr " • "
 msgid "Alert"
 msgstr ""
 
+msgid "Usage"
+msgstr "ការប្រើប្រាស់"
+
+msgid "Added"
+msgstr "បាន​បន្ថែម"
+
+msgid "Updated"
+msgstr "បាន​កែប្រែ"
+
 #: templates/admin/rooms/change_list.html
 msgid "Send to Telegram group"
 msgstr "ផ្ញើទៅក្រុម Telegram"
@@ -834,6 +843,13 @@ msgstr "បង្ហាញបន្ទប់ទាំងអស់ (ទិដ្�
 msgid "Income per Month"
 msgstr "ចំណូលក្នុងមួយខែ"
 
+#: templates/admin/dashboard.html
+msgid "Income (៛)"
+msgstr "ចំណូល (៛)"
+
+#: templates/admin/dashboard.html
+msgid "Expense (៛)"
+msgstr "ចំណាយ (៛)"
 #: .\templates\admin\dashboard.html:31
 msgid "Water / Electricity Trends"
 msgstr "និន្នាការទឹក / អគ្គិសនី"

@@ -211,6 +211,23 @@
     var gridColor = isDark ? "rgba(148, 163, 184, 0.25)" : "rgba(148, 163, 184, 0.18)";
     var textColor = isDark ? "#e2e8f0" : "#334155";
 
+    var numberLocale = "fr-FR";
+    var numberFormatter = null;
+    try {
+      numberFormatter = new Intl.NumberFormat(numberLocale);
+    } catch (e) {
+      numberFormatter = null;
+    }
+    function formatNumber(value) {
+      if (value === null || value === undefined || value === "") {
+        return "";
+      }
+      if (numberFormatter) {
+        return numberFormatter.format(value);
+      }
+      return String(value);
+    }
+
     var incomeLabels = JSON.parse(document.getElementById("income-labels").textContent || "[]");
     var incomeValues = JSON.parse(document.getElementById("income-values").textContent || "[]");
     var waterLabels = JSON.parse(document.getElementById("water-labels").textContent || "[]");
@@ -226,10 +243,11 @@
           labels: incomeLabels,
           datasets: [
             {
-              label: "{% if is_tenant %}{% translate "Expense (៛)" %}{% else %}{% translate "Income (៛)" %}{% endif %}",
+              label: "{% if is_tenant %}{% translate "Expense" %}{% else %}{% translate "Income" %}{% endif %}",
               data: incomeValues,
               borderColor: "#16a34a",
               backgroundColor: "rgba(22, 163, 74, 0.18)",
+              unit: "៛",
               fill: true,
               tension: 0.35,
               pointRadius: 3,
@@ -257,6 +275,14 @@
               bodyColor: "#fff",
               padding: 10,
               cornerRadius: 8,
+              callbacks: {
+                label: function (context) {
+                  var label = context.dataset.label || "";
+                  var value = formatNumber(context.parsed.y);
+                  var unit = context.dataset.unit || "";
+                  return label ? label + ": " + value + (unit ? " " + unit : "") : value + (unit ? " " + unit : "");
+                },
+              },
             },
           },
           scales: {
@@ -264,7 +290,12 @@
             y: {
               beginAtZero: true,
               grid: { color: gridColor },
-              ticks: { color: textColor },
+              ticks: {
+                color: textColor,
+                callback: function (value) {
+                  return formatNumber(value);
+                },
+              },
             },
           },
         },
@@ -279,10 +310,11 @@
           labels: waterLabels.length ? waterLabels : elecLabels,
           datasets: [
             {
-              label: "{% translate "Water (m³)" %}",
+              label: "{% translate "Water" %}",
               data: waterValues,
               borderColor: "#0ea5e9",
               backgroundColor: "rgba(14, 165, 233, 0.14)",
+              unit: "m³",
               fill: true,
               tension: 0.35,
               pointRadius: 3,
@@ -290,10 +322,11 @@
               borderWidth: 2,
             },
             {
-              label: "{% translate "Electricity (kWh)" %}",
+              label: "{% translate "Electricity" %}",
               data: elecValues,
               borderColor: "#2563eb",
               backgroundColor: "rgba(37, 99, 235, 0.16)",
+              unit: "kWh",
               fill: true,
               tension: 0.35,
               pointRadius: 3,
@@ -321,11 +354,28 @@
               bodyColor: "#fff",
               padding: 10,
               cornerRadius: 8,
+              callbacks: {
+                label: function (context) {
+                  var label = context.dataset.label || "";
+                  var value = formatNumber(context.parsed.y);
+                  var unit = context.dataset.unit || "";
+                  return label ? label + ": " + value + (unit ? " " + unit : "") : value + (unit ? " " + unit : "");
+                },
+              },
             },
           },
           scales: {
             x: { grid: { color: gridColor }, ticks: { color: textColor } },
-            y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor } },
+            y: {
+              beginAtZero: true,
+              grid: { color: gridColor },
+              ticks: {
+                color: textColor,
+                callback: function (value) {
+                  return formatNumber(value);
+                },
+              },
+            },
           },
         },
       });

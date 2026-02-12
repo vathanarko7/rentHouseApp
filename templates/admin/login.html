@@ -6,6 +6,7 @@
   {% include "includes/language_switcher.html" %}
 </div>
 <style>
+  html,
   body.login {
     background: radial-gradient(
       1200px 800px at 10% 10%,
@@ -13,8 +14,12 @@
       #1a2a34 40%,
       #0b0f14 100%
     );
-    min-height: 100vh;
+    min-height: 100%;
     overflow: hidden;
+  }
+  body.login {
+    min-height: 100dvh;
+    padding-bottom: env(safe-area-inset-bottom);
   }
   .login #container {
     max-width: 420px;

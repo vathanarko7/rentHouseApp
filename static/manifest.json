@@ -13,8 +13,20 @@
       "purpose": "any"
     },
     {
+      "src": "/static/images/pwa-icon-1024.png",
+      "sizes": "1024x1024",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/static/images/pwa-icon-192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/static/images/pwa-icon-256.png",
+      "sizes": "256x256",
       "type": "image/png",
       "purpose": "any"
     }

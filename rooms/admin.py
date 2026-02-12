@@ -51,7 +51,7 @@ from rooms.services import generate_invoice_for_bill
 from django.urls import reverse, path, re_path
 from django.db.models import Sum
 from django.db.models.functions import TruncMonth
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
 # Register your models here.
 admin.site.site_header = _("Rent House Administration")
@@ -574,32 +574,45 @@ class RoomAdmin(admin.ModelAdmin):
         except Room.DoesNotExist:
             return super().change_view(request, object_id, form_url, extra_context)
 
-        elec_readings = (
+        elec_readings = list(
             Electricity.objects.filter(room=room)
             .order_by("date")
             .values_list("date", "meter_value")
         )
-        water_readings = (
+        water_readings = list(
             Water.objects.filter(room=room)
             .order_by("date")
             .values_list("date", "meter_value")
         )
 
-        label_dates = sorted(
-            {d for d, _ in elec_readings}.union({d for d, _ in water_readings})
-        )
-        labels = [d.strftime("%Y-%m-%d") for d in label_dates]
+        def usage_by_month(readings):
+            usage_map = {}
+            previous = None
+            for date, value in readings:
+                if previous is None:
+                    previous = value
+                    continue
+                usage = value - previous
+                previous = value
+                if usage < 0:
+                    continue
+                month = date.replace(day=1)
+                usage_map[month] = usage_map.get(month, 0) + usage
+            return usage_map
 
-        elec_map = {d: v for d, v in elec_readings}
-        water_map = {d: v for d, v in water_readings}
+        elec_usage = usage_by_month(elec_readings)
+        water_usage = usage_by_month(water_readings)
 
-        elec_values = [elec_map.get(d) for d in label_dates]
-        water_values = [water_map.get(d) for d in label_dates]
+        label_dates = sorted(set(elec_usage.keys()).union(water_usage.keys()))
+        labels = [date_format(d, "M Y") for d in label_dates]
+
+        elec_values = [elec_usage.get(d) for d in label_dates]
+        water_values = [water_usage.get(d) for d in label_dates]
 
         extra_context["electricity_chart_labels"] = labels
         extra_context["electricity_chart_datasets"] = [
             {
-                "label": _("Electricity (kWh)"),
+                "label": _("Electricity"),
                 "data": elec_values,
                 "borderColor": "#2563eb",
                 "backgroundColor": "rgba(37, 99, 235, 0.12)",
@@ -608,7 +621,7 @@ class RoomAdmin(admin.ModelAdmin):
                 "yAxisID": "y",
             },
             {
-                "label": _("Water (m³)"),
+                "label": _("Water"),
                 "data": water_values,
                 "borderColor": "#0ea5e9",
                 "backgroundColor": "rgba(14, 165, 233, 0.10)",
@@ -618,11 +631,11 @@ class RoomAdmin(admin.ModelAdmin):
             },
         ]
         extra_context["electricity_chart_texts"] = {
-            "axis_readings": _("Readings"),
+            "axis_readings": _("Usage"),
             "tooltip_electricity": _("Electricity"),
             "tooltip_water": _("Water"),
-            "label_electricity": _("Electricity (kWh)"),
-            "label_water": _("Water (m³)"),
+            "label_electricity": _("Electricity"),
+            "label_water": _("Water"),
         }
         return super().change_view(request, object_id, form_url, extra_context)
 
@@ -774,6 +787,37 @@ class UnitPriceAdmin(admin.ModelAdmin):
 
 @admin.register(Water)
 class WaterAdmin(admin.ModelAdmin):
+    class WaterAdminForm(forms.ModelForm):
+        def clean(self):
+            cleaned = super().clean()
+            room = cleaned.get("room")
+            date = cleaned.get("date")
+            value = cleaned.get("meter_value")
+            if not room or not date or value is None:
+                return cleaned
+            prev = (
+                Water.objects.filter(room=room, date__lt=date)
+                .order_by("-date")
+                .first()
+            )
+            next_reading = (
+                Water.objects.filter(room=room, date__gt=date)
+                .order_by("date")
+                .first()
+            )
+            if prev and value < prev.meter_value:
+                raise ValidationError(
+                    _("Water meter value cannot decrease (previous: %(prev)s).")
+                    % {"prev": prev.meter_value}
+                )
+            if next_reading and value > next_reading.meter_value:
+                raise ValidationError(
+                    _("Water meter value cannot exceed next reading (next: %(next)s).")
+                    % {"next": next_reading.meter_value}
+                )
+            return cleaned
+
+    form = WaterAdminForm
     list_display = ("month_year", "room_name", "meter_value_m3")
     actions = None
     list_filter = ("room", ReadingMonthFilter)
@@ -891,6 +935,37 @@ class WaterAdmin(admin.ModelAdmin):
 
 @admin.register(Electricity)
 class ElectricityAdmin(admin.ModelAdmin):
+    class ElectricityAdminForm(forms.ModelForm):
+        def clean(self):
+            cleaned = super().clean()
+            room = cleaned.get("room")
+            date = cleaned.get("date")
+            value = cleaned.get("meter_value")
+            if not room or not date or value is None:
+                return cleaned
+            prev = (
+                Electricity.objects.filter(room=room, date__lt=date)
+                .order_by("-date")
+                .first()
+            )
+            next_reading = (
+                Electricity.objects.filter(room=room, date__gt=date)
+                .order_by("date")
+                .first()
+            )
+            if prev and value < prev.meter_value:
+                raise ValidationError(
+                    _("Electricity meter value cannot decrease (previous: %(prev)s).")
+                    % {"prev": prev.meter_value}
+                )
+            if next_reading and value > next_reading.meter_value:
+                raise ValidationError(
+                    _("Electricity meter value cannot exceed next reading (next: %(next)s).")
+                    % {"next": next_reading.meter_value}
+                )
+            return cleaned
+
+    form = ElectricityAdminForm
     list_display = ("month_year", "room_name", "meter_value_kwh")
     actions = None
     list_filter = ("room", ReadingMonthFilter)
@@ -1625,6 +1700,26 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 issue_label,
                 issue_label,
             )
+        regen_link = ""
+        if not is_tenant and obj.status == MonthlyBill.Status.DRAFT and not missing_data:
+            regen_confirm = _("Re-generate this invoice? This will overwrite the current draft.")
+            regen_label = _("Re-generate")
+            regen_link = format_html(
+                '<a class="button regen-btn btn-sm" href="{}" '
+                'data-confirm-message="{}" data-confirm-kind="regen" data-confirm-label="{}" '
+                'aria-label="{}" title="{}">'
+                '<span class="btn-icon" aria-hidden="true">'
+                '<svg viewBox="0 0 24 24" width="14" height="14"><path fill="currentColor" d="M12 6V3L8 7l4 4V8a4 4 0 1 1-4 4H6a6 6 0 1 0 6-6z"/></svg>'
+                '</span>'
+                '<span class="btn-label">{}</span>'
+                '</a> ',
+                reverse("admin:rooms_monthlybill_regenerate_invoice", args=[obj.id]),
+                regen_confirm,
+                regen_label,
+                regen_label,
+                regen_label,
+                regen_label,
+            )
         send_link = ""
         if (
             not is_tenant
@@ -1671,10 +1766,11 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 paid_label,
             )
         test_link = ""
-        if not (issue_link or send_link or paid_link or test_link):
+        if not (issue_link or regen_link or send_link or paid_link or test_link):
             return "-"
         return format_html(
-            "{}{}{}{}",
+            "{}{}{}{}{}",
+            regen_link,
             issue_link,
             send_link,
             paid_link,
@@ -1968,17 +2064,13 @@ def dashboard_view(request):
         .annotate(total=Sum("total"))
         .order_by("m")
     )
-    water_by_month = (
-        waters.annotate(m=TruncMonth("date"))
-        .values("m")
-        .annotate(total=Sum("meter_value"))
-        .order_by("m")
+    water_readings = (
+        waters.order_by("room_id", "date")
+        .values("room_id", "date", "meter_value")
     )
-    elec_by_month = (
-        electrics.annotate(m=TruncMonth("date"))
-        .values("m")
-        .annotate(total=Sum("meter_value"))
-        .order_by("m")
+    elec_readings = (
+        electrics.order_by("room_id", "date")
+        .values("room_id", "date", "meter_value")
     )
 
     def build_series(qs):
@@ -1987,13 +2079,35 @@ def dashboard_view(request):
         for row in qs:
             if not row["m"]:
                 continue
-            labels.append(date_format(row["m"], "F Y"))
+            labels.append(date_format(row["m"], "M Y"))
             values.append(float(row["total"] or 0))
         return labels, values
 
+    def build_usage_series(readings):
+        usage_by_month = {}
+        last_by_room = {}
+        for row in readings:
+            room_id = row["room_id"]
+            current = row["meter_value"]
+            previous = last_by_room.get(room_id)
+            last_by_room[room_id] = current
+            if previous is None:
+                continue
+            usage = current - previous
+            if usage < 0:
+                continue
+            month = row["date"].replace(day=1)
+            usage_by_month[month] = usage_by_month.get(month, 0) + usage
+        labels = []
+        values = []
+        for month in sorted(usage_by_month.keys()):
+            labels.append(date_format(month, "M Y"))
+            values.append(float(usage_by_month[month]))
+        return labels, values
+
     income_labels, income_values = build_series(income_by_month)
-    water_labels, water_values = build_series(water_by_month)
-    elec_labels, elec_values = build_series(elec_by_month)
+    water_labels, water_values = build_usage_series(water_readings)
+    elec_labels, elec_values = build_usage_series(elec_readings)
 
     context = {
         **admin.site.each_context(request),
