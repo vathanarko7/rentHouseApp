@@ -1203,9 +1203,58 @@
       color: #f59e0b;
     }
   }
+  .app-splash {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(160deg, #0f172a 0%, #1f2937 55%, #111827 100%);
+    opacity: 1;
+    transition: opacity 0.6s ease;
+  }
+  .app-splash.is-hidden {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .app-splash__logo {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.35));
+  }
+  @media (max-width: 640px) {
+    .app-splash__logo {
+      width: 96px;
+    }
+  }
 </style>
 {% endblock %} {% block extrabody %} {{ block.super }}
 {% load i18n %}
+<div id="app-splash" class="app-splash" aria-hidden="true">
+  <img
+    class="app-splash__logo"
+    src="{% static 'images/ptasjuolkrudy-splash-screen.png' %}"
+    alt="{% translate 'PtasJuolKruDy' %}"
+  />
+</div>
+<script>
+  (function () {
+    function hideSplash() {
+      var splash = document.getElementById("app-splash");
+      if (!splash) return;
+      splash.classList.add("is-hidden");
+      setTimeout(function () {
+        splash.remove();
+      }, 700);
+    }
+    if (document.readyState === "complete") {
+      hideSplash();
+    } else {
+      window.addEventListener("load", hideSplash, { once: true });
+    }
+  })();
+</script>
 <div class="alert-details-modal" id="alert-details-modal" aria-hidden="true">
   <div class="alert-details-card" role="dialog" aria-modal="true">
     <h3 class="alert-details-title">{% trans "Missing data details" %}</h3>
