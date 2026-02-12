@@ -15,6 +15,7 @@ from django.utils.formats import date_format
 from django.shortcuts import redirect
 from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import override
 from django.utils.formats import number_format
 import os
 from django import forms
@@ -2073,17 +2074,7 @@ def dashboard_view(request):
         .values("room_id", "date", "meter_value")
     )
 
-    def build_series(qs):
-        labels = []
-        values = []
-        for row in qs:
-            if not row["m"]:
-                continue
-            labels.append(date_format(row["m"], "M Y"))
-            values.append(float(row["total"] or 0))
-        return labels, values
-
-    def build_usage_series(readings):
+    def build_usage_map(readings):
         usage_by_month = {}
         last_by_room = {}
         for row in readings:
@@ -2098,6 +2089,19 @@ def dashboard_view(request):
                 continue
             month = row["date"].replace(day=1)
             usage_by_month[month] = usage_by_month.get(month, 0) + usage
+        return usage_by_month
+
+    def build_series(qs):
+        labels = []
+        values = []
+        for row in qs:
+            if not row["m"]:
+                continue
+            labels.append(date_format(row["m"], "M Y"))
+            values.append(float(row["total"] or 0))
+        return labels, values
+
+    def build_usage_series(usage_by_month):
         labels = []
         values = []
         for month in sorted(usage_by_month.keys()):
@@ -2106,8 +2110,33 @@ def dashboard_view(request):
         return labels, values
 
     income_labels, income_values = build_series(income_by_month)
-    water_labels, water_values = build_usage_series(water_readings)
-    elec_labels, elec_values = build_usage_series(elec_readings)
+    water_usage_by_month = build_usage_map(water_readings)
+    elec_usage_by_month = build_usage_map(elec_readings)
+    water_labels, water_values = build_usage_series(water_usage_by_month)
+    elec_labels, elec_values = build_usage_series(elec_usage_by_month)
+
+    income_map = {row["m"]: row["total"] or 0 for row in income_by_month if row["m"]}
+    latest_month = None
+    month_candidates = (
+        set(income_map.keys())
+        | set(water_usage_by_month.keys())
+        | set(elec_usage_by_month.keys())
+    )
+    if month_candidates:
+        latest_month = max(month_candidates)
+
+    voice_summary_km = ""
+    if latest_month:
+        income_total = income_map.get(latest_month, 0) or 0
+        water_total = water_usage_by_month.get(latest_month, 0) or 0
+        elec_total = elec_usage_by_month.get(latest_month, 0) or 0
+        with override("km"):
+            month_label_km = date_format(latest_month, "F Y")
+        voice_summary_km = (
+            f"ខែ{month_label_km} ទទួលបានចំណូលសរុប {income_total:,.0f}៛។ "
+            f"ប្រើប្រាស់ទឹកប្រើសរុបអស់ {int(round(water_total))}m³ "
+            f"និងអគ្គិសនីប្រើសរុបអស់ {int(round(elec_total))}kWh។"
+        )
 
     context = {
         **admin.site.each_context(request),
@@ -2119,6 +2148,7 @@ def dashboard_view(request):
         "water_values": water_values,
         "elec_labels": elec_labels,
         "elec_values": elec_values,
+        "voice_summary_km": voice_summary_km,
     }
     return TemplateResponse(request, "admin/dashboard.html", context)
 

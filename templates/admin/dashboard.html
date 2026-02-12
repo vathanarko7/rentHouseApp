@@ -21,6 +21,28 @@
 {% endif %}
 
 <style>
+  .voice-summary {
+    margin: 12px 0 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .voice-summary button {
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-weight: 600;
+  }
+  .voice-summary .voice-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--body-quiet-color, #6b7280);
+  }
+  .voice-summary .voice-toggle input {
+    transform: translateY(1px);
+  }
   .dashboard-section {
     margin-top: 16px;
   }
@@ -127,6 +149,15 @@
   }
 </style>
 
+<div class="voice-summary">
+  <button type="button" class="button" id="voice-summary-play">{% translate "Play summary" %}</button>
+  <label class="voice-toggle">
+    <input type="checkbox" id="voice-summary-auto" />
+    {% translate "Auto play" %}
+  </label>
+</div>
+<p id="voice-summary-display" class="voice-summary-text" style="margin: 6px 0 0; color: var(--body-quiet-color, #6b7280);"></p>
+
 <section class="dashboard-section">
   <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">
     {% if is_tenant %}
@@ -203,6 +234,7 @@
 {{ water_values|json_script:"water-values" }}
 {{ elec_labels|json_script:"elec-labels" }}
 {{ elec_values|json_script:"elec-values" }}
+{{ voice_summary_km|json_script:"voice-summary-text" }}
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
@@ -408,6 +440,70 @@
         li.remove();
       }, 400);
     }, 3000);
+  })();
+</script>
+<script>
+  (function () {
+    var textEl = document.getElementById("voice-summary-text");
+    var textDisplay = document.getElementById("voice-summary-display");
+    var playBtn = document.getElementById("voice-summary-play");
+    var autoToggle = document.getElementById("voice-summary-auto");
+    if (!textEl || !playBtn || !autoToggle) return;
+
+    var summaryText = "";
+    try {
+      summaryText = JSON.parse(textEl.textContent || '""');
+    } catch (e) {
+      summaryText = (textEl.textContent || "").trim();
+    }
+    if (textDisplay) {
+      textDisplay.textContent = summaryText;
+    }
+    var storageKey = "voiceSummaryAuto";
+    var autoOn = localStorage.getItem(storageKey) === "1";
+    autoToggle.checked = autoOn;
+
+    function pickVoice() {
+      var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+      if (!voices.length) return null;
+      var kmVoice = null;
+      for (var i = 0; i < voices.length; i++) {
+        var v = voices[i];
+        if (v.lang && v.lang.toLowerCase().indexOf("km") === 0) {
+          kmVoice = v;
+          break;
+        }
+      }
+      return kmVoice;
+    }
+
+    function speak() {
+      if (!summaryText || !window.speechSynthesis) return;
+      var utter = new SpeechSynthesisUtterance(summaryText);
+      utter.lang = "km-KH";
+      var voice = pickVoice();
+      if (voice) utter.voice = voice;
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(utter);
+    }
+
+    playBtn.addEventListener("click", speak);
+    autoToggle.addEventListener("change", function () {
+      localStorage.setItem(storageKey, autoToggle.checked ? "1" : "0");
+      if (autoToggle.checked) {
+        speak();
+      }
+    });
+
+    if (autoOn) {
+      speak();
+    }
+
+    if (window.speechSynthesis) {
+      window.speechSynthesis.onvoiceschanged = function () {
+        if (autoOn) speak();
+      };
+    }
   })();
 </script>
 {% endblock %}
