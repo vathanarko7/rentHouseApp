@@ -1,0 +1,10 @@
+[Unit]
+Description=Run RentHouse monthly report on the 1st
+
+[Timer]
+OnCalendar=*-*-01 02:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+

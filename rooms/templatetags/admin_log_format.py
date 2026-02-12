@@ -26,6 +26,7 @@ def _parse_title(title):
     return data if "ACTION" in data else None
 
 
+
 @register.filter
 def admin_log_title(title):
     data = _parse_title(title)
