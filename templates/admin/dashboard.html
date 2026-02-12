@@ -12,7 +12,37 @@
 {% endblock %}
 
 {% block content %}
-<h1>{% translate "Reports & Dashboard" %}</h1>
+<div class="dashboard-header">
+  <h1>{% translate "Reports & Dashboard" %}</h1>
+  <div class="voice-summary voice-summary--compact">
+    <button
+      type="button"
+      class="button voice-icon-btn"
+      id="voice-summary-play"
+      aria-label="{% translate "Play summary" %}"
+      title="{% translate "Play summary" %}"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M4 10v4a1 1 0 0 0 1 1h3l5 4V5l-5 4H5a1 1 0 0 0-1 1z"
+          fill="currentColor"
+        />
+        <path
+          d="M16.5 8.5a1 1 0 0 1 1.4 0 5 5 0 0 1 0 7.1 1 1 0 1 1-1.4-1.4 3 3 0 0 0 0-4.3 1 1 0 0 1 0-1.4z"
+          fill="currentColor"
+        />
+        <path
+          d="M18.9 6.1a1 1 0 0 1 1.4 0 8.5 8.5 0 0 1 0 12.1 1 1 0 1 1-1.4-1.4 6.5 6.5 0 0 0 0-9.3 1 1 0 0 1 0-1.4z"
+          fill="currentColor"
+        />
+      </svg>
+    </button>
+    <label class="voice-toggle">
+      <input type="checkbox" id="voice-summary-auto" />
+      {% translate "Auto play" %}
+    </label>
+  </div>
+</div>
 
 {% if is_tenant %}
 <p>{% translate "Showing your room data only." %}</p>
@@ -21,17 +51,37 @@
 {% endif %}
 
 <style>
+  .dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .dashboard-header h1 {
+    margin: 0;
+  }
   .voice-summary {
-    margin: 12px 0 6px;
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
-  .voice-summary button {
+  .voice-summary--compact {
+    margin: 0;
+  }
+  .voice-icon-btn {
     border-radius: 999px;
-    padding: 6px 12px;
-    font-weight: 600;
+    padding: 6px;
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .voice-icon-btn svg {
+    width: 18px;
+    height: 18px;
   }
   .voice-summary .voice-toggle {
     display: inline-flex;
@@ -95,6 +145,9 @@
     .chart-card {
       padding: 12px;
     }
+    .dashboard-header {
+      align-items: flex-start;
+    }
   }
   #income-chart,
   #usage-chart {
@@ -149,14 +202,6 @@
   }
 </style>
 
-<div class="voice-summary">
-  <button type="button" class="button" id="voice-summary-play">{% translate "Play summary" %}</button>
-  <label class="voice-toggle">
-    <input type="checkbox" id="voice-summary-auto" />
-    {% translate "Auto play" %}
-  </label>
-</div>
-<p id="voice-summary-display" class="voice-summary-text" style="margin: 6px 0 0; color: var(--body-quiet-color, #6b7280);"></p>
 
 <section class="dashboard-section">
   <h2 style="margin: 0 0 8px; font-size: 16px; font-weight: 600;">
@@ -445,44 +490,19 @@
 <script>
   (function () {
     var textEl = document.getElementById("voice-summary-text");
-    var textDisplay = document.getElementById("voice-summary-display");
     var playBtn = document.getElementById("voice-summary-play");
     var autoToggle = document.getElementById("voice-summary-auto");
     if (!textEl || !playBtn || !autoToggle) return;
 
-    var summaryText = "";
-    try {
-      summaryText = JSON.parse(textEl.textContent || '""');
-    } catch (e) {
-      summaryText = (textEl.textContent || "").trim();
-    }
-    if (textDisplay) {
-      textDisplay.textContent = summaryText;
-    }
+    var summaryText = (textEl.textContent || "").trim();
     var storageKey = "voiceSummaryAuto";
     var autoOn = localStorage.getItem(storageKey) === "1";
     autoToggle.checked = autoOn;
-
-    function pickVoice() {
-      var voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
-      if (!voices.length) return null;
-      var kmVoice = null;
-      for (var i = 0; i < voices.length; i++) {
-        var v = voices[i];
-        if (v.lang && v.lang.toLowerCase().indexOf("km") === 0) {
-          kmVoice = v;
-          break;
-        }
-      }
-      return kmVoice;
-    }
 
     function speak() {
       if (!summaryText || !window.speechSynthesis) return;
       var utter = new SpeechSynthesisUtterance(summaryText);
       utter.lang = "km-KH";
-      var voice = pickVoice();
-      if (voice) utter.voice = voice;
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(utter);
     }
@@ -497,12 +517,6 @@
 
     if (autoOn) {
       speak();
-    }
-
-    if (window.speechSynthesis) {
-      window.speechSynthesis.onvoiceschanged = function () {
-        if (autoOn) speak();
-      };
     }
   })();
 </script>

@@ -2132,10 +2132,15 @@ def dashboard_view(request):
         elec_total = elec_usage_by_month.get(latest_month, 0) or 0
         with override("km"):
             month_label_km = date_format(latest_month, "F Y")
+        # voice_summary_km = (
+        #     f"ខែ{month_label_km} ទទួលបានចំណូលសរុប {income_total:,.0f}៛។ "
+        #     f"ប្រើប្រាស់ទឹកប្រើសរុបអស់ {int(round(water_total))}m³ "
+        #     f"និងអគ្គិសនីប្រើសរុបអស់ {int(round(elec_total))}kWh។"
+        # )
         voice_summary_km = (
-            f"ខែ{month_label_km} ទទួលបានចំណូលសរុប {income_total:,.0f}៛។ "
-            f"ប្រើប្រាស់ទឹកប្រើសរុបអស់ {int(round(water_total))}m³ "
-            f"និងអគ្គិសនីប្រើសរុបអស់ {int(round(elec_total))}kWh។"
+            f"{month_label_km} ទទួលបានចំណូលសរុប {income_total:,.0f}៛។ "
+            f"ប្រើប្រាស់ទឹកអស់សរុប {int(round(water_total))}m³ "
+            f"និងអគ្គិសនីសរុបអស់ {int(round(elec_total))}kWh។"
         )
 
     context = {
