@@ -22,3 +22,5 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+ADMIN_TELEGRAM_CHAT_ID = 562271569

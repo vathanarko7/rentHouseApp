@@ -234,6 +234,9 @@ EXCHANGE_RATE_API_KEY = ""  # If required by the API provider
 TELEGRAM_BOT_TOKEN = "8217798129:AAFTRD2XE5lwxdV7-mJIwoPzDxd3j8YcCFU"
 TENANTS_TELEGRAM_GROUP_CHAT_ID = -1003826670179
 TELEGRAM_TEST_MESSAGE_TEMPLATE = "សួស្តីពីបន្ទប់ជួលគ្រូឌី​ {room_number}."
+SMART_ALERT_DUE_DAYS = int(os.getenv("SMART_ALERT_DUE_DAYS", "5"))
+SMART_ALERT_USAGE_PCT = float(os.getenv("SMART_ALERT_USAGE_PCT", "30"))
+
 # # PDF generation settings
 # PDF_PAGE_SIZE = "A4"
 # PDF_FONT = "Helvetica"

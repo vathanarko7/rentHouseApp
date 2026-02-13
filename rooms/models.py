@@ -293,3 +293,23 @@ class TelegramBatchJob(models.Model):
 
     def __str__(self):
         return f"Telegram batch {self.month.strftime('%Y-%m')} ({self.status})"
+
+
+class SmartAlertLog(models.Model):
+    month = models.DateField()
+    alert_type = models.CharField(max_length=50)
+    room = models.ForeignKey(
+        Room, on_delete=models.SET_NULL, null=True, blank=True, related_name="smart_alerts"
+    )
+    message = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("month", "alert_type", "room")
+        ordering = ["-created_at"]
+        verbose_name = _("Smart alert log")
+        verbose_name_plural = _("Smart alert logs")
+
+    def __str__(self):
+        room_label = self.room.room_number if self.room else "all"
+        return f"{self.alert_type} {room_label} {self.month.strftime('%Y-%m')}"
