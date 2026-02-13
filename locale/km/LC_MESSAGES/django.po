@@ -970,7 +970,7 @@ msgstr "ឆ្នាំ"
 
 #: .\templates\admin\rooms\change_list.html:591
 msgid "Leave unchecked = all rooms"
-msgstr "ទុកមិនធីក = បន្ទប់ទាំងអស់"
+msgstr "មិនជ្រើសរើស = ជ្រើសរើសបន្ទប់ទាំងអស់"
 
 #: .\templates\admin\rooms\change_list.html:603
 msgid "Submit"
@@ -1091,15 +1091,15 @@ msgstr "ថ្លៃអគ្គិសនី"
 
 #: .\rooms\models.py
 msgid "Issued at"
-msgstr "បានចេញនៅ"
+msgstr "បានដាក់ចេញនៅថ្ងៃ"
 
 #: .\rooms\models.py
 msgid "Sent at"
-msgstr "បានផ្ញើនៅ"
+msgstr "បានផ្ញើនៅថ្ងៃ"
 
 #: .\rooms\models.py
 msgid "Paid at"
-msgstr "ទូទាត់ប្រាក់នៅ"
+msgstr "ទូទាត់ប្រាក់នៅថ្ងៃ"
 
 #: .\rooms\models.py
 msgid "Async job pending"
@@ -1131,7 +1131,7 @@ msgstr "ពេលវេលាការងារចុងក្រោយ"
 
 #: .\rooms\models.py
 msgid "Created at"
-msgstr "បានបង្កើតនៅ"
+msgstr "បានបង្កើតនៅថ្ងៃ"
 
 #: .\templates\admin\rooms\water\change_list.html:12
 msgid "Add water"
