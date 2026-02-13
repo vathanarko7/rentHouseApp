@@ -55,6 +55,17 @@ def _get_usage(model, room, month):
     return usage if usage >= 0 else None
 
 
+def _get_recent_usages(model, room, month, count=3):
+    usages = []
+    cursor = month
+    for _ in range(count):
+        cursor = _prev_month(cursor)
+        usage = _get_usage(model, room, cursor)
+        if usage is not None:
+            usages.append(usage)
+    return usages
+
+
 def _should_send(month, alert_type, room=None):
     return not SmartAlertLog.objects.filter(
         month=month, alert_type=alert_type, room=room
@@ -85,6 +96,10 @@ class Command(BaseCommand):
         chat_id = getattr(settings, "ADMIN_TELEGRAM_CHAT_ID", "")
         if not chat_id:
             raise CommandError("ADMIN_TELEGRAM_CHAT_ID is not configured.")
+
+        if not getattr(settings, "SMART_ALERTS_ENABLED", True):
+            self.stdout.write(self.style.WARNING("Smart alerts are disabled."))
+            return
 
         due_days = int(getattr(settings, "SMART_ALERT_DUE_DAYS", 5))
         pct = float(getattr(settings, "SMART_ALERT_USAGE_PCT", 30))
@@ -141,17 +156,19 @@ class Command(BaseCommand):
             .first()
         )
         if latest_month:
-            prev_month = _prev_month(latest_month)
             for room in Room.objects.all():
                 for model, alert_key in (
                     (Water, "usage_water_high"),
                     (Electricity, "usage_electricity_high"),
                 ):
                     current = _get_usage(model, room, latest_month)
-                    previous = _get_usage(model, room, prev_month)
-                    if current is None or previous is None or previous == 0:
+                    recent = _get_recent_usages(model, room, latest_month, count=3)
+                    if current is None or len(recent) < 2:
                         continue
-                    if current <= previous * (1 + pct / 100):
+                    avg_recent = sum(recent) / len(recent)
+                    if avg_recent == 0:
+                        continue
+                    if current <= avg_recent * (1 + pct / 100):
                         continue
                     if not _should_send(latest_month, alert_key, room):
                         continue

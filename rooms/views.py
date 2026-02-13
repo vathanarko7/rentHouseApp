@@ -258,7 +258,7 @@ def regenerate_invoice_view(request, bill_id):
         )
         return _redirect_back(request)
     if bill.status != MonthlyBill.Status.DRAFT:
-        messages.error(request, "Invoice can only be re-generated in Draft status.")
+        messages.error(request, _("Invoice can only be re-generated in Draft status."))
         return _redirect_back(request)
 
     def _regen():
@@ -280,7 +280,7 @@ def regenerate_invoice_view(request, bill_id):
         bill.save(update_fields=["async_job_pending", "async_job_type"])
         _set_job_result(bill, "pending", "Re-generate queued.")
         threading.Thread(target=_regen, daemon=True).start()
-        messages.success(request, "Invoice re-generation queued.")
+        messages.success(request, _("Invoice re-generation queued."))
         return _redirect_back(request)
 
     try:
@@ -290,7 +290,7 @@ def regenerate_invoice_view(request, bill_id):
         messages.error(request, "; ".join(e.messages))
         return _redirect_back(request)
 
-    messages.success(request, "Invoice re-generated successfully.")
+    messages.success(request, _("Invoice re-generated successfully."))
     return _redirect_back(request)
 
 
@@ -306,7 +306,7 @@ def issue_invoice_view(request, bill_id):
         )
         return _redirect_back(request)
     if bill.status != MonthlyBill.Status.DRAFT:
-        messages.error(request, "Invoice can only be issued from Draft status.")
+        messages.error(request, _("Invoice can only be issued from Draft status."))
         return _redirect_back(request)
 
     bill.status = MonthlyBill.Status.ISSUED
@@ -340,7 +340,7 @@ def issue_invoice_view(request, bill_id):
         _set_job_result(bill, "pending", "Issue queued.")
         threading.Thread(target=_generate_issue_invoice, daemon=True).start()
 
-    messages.success(request, "Invoice issued successfully.")
+    messages.success(request, _("Invoice issued successfully."))
     return _redirect_back(request)
 
 
@@ -350,12 +350,18 @@ def mark_paid_view(request, bill_id):
 
     bill = get_object_or_404(MonthlyBill, pk=bill_id)
     if bill.status != MonthlyBill.Status.SENT:
-        messages.error(request, "Invoice can only be marked Paid after it is Sent.")
+        messages.error(request, _("Invoice can only be marked Paid after it is Sent."))
         return _redirect_back(request)
 
     bill.status = MonthlyBill.Status.PAID
     bill.paid_at = timezone.now()
     bill.save(update_fields=["status", "paid_at"])
+    try:
+        generate_invoice_for_bill(bill=bill, lang="kh")
+    except ValidationError as e:
+        messages.warning(request, "; ".join(e.messages))
+    except Exception as e:
+        messages.warning(request, f"Invoice regenerate failed: {str(e)}")
     _admin_action_log(
         request,
         _("Mark paid %(room)s %(month)s")
@@ -363,7 +369,7 @@ def mark_paid_view(request, bill_id):
         _("Marked paid for %(room)s, %(month)s.")
         % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
     )
-    messages.success(request, "Invoice marked as Paid.")
+    messages.success(request, _("Invoice marked as Paid."))
     return _redirect_back(request)
 
 
@@ -467,7 +473,7 @@ def send_invoice_telegram_view(request, bill_id):
         )
         return _redirect_back(request)
     if bill.status != MonthlyBill.Status.ISSUED:
-        messages.error(request, "Invoice can only be sent when status is Issued.")
+        messages.error(request, _("Invoice can only be sent when status is Issued."))
         return _redirect_back(request)
 
     renter = bill.room.renter
@@ -477,12 +483,12 @@ def send_invoice_telegram_view(request, bill_id):
             getattr(renter, "client_profile", None), "telegram_chat_id", None
         )
     if not chat_id:
-        messages.error(request, "Tenant Telegram chat ID is missing.")
+        messages.error(request, _("Tenant Telegram chat ID is missing."))
         return _redirect_back(request)
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
-        messages.error(request, "Telegram bot token is not configured.")
+        messages.error(request, _("Telegram bot token is not configured."))
         return _redirect_back(request)
 
     if getattr(settings, "ASYNC_TASKS", True):
@@ -502,7 +508,7 @@ def send_invoice_telegram_view(request, bill_id):
         bill.async_job_type = "send"
         bill.save(update_fields=["async_job_pending", "async_job_type"])
         _set_job_result(bill, "pending", "Send queued.")
-        messages.success(request, "Sending invoice in background.")
+        messages.success(request, _("Sending invoice in background."))
         return _redirect_back(request)
 
     filename = _invoice_filename(bill, "kh")
@@ -556,7 +562,7 @@ def send_invoice_telegram_view(request, bill_id):
         _("Send invoice to tenant for %(room)s, %(month)s.")
         % {"room": bill.room.room_number, "month": bill.month.strftime("%Y-%m")},
     )
-    messages.success(request, "Invoice sent via Telegram.")
+    messages.success(request, _("Invoice sent via Telegram."))
     return _redirect_back(request)
 
 
@@ -732,14 +738,14 @@ def send_group_invoices_telegram_view(request):
 
     month = request.POST.get("month", "")
     if not month:
-        messages.error(request, "Please select a month.")
+        messages.error(request, _("Please select a month."))
         return _redirect_back(request)
 
     try:
         year, month_num = map(int, month.split("-"))
         bill_month = date(year, month_num, 1)
     except Exception:
-        messages.error(request, "Invalid month format.")
+        messages.error(request, _("Invalid month format."))
         return _redirect_back(request)
 
     room_ids = request.POST.getlist("rooms")
@@ -756,10 +762,10 @@ def send_group_invoices_telegram_view(request):
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     chat_id = getattr(settings, "TENANTS_TELEGRAM_GROUP_CHAT_ID", "")
     if not token:
-        messages.error(request, "Telegram bot token is not configured.")
+        messages.error(request, _("Telegram bot token is not configured."))
         return _redirect_back(request)
     if not chat_id:
-        messages.error(request, "Telegram group chat ID is not configured.")
+        messages.error(request, _("Telegram group chat ID is not configured."))
         return _redirect_back(request)
 
     items = []
@@ -907,7 +913,7 @@ def test_telegram_connection_view(request):
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
-        messages.error(request, "Telegram bot token is not configured.")
+        messages.error(request, _("Telegram bot token is not configured."))
         return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
     url = f"https://api.telegram.org/bot{token}/getMe"
@@ -955,12 +961,12 @@ def test_tenant_telegram_view(request, bill_id):
             getattr(renter, "client_profile", None), "telegram_chat_id", None
         )
     if not chat_id:
-        messages.error(request, "Tenant Telegram chat ID is missing.")
+        messages.error(request, _("Tenant Telegram chat ID is missing."))
         return _redirect_back(request)
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
-        messages.error(request, "Telegram bot token is not configured.")
+        messages.error(request, _("Telegram bot token is not configured."))
         return _redirect_back(request)
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -988,7 +994,7 @@ def test_tenant_telegram_view(request, bill_id):
             if not data.get("ok"):
                 messages.error(request, f"Telegram test failed: {data}")
                 return _redirect_back(request)
-            messages.success(request, "Tenant Telegram test message sent.")
+            messages.success(request, _("Tenant Telegram test message sent."))
             return _redirect_back(request)
         except Exception as e:
             last_error = e
@@ -1010,12 +1016,12 @@ def test_clientprofile_telegram_view(request, profile_id):
     profile = get_object_or_404(ClientProfile, pk=profile_id)
     chat_id = getattr(profile, "telegram_chat_id", None)
     if not chat_id:
-        messages.error(request, "Tenant Telegram chat ID is missing.")
+        messages.error(request, _("Tenant Telegram chat ID is missing."))
         return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
     token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
     if not token:
-        messages.error(request, "Telegram bot token is not configured.")
+        messages.error(request, _("Telegram bot token is not configured."))
         return _redirect_back(request, reverse("admin:rooms_clientprofile_changelist"))
 
     url = f"https://api.telegram.org/bot{token}/sendMessage"
@@ -1050,7 +1056,7 @@ def test_clientprofile_telegram_view(request, profile_id):
                 return _redirect_back(
                     request, reverse("admin:rooms_clientprofile_changelist")
                 )
-            messages.success(request, "Tenant Telegram test message sent.")
+            messages.success(request, _("Tenant Telegram test message sent."))
             return _redirect_back(
                 request, reverse("admin:rooms_clientprofile_changelist")
             )
@@ -1338,7 +1344,7 @@ def generate_and_download_view(request):
         buffer.seek(0)
 
         if generated_count == 0:
-            messages.warning(request, "No invoices generated to download.")
+            messages.warning(request, _("No invoices generated to download."))
             return _redirect_back(request)
 
         response = HttpResponse(buffer, content_type="application/zip")

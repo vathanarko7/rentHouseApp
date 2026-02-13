@@ -149,7 +149,7 @@ msgstr "ខែ"
 
 #: .\rooms\admin.py:945
 msgid "Select at least one invoice."
-msgstr "សូមជ្រើសយ៉ាងហោចណាស់មួយវិក្កយបត្រ"
+msgstr "រើសវិក្កយបត្រយ៉ាងហោចមួយ"
 
 #: .\rooms\admin.py:1056
 msgid "Invoice file missing."
@@ -294,7 +294,7 @@ msgstr "ទាញយកវិក្កយបត្រសម្រាប់ %(mon
 
 #: .\rooms\views.py
 msgid "No rooms found for the selected month."
-msgstr "រកមិនឃើញបន្ទប់សម្រាប់ខែដែលបានជ្រើសរើស"
+msgstr "មិនអាចស្វែងរកឃើញបន្ទប់សម្រាប់ខែដែលបានជ្រើសរើស"
 
 #: .\rooms\views.py
 #, python-format
@@ -308,15 +308,15 @@ msgstr "ខ្វះឯកសារវិក្កយបត្រសម្រា
 
 #: .\rooms\views.py
 msgid "No invoices were sent. Fix issues and try again."
-msgstr "មិនបានផ្ញើវិក្កយបត្របានទេ សូមផ្ទៀងផ្ទាត់ ហើយសាកល្បងម្តងទៀត"
+msgstr "មិនមានវិក្កយបត្រផ្ញើចេញទេ​ សូមដោះស្រាយបញ្ហា និងសាកល្បងម្តងទៀត"
 
 #: .\rooms\views.py
 msgid "No invoice files found to send."
-msgstr "រកមិនឃើញឯកសារវិក្កយបត្រសម្រាប់ផ្ញើ"
+msgstr "ស្វែងរកមិនឃើញវិក្កយបត្រដើម្បីផ្ញើចេញទេ"
 
 #: .\rooms\views.py
 msgid "Sending invoices to Telegram group in background."
-msgstr "កំពុងផ្ញើវិក្កយបត្រទៅក្រុម Telegram នៅផ្ទៃខាងក្រោយ"
+msgstr "កំពុងដំណើរការផ្ញើវិក្កយបត្រទៅកាន់ក្រុម Telegram នៅផ្ទៃខាងក្រោយ"
 
 #: .\rooms\admin.py:1236
 msgid "Alert / Job"
@@ -349,7 +349,7 @@ msgstr "បានផ្ញើ"
 
 #: .\rooms\admin.py:1296 .\rooms\models.py:188
 msgid "Paid"
-msgstr "បានបង់"
+msgstr "ទូទាត់រួច"
 
 #: .\rooms\admin.py:1307 .\rooms\models.py:199
 msgid "Status"
@@ -406,7 +406,7 @@ msgstr "វិក្កយបត្រ"
 
 #: .\rooms\admin.py:1542 .\rooms\admin.py:1543 .\rooms\admin.py:1544
 msgid "Preview"
-msgstr "មើលជាមុន"
+msgstr "បើកផ្ទៀងផ្ទាត់"
 
 #: .\rooms\admin.py:1554 .\rooms\admin.py:1555 .\rooms\admin.py:1556
 msgid "Download"
@@ -615,7 +615,7 @@ msgstr "ស្ថានភាពមិនអាចត្រឡប់ក្រោ
 #: .\rooms\views.py:528
 #, python-format
 msgid "Telegram connection OK: %(bot_name)s"
-msgstr "ការតភ្ជាប់ Telegram ជោគជ័យ៖ %(bot_name)s"
+msgstr "សាកល្បងភ្ជាប់ទៅកាន់ Telegram ដោយជោគជ័យ៖ %(bot_name)s"
 
 #: .\templates\admin\app_list.html:4
 msgid "Authentication and Authorization"
@@ -1267,3 +1267,108 @@ msgstr "លេខសម្ងាត់មិនអាចជាលេខទាំ
 #: .\templates\registration\password_change_form.html:45
 msgid "New password confirmation:"
 msgstr "ផ្ទៀតផ្ទាត់លេខសម្ងាត់ថ្មី"
+
+msgid "Sending invoice in background."
+msgstr "កំពុងផ្ញើវិក្កយបត្រនៅផ្ទៃខាងក្រោយ"
+
+msgid "Not allowed."
+msgstr "មិនមានសិទ្ធិ"
+
+msgid "Telegram bot token is not configured."
+msgstr "មិនទាន់កំណត់ Telegram bot token ទេ"
+
+msgid "Telegram group chat ID is not configured."
+msgstr "មិនទាន់កំណត់ Telegram group chat ID ទេ"
+
+msgid "Tenant Telegram chat ID is missing."
+msgstr "មិនមាន Telegram chat ID របស់អ្នកជួលទេ"
+
+msgid "Bulk send queued. Processing in background."
+msgstr "ការផ្ញើជាក្រុមបានដាក់ចូលក្នុងជួររួចហើយ កំពុងដំណើរការនៅផ្ទៃក្រោយ"
+
+msgid "Invoice is unavailable because required utility data is missing."
+msgstr "វិក័យប័ត្រមិនអាចប្រើបានទេ ព្រោះខ្វះទិន្នន័យទឹក/ភ្លើងដែលចាំបាច់"
+
+msgid "Renter profile is missing. Some invoice fields may be blank."
+msgstr "ខ្វះព័ត៌មានអ្នកជួល ព័ត៌មានខ្លះក្នុងវិក័យប័ត្រអាចនឹងទទេ"
+
+msgid "Invoice file is not available yet."
+msgstr "ឯកសារវិក័យប័ត្រមិនទាន់មាននៅឡើយទេ"
+
+msgid "Invoice can only be re-generated in Draft status."
+msgstr "អាចបង្កើតវិក័យប័ត្រឡើងវិញបានតែនៅស្ថានភាពព្រាងប៉ុណ្ណោះ"
+
+msgid "Invoice re-generation queued."
+msgstr "ការបង្កើតវិក័យប័ត្រឡើងវិញត្រូវបានដាក់ចូលក្នុងជួរ"
+
+msgid "Invoice re-generated successfully."
+msgstr "បានបង្កើតវិក័យប័ត្រឡើងវិញដោយជោគជ័យ"
+
+msgid "Invoice can only be issued from Draft status."
+msgstr "អាចចេញវិក័យប័ត្របានតែនៅស្ថានភាពព្រាងប៉ុណ្ណោះ"
+
+msgid "Invoice issued successfully."
+msgstr "ដាក់ចេញវិក័យប័ត្រដោយជោគជ័យ។"
+
+msgid "Invoice can only be marked Paid after it is Sent."
+msgstr "អាចសម្គាល់ថាបានទូទាត់ប្រាក់រួច បន្ទាប់ពីបានផ្ញើរួចហើយប៉ុណ្ណោះ"
+
+msgid "Invoice marked as Paid."
+msgstr "វិក័យប័ត្រត្រូវបានសម្គាល់ថាបានទូទាត់ប្រាក់រួចរាល់"
+
+msgid "Invoice can only be sent when status is Issued."
+msgstr "អាចផ្ញើវិក័យប័ត្របានតែនៅស្ថានភាពបានដាក់ចេញតែប៉ុណ្ណោះ។"
+
+msgid "Invoice sent via Telegram."
+msgstr "វិក័យប័ត្រត្រូវបានផ្ញើតាម Telegram។"
+
+msgid "Please select a month."
+msgstr "សូមជ្រើសរើសខែ"
+
+msgid "Invalid month format."
+msgstr "ទម្រង់ខែមិនត្រឹមត្រូវ"
+
+msgid "No invoices generated to download."
+msgstr "មិនមានវិក្កយបត្រដែលបានបង្កើតសម្រាប់ទាញយកទេ"
+
+msgid "Generating invoices in background."
+msgstr "កំពុងបង្កើតវិក័យប័ត្រនៅផ្ទៃក្រោយ"
+
+msgid "Telegram test failed: %(data)s"
+msgstr "ការសាកល្បងភ្ជាប់ទៅ Telegram បរាជ័យ៖ %(data)s"
+
+msgid "Telegram test failed: %(last_error)s"
+msgstr "ការសាកល្បងភ្ជាប់ទៅ Telegram បរាជ័យ៖ %(last_error)s"
+
+msgid "Tenant Telegram test message sent."
+msgstr "បានផ្ញើសារសាកល្បងទៅកាន់ Telegram អ្នកជួល"
+
+msgid "Cannot add water reading for a locked invoice month."
+msgstr "មិនអាចបន្ថែមអំនានទឹក​ សម្រាប់ខែដែលបានចេញវិក័យប័ត្ររួចរាល់ហើយនោះទេ"
+
+msgid "Cannot add electricity reading for a locked invoice month."
+msgstr "មិនអាចបន្ថែមអំនានភ្លើង សម្រាប់ខែដែលបានចេញវិក័យប័ត្ររួចរាល់ហើយនោះទេ"
+
+msgid "Electricity meter value cannot decrease (previous: %(prev)s kWh)."
+msgstr "អំនានអគ្គិសនីមិនអាចតិចជាងខែមុនបានទេ (អំនានខែមុន៖ %(prev)s kWh)"
+
+msgid "Electricity meter value cannot exceed next reading (next: %(next)s kWh)."
+msgstr "អំនានអគ្គិសនីមិនអាចច្រើនជាងខែបន្ទាប់បានទេ (អំនានខែបន្ទាប់៖ %(next)s kWh)"
+
+msgid "Water meter value cannot decrease (previous: %(prev)s m³)."
+msgstr "អំនានទឹកមិនអាចតិចជាងខែមុនបានទេ (អំនានខែមុន៖ %(prev)s m³)"
+
+msgid "Water meter value cannot exceed next reading (next: %(next)s m³)."
+msgstr "អំនានទឹកមិនអាចច្រើនជាងខែបន្ទាប់បានទេ (អំនានខែបន្ទាប់៖ %(next)s m³)"
+
+msgid "Please correct the error below."
+msgstr "សូមកែសម្រួលកំហុសខាងក្រោម។"
+
+msgid "This record is locked because the invoice for this room and month is issued/sent/paid."
+msgstr "កំណត់ត្រានេះត្រូវបានចាក់សោ ព្រោះវិក្កយបត្រសម្រាប់បន្ទប់ និងខែនេះ បានចេញ/បានផ្ញើ/បានបង់រួច​​  "
+
+msgid "Electricity with this room and date already exists."
+msgstr "ទិន្នន័យអគ្គិសនីសម្រាប់បន្ទប់ និងកាលបរិច្ឆេទនេះ មានរួចហើយ"
+
+msgid "Water for this room and date already exists."
+msgstr "ទិន្នន័យទឹកសម្រាប់បន្ទប់ និងកាលបរិច្ឆេទនេះ មានរួចហើយ"

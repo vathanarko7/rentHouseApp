@@ -807,12 +807,12 @@ class WaterAdmin(admin.ModelAdmin):
             )
             if prev and value < prev.meter_value:
                 raise ValidationError(
-                    _("Water meter value cannot decrease (previous: %(prev)s).")
+                    _("Water meter value cannot decrease (previous: %(prev)s m³).")
                     % {"prev": prev.meter_value}
                 )
             if next_reading and value > next_reading.meter_value:
                 raise ValidationError(
-                    _("Water meter value cannot exceed next reading (next: %(next)s).")
+                    _("Water meter value cannot exceed next reading (next: %(next)s m³).")
                     % {"next": next_reading.meter_value}
                 )
             return cleaned
@@ -904,7 +904,7 @@ class WaterAdmin(admin.ModelAdmin):
             if locked and not getattr(request, "_lock_notice_shown", False):
                 self.message_user(
                     request,
-                    "This record is locked because the invoice for this room and month is issued/sent/paid.",
+                    _("This record is locked because the invoice for this room and month is issued/sent/paid."),
                     level=messages.WARNING,
                 )
                 request._lock_notice_shown = True
@@ -926,7 +926,7 @@ class WaterAdmin(admin.ModelAdmin):
             if locked:
                 self.message_user(
                     request,
-                    "Cannot add water reading for a locked invoice month.",
+                    _("Cannot add water reading for a locked invoice month."),
                     level=messages.ERROR,
                 )
                 return
@@ -955,12 +955,12 @@ class ElectricityAdmin(admin.ModelAdmin):
             )
             if prev and value < prev.meter_value:
                 raise ValidationError(
-                    _("Electricity meter value cannot decrease (previous: %(prev)s).")
+                    _("Electricity meter value cannot decrease (previous: %(prev)s kWh).")
                     % {"prev": prev.meter_value}
                 )
             if next_reading and value > next_reading.meter_value:
                 raise ValidationError(
-                    _("Electricity meter value cannot exceed next reading (next: %(next)s).")
+                    _("Electricity meter value cannot exceed next reading (next: %(next)s kWh).")
                     % {"next": next_reading.meter_value}
                 )
             return cleaned
@@ -1052,7 +1052,7 @@ class ElectricityAdmin(admin.ModelAdmin):
             if locked and not getattr(request, "_lock_notice_shown", False):
                 self.message_user(
                     request,
-                    "This record is locked because the invoice for this room and month is issued/sent/paid.",
+                    _("This record is locked because the invoice for this room and month is issued/sent/paid."),
                     level=messages.WARNING,
                 )
                 request._lock_notice_shown = True
@@ -1074,7 +1074,7 @@ class ElectricityAdmin(admin.ModelAdmin):
             if locked:
                 self.message_user(
                     request,
-                    "Cannot add electricity reading for a locked invoice month.",
+                    _("Cannot add electricity reading for a locked invoice month."),
                     level=messages.ERROR,
                 )
                 return
@@ -1201,7 +1201,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
 
     def bulk_send_telegram(self, request, queryset):
         if _is_tenant(request.user):
-            self.message_user(request, "Not allowed.", level=messages.ERROR)
+            self.message_user(request, _("Not allowed."), level=messages.ERROR)
             return
 
         if not queryset.exists():
@@ -1213,7 +1213,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
         token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
         if not token:
             self.message_user(
-                request, "Telegram bot token is not configured.", level=messages.ERROR
+                request, _("Telegram bot token is not configured."), level=messages.ERROR
             )
             return
 
@@ -1232,7 +1232,7 @@ class MonthlyBillAdmin(admin.ModelAdmin):
                 daemon=True,
             ).start()
             self.message_user(
-                request, "Bulk send queued. Processing in background.", level=messages.SUCCESS
+                request, _("Bulk send queued. Processing in background."), level=messages.SUCCESS
             )
             return
 

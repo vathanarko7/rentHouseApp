@@ -77,6 +77,11 @@ def generate_invoice_image(
     total_khr = room_total_khr + water_total_khr + elec_total_khr
     total_usd = total_khr / unit_price.exchange_rate
 
+    is_paid = bill.status == bill.Status.PAID
+    watermark_html = (
+        '<div class="watermark">ទូទាត់រួចរាល់</div>' if is_paid else ""
+    )
+
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -103,6 +108,21 @@ def generate_invoice_image(
             padding: 40px;
             box-sizing: border-box;
             color: #000;
+            position: relative;
+        }}
+        .watermark {{
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-20deg);
+            font-size: 120px;
+            font-weight: 700;
+            color: rgba(200, 0, 0, 0.12);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 2;
         }}
         .center {{
             text-align: center;
@@ -150,6 +170,7 @@ def generate_invoice_image(
     </head>
 
     <body>
+    {watermark_html}
     <div class="center title">{T["invoice"]}</div>
     <br>
     <table>
