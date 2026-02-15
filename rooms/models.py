@@ -313,3 +313,24 @@ class SmartAlertLog(models.Model):
     def __str__(self):
         room_label = self.room.room_number if self.room else "all"
         return f"{self.alert_type} {room_label} {self.month.strftime('%Y-%m')}"
+
+
+class TelegramPasswordReset(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="telegram_password_resets",
+    )
+    code = models.CharField(max_length=8)
+    expires_at = models.DateTimeField()
+    attempts = models.PositiveIntegerField(default=0)
+    used = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = _("Telegram password reset")
+        verbose_name_plural = _("Telegram password resets")
+
+    def __str__(self):
+        return f"{self.user.username} {self.created_at:%Y-%m-%d %H:%M}"

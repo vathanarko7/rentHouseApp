@@ -187,6 +187,24 @@
   .password-toggle-btn:hover {
     color: var(--body-quiet-color, #6b7280);
   }
+  .login .forgot-password-link {
+    display: block;
+    margin-top: 8px;
+    text-align: right;
+    color: #93c5fd;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .login .forgot-password-link:hover {
+    color: #bfdbfe;
+    text-decoration: underline;
+  }
+  @media (max-width: 480px) {
+    .login .forgot-password-link {
+      font-size: 13px;
+    }
+  }
 </style>
 {{ block.super }}
 <script>
@@ -252,6 +270,31 @@
         );
       });
       wrapper.appendChild(btn);
+    }
+    var existingLinks = document.querySelectorAll(
+      ".forgot-password-link, .password-reset-link",
+    );
+    var reusableLink = null;
+    existingLinks.forEach(function (el) {
+      if (!reusableLink) {
+        reusableLink = el;
+      } else if (el.parentNode) {
+        el.parentNode.removeChild(el);
+      }
+    });
+    if (form) {
+      var link = reusableLink || document.createElement("a");
+      link.href = "{% url 'telegram_password_reset' %}";
+      link.className = "forgot-password-link";
+      link.textContent = "{% translate 'Forgot password?' %}";
+      var submitRow = form.querySelector(".submit-row");
+      if (submitRow && submitRow.parentNode) {
+        submitRow.parentNode.insertBefore(link, submitRow.nextSibling);
+      } else {
+        form.appendChild(link);
+      }
+    } else if (reusableLink && reusableLink.parentNode) {
+      reusableLink.parentNode.removeChild(reusableLink);
     }
   })();
 </script>

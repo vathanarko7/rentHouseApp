@@ -8,6 +8,10 @@ from django.http import (
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from datetime import date
+import datetime
+import json
+import secrets
+import urllib.parse
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -17,6 +21,10 @@ import os
 from django.urls import reverse
 import io
 from zipfile import ZipFile
+from django import forms
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.views.decorators.csrf import csrf_protect
 
 from .models import (
     MonthlyBill,
@@ -26,9 +34,10 @@ from .models import (
     Water,
     Electricity,
     TelegramBatchJob,
+    TelegramPasswordReset,
 )
 from django.utils.formats import date_format
-from django.utils.translation import override, gettext as _
+from django.utils.translation import override, gettext as _, gettext_lazy as _lazy
 from django.utils import timezone
 from django.contrib.admin.models import LogEntry, CHANGE
 from django.contrib.contenttypes.models import ContentType
@@ -103,6 +112,172 @@ def _set_job_result(bill, status, message):
             "last_job_message",
             "last_job_at",
         ]
+    )
+
+
+RESET_CODE_TTL_MINUTES = 10
+RESET_MAX_ATTEMPTS = 3
+RESET_THROTTLE_SECONDS = 60
+
+
+class TelegramResetRequestForm(forms.Form):
+    username = forms.CharField(label=_lazy("Username or email"))
+
+
+class TelegramResetConfirmForm(forms.Form):
+    username = forms.CharField(label=_lazy("Username or email"))
+    code = forms.CharField(label=_lazy("Reset code"))
+    new_password1 = forms.CharField(label=_lazy("New password"), widget=forms.PasswordInput)
+    new_password2 = forms.CharField(label=_lazy("Confirm new password"), widget=forms.PasswordInput)
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get("new_password1")
+        p2 = cleaned.get("new_password2")
+        if p1 and p2 and p1 != p2:
+            raise ValidationError(_("Passwords do not match."))
+        return cleaned
+
+
+def _find_user_by_identifier(identifier):
+    User = get_user_model()
+    return (
+        User.objects.filter(username__iexact=identifier).first()
+        or User.objects.filter(email__iexact=identifier).first()
+    )
+
+
+def _get_telegram_chat_id_for_user(user):
+    profile = getattr(user, "client_profile", None)
+    if profile and profile.telegram_chat_id:
+        return profile.telegram_chat_id
+    if (user.is_staff or user.is_superuser) and getattr(
+        settings, "ADMIN_TELEGRAM_CHAT_ID", ""
+    ):
+        return getattr(settings, "ADMIN_TELEGRAM_CHAT_ID", "")
+    return None
+
+
+def _send_telegram_message(chat_id, token, text):
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    payload = {
+        "chat_id": chat_id,
+        "text": text,
+        "disable_web_page_preview": True,
+    }
+    data = urllib.parse.urlencode(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=data)
+    with urllib.request.urlopen(req, timeout=12) as resp:
+        return json.loads(resp.read().decode("utf-8"))
+
+
+@csrf_protect
+def telegram_password_reset_request_view(request):
+    form = TelegramResetRequestForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        identifier = form.cleaned_data["username"].strip()
+        user = _find_user_by_identifier(identifier)
+        if not user:
+            messages.error(request, _("User not found."))
+            return redirect("telegram_password_reset")
+
+        chat_id = _get_telegram_chat_id_for_user(user)
+        if not chat_id:
+            messages.error(
+                request, _("Telegram chat ID is missing. Contact admin to link.")
+            )
+            return redirect("telegram_password_reset")
+
+        token = getattr(settings, "TELEGRAM_BOT_TOKEN", "")
+        if not token:
+            messages.error(request, _("Telegram bot token is not configured."))
+            return redirect("telegram_password_reset")
+
+        now = timezone.now()
+        recent = TelegramPasswordReset.objects.filter(
+            user=user,
+            created_at__gte=now - datetime.timedelta(seconds=RESET_THROTTLE_SECONDS),
+            used=False,
+        ).first()
+        if recent:
+            messages.warning(request, _("Please wait before requesting another code."))
+            return redirect("telegram_password_reset")
+
+        code = f"{secrets.randbelow(1000000):06d}"
+        reset = TelegramPasswordReset.objects.create(
+            user=user,
+            code=code,
+            expires_at=now + datetime.timedelta(minutes=RESET_CODE_TTL_MINUTES),
+        )
+        msg = _(
+            "Your reset code is %(code)s. It expires in %(minutes)s minutes."
+        ) % {"code": code, "minutes": RESET_CODE_TTL_MINUTES}
+        try:
+            resp = _send_telegram_message(chat_id, token, msg)
+        except Exception:
+            reset.delete()
+            messages.error(request, _("Telegram send failed. Please try again."))
+            return redirect("telegram_password_reset")
+        if not resp.get("ok"):
+            reset.delete()
+            messages.error(request, _("Telegram send failed. Please try again."))
+            return redirect("telegram_password_reset")
+
+        messages.success(request, _("Reset code sent via Telegram."))
+        return redirect("telegram_password_reset_confirm")
+
+    return render(
+        request,
+        "registration/telegram_password_reset.html",
+        {"form": form},
+    )
+
+
+@csrf_protect
+def telegram_password_reset_confirm_view(request):
+    form = TelegramResetConfirmForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        identifier = form.cleaned_data["username"].strip()
+        code = form.cleaned_data["code"].strip()
+        user = _find_user_by_identifier(identifier)
+        if not user:
+            messages.error(request, _("User not found."))
+            return redirect("telegram_password_reset_confirm")
+
+        now = timezone.now()
+        reset = TelegramPasswordReset.objects.filter(
+            user=user, used=False, expires_at__gt=now, code=code
+        ).order_by("-created_at").first()
+        latest = TelegramPasswordReset.objects.filter(
+            user=user, used=False, expires_at__gt=now
+        ).order_by("-created_at").first()
+        if not reset:
+            if latest:
+                latest.attempts += 1
+                if latest.attempts >= RESET_MAX_ATTEMPTS:
+                    latest.used = True
+                latest.save(update_fields=["attempts", "used"])
+            messages.error(request, _("Invalid or expired code."))
+            return redirect("telegram_password_reset_confirm")
+
+        new_password = form.cleaned_data["new_password1"]
+        try:
+            validate_password(new_password, user=user)
+        except ValidationError as e:
+            messages.error(request, "; ".join(e.messages))
+            return redirect("telegram_password_reset_confirm")
+
+        user.set_password(new_password)
+        user.save(update_fields=["password"])
+        reset.used = True
+        reset.save(update_fields=["used"])
+        messages.success(request, _("Password updated. You can log in now."))
+        return redirect("admin:login")
+
+    return render(
+        request,
+        "registration/telegram_password_reset_confirm.html",
+        {"form": form},
     )
 
 

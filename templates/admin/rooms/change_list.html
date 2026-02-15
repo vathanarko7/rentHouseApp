@@ -779,8 +779,9 @@
     var statusUrl = genBtn.getAttribute("data-generate-status") || "";
     if (!statusUrl) return;
 
-    var toast = null;
-    var lastSignature = "";
+      var toast = null;
+      var lastSignature = "";
+      var hasReloaded = false;
 
     function ensureToast() {
       if (toast) return toast;
@@ -815,7 +816,10 @@
           return resp.json();
         })
         .then(function (data) {
-          if (!data || !data.active) return;
+            if (!data || !data.active) {
+              if (toast) toast.classList.remove("show");
+              return;
+            }
           var total = data.total || 0;
           var completed = data.completed || 0;
           var failed = data.failed || 0;
@@ -865,17 +869,18 @@
                 failed,
               100
             );
-            setTimeout(function () {
-              if (toast) toast.classList.remove("show");
-              if (status === "success" || status === "failed") {
-                window.location.reload();
-              }
-            }, 5000);
-          }
-        })
-        .catch(function () {
-          setTimeout(poll, 4000);
-        });
+              setTimeout(function () {
+                if (toast) toast.classList.remove("show");
+                if (!hasReloaded && (status === "success" || status === "failed")) {
+                  hasReloaded = true;
+                  window.location.reload();
+                }
+              }, 5000);
+            }
+          })
+          .catch(function () {
+            setTimeout(poll, 4000);
+          });
     }
 
     poll();
@@ -887,8 +892,9 @@
     var statusUrl = statusBtn.getAttribute("data-status") || "";
     if (!statusUrl) return;
 
-    var toast = null;
-    var lastSignature = "";
+      var toast = null;
+      var lastSignature = "";
+      var hasReloaded = false;
 
     function ensureToast() {
       if (toast) return toast;
@@ -923,7 +929,10 @@
           return resp.json();
         })
         .then(function (data) {
-          if (!data || !data.active) return;
+            if (!data || !data.active) {
+              if (toast) toast.classList.remove("show");
+              return;
+            }
           var total = data.total || 0;
           var completed = data.completed || 0;
           var failed = data.failed || 0;
@@ -964,17 +973,18 @@
               if (data.errors.length > 3) doneMsg += "…";
             }
             setToast(status, doneMsg, 100);
-            setTimeout(function () {
-              if (toast) toast.classList.remove("show");
-              if (status === "success" || status === "failed") {
-                window.location.reload();
-              }
-            }, 5000);
-          }
-        })
-        .catch(function () {
-          setTimeout(poll, 4000);
-        });
+              setTimeout(function () {
+                if (toast) toast.classList.remove("show");
+                if (!hasReloaded && (status === "success" || status === "failed")) {
+                  hasReloaded = true;
+                  window.location.reload();
+                }
+              }, 5000);
+            }
+          })
+          .catch(function () {
+            setTimeout(poll, 4000);
+          });
     }
 
     poll();
@@ -984,13 +994,20 @@
 {% endif %}
 {{ block.super }}
 
-<div id="invoice-preview-modal" style="display: none">
-  <div class="preview-backdrop"></div>
-  <div class="preview-panel">
-    <button type="button" class="preview-close">{% translate "Close" %}</button>
-    <img id="invoice-preview-image" alt="{% translate "Invoice Preview" %}" />
+  <div id="invoice-preview-modal" style="display: none">
+    <div class="preview-backdrop"></div>
+    <div class="preview-panel">
+      <button type="button" class="preview-close">{% translate "Close" %}</button>
+      <div class="preview-loading" aria-live="polite">
+        <div class="preview-spinner" aria-hidden="true"></div>
+        <div class="preview-loading-text">{% translate "Generating invoice preview..." %}</div>
+        <div class="preview-progress" aria-hidden="true">
+          <span></span>
+        </div>
+      </div>
+      <img id="invoice-preview-image" alt="{% translate "Invoice Preview" %}" />
+    </div>
   </div>
-</div>
 
 <style>
   #invoice-preview-modal {
@@ -1028,6 +1045,63 @@
     height: auto;
     display: block;
     border-radius: 10px;
+  }
+  #invoice-preview-modal .preview-loading {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 12px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    background: linear-gradient(120deg, #eef2ff, #e0e7ff);
+    color: #1e3a8a;
+    font-weight: 600;
+  }
+  #invoice-preview-modal.is-loading .preview-loading {
+    display: flex;
+  }
+  #invoice-preview-modal.is-loading #invoice-preview-image {
+    opacity: 0.25;
+    filter: blur(1px);
+  }
+  #invoice-preview-modal .preview-spinner {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid rgba(30, 64, 175, 0.25);
+    border-top-color: #2563eb;
+    animation: preview-spin 0.9s linear infinite;
+  }
+  #invoice-preview-modal .preview-loading-text {
+    white-space: nowrap;
+  }
+  #invoice-preview-modal .preview-progress {
+    position: relative;
+    flex: 1;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.2);
+    overflow: hidden;
+  }
+  #invoice-preview-modal .preview-progress span {
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, #2563eb, transparent);
+    animation: preview-progress 1.2s ease-in-out infinite;
+  }
+  @keyframes preview-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes preview-progress {
+    0% {
+      transform: translateX(-60%);
+    }
+    100% {
+      transform: translateX(160%);
+    }
   }
   #invoice-preview-modal .preview-close {
     position: sticky;
@@ -1171,15 +1245,25 @@
     var monthInput = document.querySelector('#invoice-form input[name="month"]');
     var formWrapper = document.getElementById("invoice-form-wrapper");
     var formWasVisible = false;
+    var loadingTimer = null;
 
     function close() {
       modal.classList.remove("is-open");
+      modal.classList.remove("is-loading");
       modal.style.display = "none";
       document.body.classList.remove("preview-open");
-      if (img) img.src = "";
+      if (img) {
+        img.onload = null;
+        img.onerror = null;
+        img.src = "";
+      }
       if (monthInput) monthInput.disabled = false;
       if (formWrapper && formWasVisible) {
         formWrapper.style.display = "block";
+      }
+      if (loadingTimer) {
+        clearTimeout(loadingTimer);
+        loadingTimer = null;
       }
     }
 
@@ -1198,6 +1282,13 @@
         }
       }
       if (monthInput) monthInput.disabled = true;
+      modal.classList.add("is-loading");
+      img.onload = function () {
+        modal.classList.remove("is-loading");
+      };
+      img.onerror = function () {
+        modal.classList.remove("is-loading");
+      };
       img.src = url;
       modal.style.display = "flex";
       modal.classList.add("is-open");

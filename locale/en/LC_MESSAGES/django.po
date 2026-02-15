@@ -12,634 +12,638 @@ msgstr ""
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: km\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: .\rentHouseApp\settings.py:159
 msgid "English"
-msgstr "អង់គ្លេស"
+msgstr ""
 
 #: .\rentHouseApp\settings.py:160
 msgid "French"
-msgstr "បារាំង"
+msgstr ""
 
 #: .\rentHouseApp\settings.py:161
 msgid "Khmer"
-msgstr "ខ្មែរ"
+msgstr ""
 
 #: .\rooms\admin.py:57
 msgid "Rent House Administration"
-msgstr "ការគ្រប់គ្រងផ្ទះជួល"
+msgstr ""
 
 #: .\rooms\admin.py:58
 msgid "Rent House Admin Portal"
-msgstr "ផ្ទាំងគ្រប់គ្រងផ្ទះជួល"
+msgstr ""
 
 #: .\rooms\admin.py:59
 msgid "Welcome to Rent House Admin Portal"
-msgstr "សូមស្វាគមន៍មកកាន់ផ្ទាំងគ្រប់គ្រងផ្ទះជួល"
+msgstr ""
 
 #: .\rooms\admin.py:84
 msgid "Leave blank to set an unusable password."
-msgstr "ទុកឲ្យទទេ ដើម្បីកំណត់ពាក្យសម្ងាត់ដែលមិនអាចប្រើបាន"
+msgstr ""
 
 #: .\rooms\admin.py:127
 msgid "Username"
-msgstr "ឈ្មោះអ្នកប្រើ"
+msgstr ""
 
 #: .\rooms\admin.py:128
 msgid "First name"
-msgstr "នាមខ្លួន"
+msgstr ""
 
 #: .\rooms\admin.py:129
 msgid "Last name"
-msgstr "នាមត្រកូល"
+msgstr ""
 
 #: .\rooms\admin.py:130 .\rooms\admin.py:276 .\rooms\admin.py:286
 msgid "Email"
-msgstr "អ៊ីមែល"
+msgstr ""
 
 #: .\rooms\admin.py:131
 msgid "Password"
-msgstr "ពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\rooms\admin.py:132 .\rooms\admin.py:282
 msgid "Sex"
-msgstr "ភេទ"
+msgstr ""
 
 #: .\rooms\admin.py:133 .\rooms\admin.py:290 .\rooms\admin.py:523
 msgid "Phone"
-msgstr "លេខទូរស័ព្ទ"
+msgstr ""
 
 #: .\rooms\admin.py:134
 msgid "Telegram chat id"
-msgstr "លេខសម្គាល់ Telegram Chat"
+msgstr ""
 
 #: .\rooms\admin.py:135 .\rooms\admin.py:294
 msgid "Id card number"
-msgstr "លេខអត្តសញ្ញាណប័ណ្ណ"
+msgstr ""
 
 #: .\rooms\admin.py:136 .\rooms\admin.py:298
 msgid "Enter date"
-msgstr "កាលបរិច្ឆេទចូល"
+msgstr ""
 
 #: .\rooms\admin.py:137 .\rooms\admin.py:302
 msgid "Exit date"
-msgstr "កាលបរិច្ឆេទចេញ"
+msgstr ""
 
 #: .\rooms\admin.py:151
 msgid "Username already exists."
-msgstr "ឈ្មោះអ្នកប្រើនេះមានរួចហើយ"
+msgstr ""
 
 #: .\rooms\admin.py:162
 msgid "Email already exists."
-msgstr "អ៊ីមែលនេះមានរួចហើយ"
+msgstr ""
 
 #: .\rooms\admin.py:172
 msgid "Account Info"
-msgstr "ព័ត៌មានគណនី"
+msgstr ""
 
 #: .\rooms\admin.py:185
 msgid "Profile Info"
-msgstr "ព័ត៌មានប្រវត្តិរូប"
+msgstr ""
 
 #: .\rooms\admin.py:237
 msgid "tenant"
-msgstr "អ្នកជួល"
+msgstr ""
 
 #: .\rooms\admin.py:240
 #, python-format
 msgid "The tenant \"%(name)s\" was added successfully."
-msgstr "អ្នកជួល \"%(name)s\" ត្រូវបានបន្ថែមដោយជោគជ័យ"
+msgstr ""
 
 #: .\rooms\admin.py:257
 msgid "Only draft invoices can be deleted."
-msgstr "អាចលុបបានតែវិក្កយបត្រព្រាងប៉ុណ្ណោះ"
+msgstr ""
 
 #: .\rooms\admin.py:278
 msgid "User"
-msgstr "អ្នកប្រើ"
+msgstr ""
 
 #: .\rooms\admin.py:316
 msgid "No chat ID"
-msgstr "មិនមាន Chat ID"
+msgstr ""
 
 #: .\rooms\admin.py:318
 msgid "Test Chat"
-msgstr "សាកល្បង Chat"
+msgstr ""
 
 #: .\rooms\admin.py:332
 msgid "Telegram"
-msgstr "Telegram"
+msgstr ""
 
 #: .\rooms\admin.py:455
 msgid "Room Modification"
-msgstr "កែប្រែបន្ទប់"
+msgstr ""
 
 #: .\rooms\admin.py:517 .\rooms\admin.py:1397 .\rooms\models.py:22
 #: .\rooms\models.py:41
 msgid "Renter"
-msgstr "អ្នកជួល"
+msgstr ""
 
 #: .\rooms\admin.py:519 .\rooms\admin.py:1576 .\rooms\models.py:210
 msgid "Status"
-msgstr "ស្ថានភាព"
+msgstr ""
 
 #: .\rooms\admin.py:521
 msgid "Occupied"
-msgstr "មានអ្នកជួល"
+msgstr ""
 
 #: .\rooms\admin.py:521
 msgid "Vacant"
-msgstr "ទំនេរ"
+msgstr ""
 
 #: .\rooms\admin.py:530
 msgid "Bill status"
-msgstr "ស្ថានភាពវិក្កយបត្រ"
+msgstr ""
 
 #: .\rooms\admin.py:542
 msgid "Price (USD)"
-msgstr "តម្លៃ (USD)"
+msgstr ""
 
 #: .\rooms\admin.py:615 .\rooms\admin.py:635 .\rooms\admin.py:637
 #: .\rooms\models.py:102 .\templates\admin\base_site.html:1313
 #: .\templates\admin\base_site.html:1363 .\templates\admin\dashboard.html:325
 msgid "Electricity"
-msgstr "អគ្គិសនី"
+msgstr ""
 
 #: .\rooms\admin.py:624 .\rooms\admin.py:636 .\rooms\admin.py:638
 #: .\rooms\models.py:71 .\templates\admin\base_site.html:1284
 #: .\templates\admin\base_site.html:1322 .\templates\admin\base_site.html:1375
 #: .\templates\admin\dashboard.html:313
 msgid "Water"
-msgstr "ទឹក"
+msgstr ""
 
 #: .\rooms\admin.py:634
 msgid "Usage"
-msgstr "ការប្រើប្រាស់"
+msgstr ""
 
 #: .\rooms\admin.py:644 .\rooms\admin.py:663
 msgid "month"
-msgstr "ខែ"
+msgstr ""
 
 #: .\rooms\admin.py:746 .\rooms\admin.py:831 .\rooms\admin.py:979
 #: .\rooms\admin.py:1598 .\rooms\models.py:195
 msgid "Month"
-msgstr "ខែ"
+msgstr ""
 
 #: .\rooms\admin.py:751
 msgid "Water unit price"
-msgstr "តម្លៃឯកតាទឹក"
+msgstr ""
 
 #: .\rooms\admin.py:755
 msgid "Electricity unit price"
-msgstr "តម្លៃឯកតាអគ្គិសនី"
+msgstr ""
 
 #: .\rooms\admin.py:759
 msgid "USD→KHR rate"
-msgstr "អត្រាប្តូរ USD→KHR"
+msgstr ""
 
 #: .\rooms\admin.py:810
 #, python-format
 msgid "Water meter value cannot decrease (previous: %(prev)s m³)."
-msgstr "អំនានទឹកមិនអាចតិចជាងខែមុនបានទេ (អំនានខែមុន៖ %(prev)s m³)"
+msgstr ""
 
 #: .\rooms\admin.py:815
 #, python-format
 msgid "Water meter value cannot exceed next reading (next: %(next)s m³)."
-msgstr "អំនានទឹកមិនអាចច្រើនជាងខែបន្ទាប់បានទេ (អំនានខែបន្ទាប់៖ %(next)s m³)"
+msgstr ""
 
 #: .\rooms\admin.py:833 .\rooms\models.py:61
 msgid "Meter value (m³)"
-msgstr "អំនាន (m³)"
+msgstr ""
 
 #: .\rooms\admin.py:840 .\rooms\admin.py:988 .\rooms\admin.py:1541
 #: .\rooms\admin.py:1600 .\rooms\models.py:29 .\rooms\models.py:58
 #: .\rooms\models.py:88 .\rooms\models.py:192
 msgid "Room"
-msgstr "បន្ទប់"
+msgstr ""
 
 #: .\rooms\admin.py:907 .\rooms\admin.py:1055
-msgid "This record is locked because the invoice for this room and month is issued/sent/paid."
-msgstr "កំណត់ត្រានេះត្រូវបានចាក់សោ ព្រោះវិក្កយបត្រសម្រាប់បន្ទប់ និងខែនេះ បានចេញ/បានផ្ញើ/បានបង់រួច​​"
+msgid ""
+"This record is locked because the invoice for this room and month is issued/"
+"sent/paid."
+msgstr ""
 
 #: .\rooms\admin.py:929
 msgid "Cannot add water reading for a locked invoice month."
-msgstr "មិនអាចបន្ថែមអំនានទឹក​ សម្រាប់ខែដែលបានចេញវិក័យប័ត្ររួចរាល់ហើយនោះទេ"
+msgstr ""
 
 #: .\rooms\admin.py:958
 #, python-format
 msgid "Electricity meter value cannot decrease (previous: %(prev)s kWh)."
-msgstr "អំនានអគ្គិសនីមិនអាចតិចជាងខែមុនបានទេ (អំនានខែមុន៖ %(prev)s kWh)"
+msgstr ""
 
 #: .\rooms\admin.py:963
 #, python-format
-msgid "Electricity meter value cannot exceed next reading (next: %(next)s kWh)."
-msgstr "អំនានអគ្គិសនីមិនអាចច្រើនជាងខែបន្ទាប់បានទេ (អំនានខែបន្ទាប់៖ %(next)s kWh)"
+msgid ""
+"Electricity meter value cannot exceed next reading (next: %(next)s kWh)."
+msgstr ""
 
 #: .\rooms\admin.py:981 .\rooms\models.py:91
 msgid "Meter value (kWh)"
-msgstr "អំនាន (kWh)"
+msgstr ""
 
 #: .\rooms\admin.py:1077
 msgid "Cannot add electricity reading for a locked invoice month."
-msgstr "មិនអាចបន្ថែមអំនានភ្លើង សម្រាប់ខែដែលបានចេញវិក័យប័ត្ររួចរាល់ហើយនោះទេ"
+msgstr ""
 
 #: .\rooms\admin.py:1128 .\rooms\models.py:198
 msgid "Room cost"
-msgstr "ថ្លៃបន្ទប់"
+msgstr ""
 
 #: .\rooms\admin.py:1132 .\rooms\models.py:201
 msgid "Water cost"
-msgstr "ថ្លៃទឹក"
+msgstr ""
 
 #: .\rooms\admin.py:1136 .\rooms\models.py:204
 msgid "Electricity cost"
-msgstr "ថ្លៃអគ្គិសនី"
+msgstr ""
 
 #: .\rooms\admin.py:1140 .\rooms\admin.py:1551 .\rooms\models.py:207
 msgid "Total"
-msgstr "សរុប"
+msgstr ""
 
 #: .\rooms\admin.py:1204
 msgid "Not allowed."
-msgstr "មិនមានសិទ្ធិ"
+msgstr ""
 
 #: .\rooms\admin.py:1209
 msgid "Select at least one invoice."
-msgstr "រើសវិក្កយបត្រយ៉ាងហោចមួយ"
+msgstr ""
 
 #: .\rooms\admin.py:1216 .\rooms\views.py:193 .\rooms\views.py:666
 #: .\rooms\views.py:940 .\rooms\views.py:1091 .\rooms\views.py:1144
 #: .\rooms\views.py:1199
 msgid "Telegram bot token is not configured."
-msgstr "មិនទាន់កំណត់ Telegram bot token ទេ"
+msgstr ""
 
 #: .\rooms\admin.py:1235
 msgid "Bulk send queued. Processing in background."
-msgstr "ការផ្ញើជាក្រុមបានដាក់ចូលក្នុងជួររួចហើយ កំពុងដំណើរការនៅផ្ទៃក្រោយ"
+msgstr ""
 
 #: .\rooms\admin.py:1320
 msgid "Invoice file missing."
-msgstr "ខ្វះឯកសារវិក្កយបត្រ"
+msgstr ""
 
 #: .\rooms\admin.py:1403
 msgid "Missing tenant"
-msgstr "ខ្វះព័ត៌មានអ្នកជួល"
+msgstr ""
 
 #: .\rooms\admin.py:1405
 msgid "Missing profile"
-msgstr "ខ្វះព័ត៌មានប្រវត្តិរូប"
+msgstr ""
 
 #: .\rooms\admin.py:1421
 msgid "Missing unit price"
-msgstr "ខ្វះតម្លៃឯកតា"
+msgstr ""
 
 #: .\rooms\admin.py:1423
 msgid "Missing current water"
-msgstr "ខ្វះអំនានទឹកខែថ្មី"
+msgstr ""
 
 #: .\rooms\admin.py:1425
 msgid "Missing previous water"
-msgstr "ខ្វះអំនានទឹកខែមុន"
+msgstr ""
 
 #: .\rooms\admin.py:1427
 msgid "Missing current electricity"
-msgstr "ខ្វះអំនានអគ្គិសនីខែថ្មី"
+msgstr ""
 
 #: .\rooms\admin.py:1429
 msgid "Missing previous electricity"
-msgstr "ខ្វះអំនានអគ្គិសនីខែមុន"
+msgstr ""
 
 #: .\rooms\admin.py:1441
 #, python-format
 msgid "Missing data (%(count)d)"
 msgid_plural "Missing data (%(count)d)"
-msgstr[0] "ខ្វះទិន្នន័យ (%(count)d)"
+msgstr[0] ""
+msgstr[1] ""
 
 #: .\rooms\admin.py:1445
 msgid " • "
-msgstr " • "
+msgstr ""
 
 #: .\rooms\admin.py:1458
 msgid "Click to see details"
-msgstr "ចុចដើម្បីមើលព័ត៌មានលម្អិត"
+msgstr ""
 
 #: .\rooms\admin.py:1464
 msgid "Alert"
-msgstr "ដំណឹង"
+msgstr ""
 
 #: .\rooms\admin.py:1504
 msgid "Alert / Job"
-msgstr "ដំណឹង / ការងារ"
+msgstr ""
 
 #: .\rooms\admin.py:1536
 msgid "Job"
-msgstr "ការងារផ្ទៃក្រោយ"
+msgstr ""
 
 #: .\rooms\admin.py:1547
 msgid "Missing data for this bill"
-msgstr "ខ្វះទិន្នន័យសម្រាប់វិក្កយបត្រនេះ"
+msgstr ""
 
 #: .\rooms\admin.py:1561 .\rooms\models.py:186
 msgid "Draft"
-msgstr "ព្រាង"
+msgstr ""
 
 #: .\rooms\admin.py:1562 .\rooms\models.py:187
 msgid "Issued"
-msgstr "បានចេញ"
+msgstr ""
 
 #: .\rooms\admin.py:1563 .\rooms\models.py:188
 msgid "Sent"
-msgstr "បានផ្ញើ"
+msgstr ""
 
 #: .\rooms\admin.py:1564 .\rooms\models.py:189
 msgid "Paid"
-msgstr "ទូទាត់រួច"
+msgstr ""
 
 #: .\rooms\admin.py:1593
 msgid "Status date"
-msgstr "កាលបរិច្ឆេទស្ថានភាព"
+msgstr ""
 
 #: .\rooms\admin.py:1685
 msgid "Issue this invoice? It will be locked."
-msgstr "ចេញវិក្កយបត្រនេះមែនទេ? រាល់ទិន្នន័យពាក់ព័ន្ធនឹងមិនអាចកែបានទៀតនោះទេ"
+msgstr ""
 
 #: .\rooms\admin.py:1686
 msgid "Issue"
-msgstr "ដាក់ចេញ"
+msgstr ""
 
 #: .\rooms\admin.py:1705
 msgid "Re-generate this invoice? This will overwrite the current draft."
-msgstr "បង្កើតវិក្កយបត្រឡើងវិញ? វានឹងជំនួសវិក្កយបត្រព្រាងបច្ចុប្បន្ន។"
+msgstr ""
 
 #: .\rooms\admin.py:1706
 msgid "Re-generate"
-msgstr "បង្កើតម្តងទៀត"
+msgstr ""
 
 #: .\rooms\admin.py:1730
 msgid "Send this invoice to the tenant?"
-msgstr "ផ្ញើវិក្កយបត្រនេះទៅអ្នកជួលមែនទេ?"
+msgstr ""
 
 #: .\rooms\admin.py:1731
 msgid "Send"
-msgstr "ផ្ញើ"
+msgstr ""
 
 #: .\rooms\admin.py:1750
 msgid "Mark this invoice as paid?"
-msgstr "សម្គាល់វិក្កយបត្រនេះថាបានបង់ហើយមែនទេ?"
+msgstr ""
 
 #: .\rooms\admin.py:1751
 msgid "Mark Paid"
-msgstr "ទូទាត់ប្រាក់"
+msgstr ""
 
 #: .\rooms\admin.py:1780 .\rooms\admin.py:1967
 #: .\templates\admin\app_list.html:7
 msgid "Invoice"
-msgstr "វិក្កយបត្រ"
+msgstr ""
 
 #: .\rooms\admin.py:1811 .\rooms\admin.py:1812 .\rooms\admin.py:1813
 msgid "Preview"
-msgstr "បើកផ្ទៀងផ្ទាត់"
+msgstr ""
 
 #: .\rooms\admin.py:1823 .\rooms\admin.py:1824 .\rooms\admin.py:1825
 msgid "Download"
-msgstr "ទាញយក"
+msgstr ""
 
 #: .\rooms\admin.py:1829
 msgid "Actions"
-msgstr "សកម្មភាព"
+msgstr ""
 
 #: .\rooms\admin.py:1946 .\rooms\admin.py:1952 .\rooms\admin.py:2114
 #: .\templates\admin\app_list.html:5 .\templates\admin\dashboard.html:10
 #: .\templates\admin\dashboard.html:15
 msgid "Reports & Dashboard"
-msgstr "របាយការណ៍ និងផ្ទាំងគ្រប់គ្រង"
+msgstr ""
 
 #: .\rooms\admin.py:1997
 msgid "This account is inactive."
-msgstr "គណនីនេះមិនដំណើរការ"
+msgstr ""
 
 #: .\rooms\admin.py:2003
 msgid "This account does not have access to the admin site."
-msgstr "គណនីនេះមិនមានសិទ្ធិចូលប្រើផ្នែកគ្រប់គ្រង"
+msgstr ""
 
 #: .\rooms\admin.py:2030
 msgid "Log in"
-msgstr "ចូលប្រើ"
+msgstr ""
 
 #: .\rooms\apps.py:8 .\templates\admin\app_list.html:6
 msgid "Utilities"
-msgstr "សេវាប្រើប្រាស់"
+msgstr ""
 
 #: .\rooms\models.py:12
 msgid "Room number"
-msgstr "លេខបន្ទប់"
+msgstr ""
 
 #: .\rooms\models.py:13
 msgid "Price"
-msgstr "តម្លៃ"
+msgstr ""
 
 #: .\rooms\models.py:26
 #, python-format
 msgid "Room %(number)s"
-msgstr "បន្ទប់ %(number)s"
+msgstr ""
 
 #: .\rooms\models.py:30 .\rooms\templatetags\admin_log_format.py:86
 #: .\templates\admin\base_site.html:1249
 #: .\templates\admin\rooms\change_list.html:533
 #: .\templates\admin\rooms\room\change_list.html:2
 msgid "Rooms"
-msgstr "បន្ទប់"
+msgstr ""
 
 #: .\rooms\models.py:43
 msgid "Start date"
-msgstr "កាលបរិច្ឆេទចូល"
+msgstr ""
 
 #: .\rooms\models.py:44
 msgid "End date"
-msgstr "កាលបរិច្ឆេទចេញ"
+msgstr ""
 
 #: .\rooms\models.py:48
 msgid "Room History"
-msgstr "ប្រវត្តិបន្ទប់"
+msgstr ""
 
 #: .\rooms\models.py:51
 msgid "Unknown"
-msgstr "មិនស្គាល់"
+msgstr ""
 
 #: .\rooms\models.py:60 .\rooms\models.py:90 .\rooms\models.py:117
 msgid "Date"
-msgstr "កាលបរិច្ឆេទ"
+msgstr ""
 
 #: .\rooms\models.py:65 .\rooms\models.py:95
 msgid "Initial meter reading at move-in"
-msgstr "ការអានម៉ែត្រដំបូងនៅពេលចូល"
+msgstr ""
 
 #: .\rooms\models.py:66 .\rooms\models.py:96
 msgid "Is initial"
-msgstr "អំនានដើម"
+msgstr ""
 
 #: .\rooms\models.py:72 .\templates\admin\rooms\water\change_list.html:5
 msgid "Water Readings"
-msgstr "អំនានទឹក"
+msgstr ""
 
 #: .\rooms\models.py:76
 #, python-format
 msgid "Water of room %(room)s - %(month)s"
-msgstr "ទឹក បន្ទប់ %(room)s - %(month)s"
+msgstr ""
 
 #: .\rooms\models.py:103 .\templates\admin\rooms\electricity\change_list.html:5
 msgid "Electricity Readings"
-msgstr "អំនានអគ្គិសនី"
+msgstr ""
 
 #: .\rooms\models.py:106
 #, python-format
 msgid "Electricity of room %(room)s - %(month)s"
-msgstr "អគ្គិសនី បន្ទប់ %(room)s - %(month)s"
+msgstr ""
 
 #: .\rooms\models.py:116
 msgid "First day of month"
-msgstr "ថ្ងៃដំបូងនៃខែ"
+msgstr ""
 
 #: .\rooms\models.py:124
 msgid "Water unit price (៛/m³)"
-msgstr "តម្លៃឯកតាទឹក (៛/m³)"
+msgstr ""
 
 #: .\rooms\models.py:130
 msgid "Electricity unit price (៛/kWh)"
-msgstr "តម្លៃឯកតាអគ្គិសនី (៛/kWh)"
+msgstr ""
 
 #: .\rooms\models.py:137
 msgid "Exchange rate USD to KHR"
-msgstr "អត្រាប្តូរប្រាក់ USD ទៅ KHR"
+msgstr ""
 
 #: .\rooms\models.py:138
 msgid "Exchange rate (USD→KHR)"
-msgstr "អត្រាប្តូរ USD→KHR"
+msgstr ""
 
 #: .\rooms\models.py:143
 msgid "Unit Price"
-msgstr "តម្លៃឯកតា"
+msgstr ""
 
 #: .\rooms\models.py:144
 msgid "Utility Rates"
-msgstr "តម្លៃសេវាប្រើប្រាស់"
+msgstr ""
 
 #: .\rooms\models.py:147
 #, python-format
 msgid "Unit Price of %(month)s"
-msgstr "តម្លៃឯកតា %(month)s"
+msgstr ""
 
 #: .\rooms\models.py:153
 msgid "Male"
-msgstr "ប្រុស"
+msgstr ""
 
 #: .\rooms\models.py:154
 msgid "Female"
-msgstr "ស្រី"
+msgstr ""
 
 #: .\rooms\models.py:155
 msgid "Other"
-msgstr "ផ្សេងទៀត"
+msgstr ""
 
 #: .\rooms\models.py:168
 msgid "Move-in date"
-msgstr "ថ្ងៃចូល"
+msgstr ""
 
 #: .\rooms\models.py:169
 msgid "Move-out date"
-msgstr "ថ្ងៃចេញ"
+msgstr ""
 
 #: .\rooms\models.py:176
 msgid "Exit date cannot be before enter date"
-msgstr "ថ្ងៃចេញមិនអាចមុនថ្ងៃចូលបាន"
+msgstr ""
 
 #: .\rooms\models.py:179
 msgid "Tenant"
-msgstr "អ្នកជួល"
+msgstr ""
 
 #: .\rooms\models.py:180 .\templates\admin\base_site.html:1261
 #: .\templates\admin\rooms\clientprofile\change_list.html:14
 msgid "Tenants"
-msgstr "អ្នកជួល"
+msgstr ""
 
 #: .\rooms\models.py:212
 msgid "Issued at"
-msgstr "បានដាក់ចេញនៅថ្ងៃ"
+msgstr ""
 
 #: .\rooms\models.py:213
 msgid "Sent at"
-msgstr "បានផ្ញើនៅថ្ងៃ"
+msgstr ""
 
 #: .\rooms\models.py:214
 msgid "Paid at"
-msgstr "ទូទាត់ប្រាក់នៅថ្ងៃ"
+msgstr ""
 
 #: .\rooms\models.py:216
 msgid "Async job pending"
-msgstr "ការងារ async កំពុងរង់ចាំ"
+msgstr ""
 
 #: .\rooms\models.py:219
 msgid "Async job type"
-msgstr "ប្រភេទការងារ async"
+msgstr ""
 
 #: .\rooms\models.py:222
 msgid "Data note"
-msgstr "កំណត់ចំណាំទិន្នន័យ"
+msgstr ""
 
 #: .\rooms\models.py:225
 msgid "Tenant name snapshot"
-msgstr "ឈ្មោះអ្នកជួល (ថតទុក)"
+msgstr ""
 
 #: .\rooms\models.py:228
 msgid "Last job status"
-msgstr "ស្ថានភាពការងារចុងក្រោយ"
+msgstr ""
 
 #: .\rooms\models.py:231
 msgid "Last job message"
-msgstr "សារការងារចុងក្រោយ"
+msgstr ""
 
 #: .\rooms\models.py:234
 msgid "Last job at"
-msgstr "ពេលវេលាការងារចុងក្រោយ"
+msgstr ""
 
 #: .\rooms\models.py:237
 msgid "Created at"
-msgstr "បានបង្កើតនៅថ្ងៃ"
+msgstr ""
 
 #: .\rooms\models.py:241
 msgid "Monthly bill"
-msgstr "វិក្កយបត្រប្រចាំខែ"
+msgstr ""
 
 #: .\rooms\models.py:242
 #: .\templates\admin\rooms\monthlybill\change_list.html:45
 msgid "Monthly Bills"
-msgstr "វិក្កយបត្រប្រចាំខែ"
+msgstr ""
 
 #: .\rooms\models.py:245
 #, python-format
 msgid "Bill %(room)s %(month)s"
-msgstr "វិក្កយបត្រ %(room)s %(month)s"
+msgstr ""
 
 #: .\rooms\models.py:263
 msgid "Status cannot move backward."
-msgstr "ស្ថានភាពមិនអាចត្រឡប់ក្រោយបាន"
+msgstr ""
 
 #: .\rooms\models.py:268
 msgid "Pending"
-msgstr "កំពុងរង់ចាំ"
+msgstr ""
 
 #: .\rooms\models.py:269
 msgid "Running"
-msgstr "កំពុងដំណើរការ"
+msgstr ""
 
 #: .\rooms\models.py:270
 msgid "Success"
-msgstr "បញ្ចប់ដោយជោគជ័យ"
+msgstr ""
 
 #: .\rooms\models.py:271 .\rooms\templatetags\admin_log_format.py:74
 #: .\rooms\templatetags\admin_log_format.py:81
@@ -647,337 +651,340 @@ msgstr "បញ្ចប់ដោយជោគជ័យ"
 #: .\templates\admin\rooms\change_list.html:837
 #: .\templates\admin\rooms\change_list.html:868
 msgid "Failed"
-msgstr "បរាជ័យ"
+msgstr ""
 
 #: .\rooms\models.py:310
 msgid "Smart alert log"
-msgstr "កំណត់ហេតុដំណឹងឆ្លាតវៃ"
+msgstr ""
 
 #: .\rooms\models.py:311
 msgid "Smart alert logs"
-msgstr "កំណត់ហេតុដំណឹងឆ្លាតវៃ"
+msgstr ""
 
 #: .\rooms\models.py:332
+msgid "Telegram password reset"
+msgstr ""
+
 #: .\rooms\models.py:333
 msgid "Telegram password resets"
-msgstr "កំណត់ពាក្យសម្ងាត់ឡើងវិញតាម Telegram"
+msgstr ""
 
 #: .\rooms\templatetags\admin_log_format.py:38
 msgid "Telegram group send"
-msgstr "ផ្ញើទៅក្រុម Telegram"
+msgstr ""
 
 #: .\rooms\templatetags\admin_log_format.py:40
 #: .\rooms\templatetags\admin_log_format.py:79
 msgid "Generate bills"
-msgstr "បង្កើតវិក្កយបត្រ"
+msgstr ""
 
 #: .\rooms\templatetags\admin_log_format.py:42
 #: .\templates\admin\dashboard.html:173
 msgid "Action"
-msgstr "សកម្មភាព"
+msgstr ""
 
 #: .\rooms\templatetags\admin_log_format.py:74
 #: .\templates\admin\rooms\change_list.html:860
 #: .\templates\admin\rooms\change_list.html:965
 msgid "Completed"
-msgstr "បំពេញ"
+msgstr ""
 
 #: .\rooms\templatetags\admin_log_format.py:77
 msgid "Telegram group"
-msgstr "ក្រុម Telegram"
+msgstr ""
 
 #: .\rooms\templatetags\admin_log_format.py:81
 #: .\rooms\templatetags\admin_log_format.py:83
 #: .\templates\admin\rooms\change_list.html:863
 msgid "Done"
-msgstr "បានបញ្ចប់"
+msgstr ""
 
 #: .\rooms\views.py:124 .\rooms\views.py:128 .\templates\admin\login.html:224
 #: .\templates\admin\login.html:228
 msgid "Username or email"
-msgstr "ឈ្មោះអ្នកប្រើ ឬ អ៊ីមែល"
+msgstr ""
 
 #: .\rooms\views.py:129
 msgid "Reset code"
-msgstr "លេខកូដកំណត់ពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\rooms\views.py:130
 msgid "New password"
-msgstr "លេខសម្ងាត់ថ្មី"
+msgstr ""
 
 #: .\rooms\views.py:131
 msgid "Confirm new password"
-msgstr "បញ្ចូលពាក្យសម្ងាត់ថ្មីម្តងទៀត"
+msgstr ""
 
 #: .\rooms\views.py:138
 msgid "Passwords do not match."
-msgstr "ពាក្យសម្ងាត់មិនត្រូវគ្នា"
+msgstr ""
 
 #: .\rooms\views.py:181 .\rooms\views.py:244
 msgid "User not found."
-msgstr "រកមិនឃើញអ្នកប្រើប្រាស់"
+msgstr ""
 
 #: .\rooms\views.py:187
 msgid "Telegram chat ID is missing. Contact admin to link."
-msgstr "មិនទាន់ភ្ជាប់ Telegram ទេ សូមទាក់ទងអ្នកគ្រប់គ្រង ដើម្បីភ្ជាប់"
+msgstr ""
 
 #: .\rooms\views.py:203
 msgid "Please wait before requesting another code."
-msgstr "សូមរង់ចាំបន្តិច មុននឹងស្នើសុំលេខកូដថ្មី"
+msgstr ""
 
 #: .\rooms\views.py:213
 #, python-format
 msgid "Your reset code is %(code)s. It expires in %(minutes)s minutes."
-msgstr "លេខកូដរបស់អ្នកគឺ %(code)s វានឹងផុតកំណត់ក្នុងរយៈពេល %(minutes)s នាទី"
+msgstr ""
 
 #: .\rooms\views.py:219 .\rooms\views.py:223
 msgid "Telegram send failed. Please try again."
-msgstr "ផ្ញើតាម Telegram បរាជ័យ សូមព្យាយាមម្តងទៀត"
+msgstr ""
 
 #: .\rooms\views.py:226
 msgid "Reset code sent via Telegram."
-msgstr "លេខកូដកំណត់ពាក្យសម្ងាត់ឡើងវិញ ត្រូវបានផ្ញើតាម Telegram"
+msgstr ""
 
 #: .\rooms\views.py:260
 msgid "Invalid or expired code."
-msgstr "លេខកូដមិនត្រឹមត្រូវ ឬ ផុតកំណត់"
+msgstr ""
 
 #: .\rooms\views.py:274
 msgid "Password updated. You can log in now."
-msgstr "ពាក្យសម្ងាត់ត្រូវបានធ្វើបច្ចុប្បន្នភាពរួចហើយ អ្នកអាចចូលប្រើបានឥឡូវនេះ"
+msgstr ""
 
 #: .\rooms\views.py:436
 msgid "Invoice can only be re-generated in Draft status."
-msgstr "អាចបង្កើតវិក័យប័ត្រឡើងវិញបានតែនៅស្ថានភាពព្រាងប៉ុណ្ណោះ"
+msgstr ""
 
 #: .\rooms\views.py:458
 msgid "Invoice re-generation queued."
-msgstr "ការបង្កើតវិក័យប័ត្រឡើងវិញត្រូវបានដាក់ចូលក្នុងជួរ"
+msgstr ""
 
 #: .\rooms\views.py:468
 msgid "Invoice re-generated successfully."
-msgstr "បានបង្កើតវិក័យប័ត្រឡើងវិញដោយជោគជ័យ"
+msgstr ""
 
 #: .\rooms\views.py:484
 msgid "Invoice can only be issued from Draft status."
-msgstr "អាចចេញវិក័យប័ត្របានតែនៅស្ថានភាពព្រាងប៉ុណ្ណោះ"
+msgstr ""
 
 #: .\rooms\views.py:492
 #, python-format
 msgid "Issue invoice %(room)s %(month)s"
-msgstr "ចេញវិក្កយបត្រ %(room)s %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:494
 #, python-format
 msgid "Issued invoice for %(room)s, %(month)s."
-msgstr "បានចេញវិក្កយបត្រ សម្រាប់ %(room)s, %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:518
 msgid "Invoice issued successfully."
-msgstr "ដាក់ចេញវិក័យប័ត្រដោយជោគជ័យ។"
+msgstr ""
 
 #: .\rooms\views.py:528
 msgid "Invoice can only be marked Paid after it is Sent."
-msgstr "អាចសម្គាល់ថាបានទូទាត់ប្រាក់រួច បន្ទាប់ពីបានផ្ញើរួចហើយប៉ុណ្ណោះ"
+msgstr ""
 
 #: .\rooms\views.py:542
 #, python-format
 msgid "Mark paid %(room)s %(month)s"
-msgstr "បានទូទាត់ប្រាក់ %(room)s %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:544
 #, python-format
 msgid "Marked paid for %(room)s, %(month)s."
-msgstr "បានទូទាត់ប្រាក់សម្រាប់ %(room)s, %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:547
 msgid "Invoice marked as Paid."
-msgstr "វិក័យប័ត្រត្រូវបានសម្គាល់ថាបានទូទាត់ប្រាក់រួចរាល់"
+msgstr ""
 
 #: .\rooms\views.py:651
 msgid "Invoice can only be sent when status is Issued."
-msgstr "អាចផ្ញើវិក័យប័ត្របានតែនៅស្ថានភាពបានដាក់ចេញតែប៉ុណ្ណោះ។"
+msgstr ""
 
 #: .\rooms\views.py:661 .\rooms\views.py:1139 .\rooms\views.py:1194
 msgid "Tenant Telegram chat ID is missing."
-msgstr "មិនមាន Telegram chat ID របស់អ្នកជួលទេ"
+msgstr ""
 
 #: .\rooms\views.py:672 .\rooms\views.py:735
 #, python-format
 msgid "Send invoice %(room)s %(month)s"
-msgstr "ផ្ញើវិក្កយបត្រ %(room)s %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:674 .\rooms\views.py:737
 #, python-format
 msgid "Send invoice to tenant for %(room)s, %(month)s."
-msgstr "ផ្ញើវិក្កយបត្រទៅអ្នកជួល សម្រាប់ %(room)s, %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:686
 msgid "Sending invoice in background."
-msgstr "កំពុងផ្ញើវិក្កយបត្រនៅផ្ទៃខាងក្រោយ"
+msgstr ""
 
 #: .\rooms\views.py:740
 msgid "Invoice sent via Telegram."
-msgstr "វិក័យប័ត្រត្រូវបានផ្ញើតាម Telegram។"
+msgstr ""
 
 #: .\rooms\views.py:916
 msgid "Please select a month."
-msgstr "សូមជ្រើសរើសខែ"
+msgstr ""
 
 #: .\rooms\views.py:923
 msgid "Invalid month format."
-msgstr "ទម្រង់ខែមិនត្រឹមត្រូវ"
+msgstr ""
 
 #: .\rooms\views.py:934 .\rooms\views.py:1354
 msgid "No rooms found for the selected month."
-msgstr "មិនអាចស្វែងរកឃើញបន្ទប់សម្រាប់ខែដែលបានជ្រើសរើស"
+msgstr ""
 
 #: .\rooms\views.py:943
 msgid "Telegram group chat ID is not configured."
-msgstr "មិនទាន់កំណត់ Telegram group chat ID ទេ"
+msgstr ""
 
 #: .\rooms\views.py:976
 #, python-format
 msgid "Draft invoices found for rooms: %(rooms)s"
-msgstr "មានវិក្កយបត្រព្រាងសម្រាប់បន្ទប់៖ %(rooms)s"
+msgstr ""
 
 #: .\rooms\views.py:982
 #, python-format
 msgid "Missing invoice files for rooms: %(rooms)s"
-msgstr "ខ្វះឯកសារវិក្កយបត្រសម្រាប់បន្ទប់៖ %(rooms)s"
+msgstr ""
 
 #: .\rooms\views.py:986
 msgid "No invoices were sent. Fix issues and try again."
-msgstr "មិនមានវិក្កយបត្រផ្ញើចេញទេ​ សូមដោះស្រាយបញ្ហា និងសាកល្បងម្តងទៀត"
+msgstr ""
 
 #: .\rooms\views.py:991
 msgid "No invoice files found to send."
-msgstr "ស្វែងរកមិនឃើញវិក្កយបត្រដើម្បីផ្ញើចេញទេ"
+msgstr ""
 
 #: .\rooms\views.py:1034
 msgid "Sending invoices to Telegram group in background."
-msgstr "កំពុងដំណើរការផ្ញើវិក្កយបត្រទៅកាន់ក្រុម Telegram នៅផ្ទៃខាងក្រោយ"
+msgstr ""
 
 #: .\rooms\views.py:1109
 #, python-format
 msgid "Telegram connection OK: %(bot_name)s"
-msgstr "សាកល្បងភ្ជាប់ទៅកាន់ Telegram ដោយជោគជ័យ៖ %(bot_name)s"
+msgstr ""
 
 #: .\rooms\views.py:1172 .\rooms\views.py:1234
 msgid "Tenant Telegram test message sent."
-msgstr "បានផ្ញើសារសាកល្បងទៅកាន់ Telegram អ្នកជួល"
+msgstr ""
 
 #: .\rooms\views.py:1325 .\rooms\views.py:1466 .\rooms\views.py:1551
 msgid "all rooms"
-msgstr "បន្ទប់ទាំងអស់"
+msgstr ""
 
 #: .\rooms\views.py:1325 .\rooms\views.py:1466 .\rooms\views.py:1551
 #, python-format
 msgid "%(count)s room(s)"
-msgstr "%(count)s បន្ទប់"
+msgstr ""
 
 #: .\rooms\views.py:1331 .\rooms\views.py:1343
 #, python-format
 msgid "Generate bills for %(month)s, %(rooms)s."
-msgstr "បង្កើតវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
+msgstr ""
 
 #: .\rooms\views.py:1374
 msgid "Generating invoices in background."
-msgstr "កំពុងបង្កើតវិក័យប័ត្រនៅផ្ទៃក្រោយ"
+msgstr ""
 
 #: .\rooms\views.py:1470
 #, python-format
 msgid "Generate and download bills %(month)s"
-msgstr "បង្កើត និងទាញយកវិក្កយបត្រ %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:1471
 #, python-format
 msgid "Generate and download bills for %(month)s, %(rooms)s."
-msgstr "បង្កើត និងទាញយកវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
+msgstr ""
 
 #: .\rooms\views.py:1522
 msgid "No invoices generated to download."
-msgstr "មិនមានវិក្កយបត្រដែលបានបង្កើតសម្រាប់ទាញយកទេ"
+msgstr ""
 
 #: .\rooms\views.py:1555
 #, python-format
 msgid "Download bills %(month)s"
-msgstr "ទាញយកវិក្កយបត្រ %(month)s"
+msgstr ""
 
 #: .\rooms\views.py:1556
 #, python-format
 msgid "Download bills for %(month)s, %(rooms)s."
-msgstr "ទាញយកវិក្កយបត្រសម្រាប់ %(month)s, %(rooms)s."
+msgstr ""
 
 #: .\templates\admin\_i18n_strings.html:3
 msgid "Show counts"
-msgstr "បង្ហាញចំនួន"
+msgstr ""
 
 #: .\templates\admin\_i18n_strings.html:4
 #, python-format
 msgid "By %(filter_title)s"
-msgstr "ដោយ %(filter_title)s"
+msgstr ""
 
 #: .\templates\admin\app_list.html:4
 msgid "Authentication and Authorization"
-msgstr "ការផ្ទៀងផ្ទាត់ និងការអនុញ្ញាតសិទ្ធិ"
+msgstr ""
 
 #: .\templates\admin\app_list.html:16 .\templates\admin\app_list.html:68
 #, python-format
 msgid "Models in the %(name)s application"
-msgstr "ម៉ូដែលនៅក្នុងកម្មវិធី %(name)s"
+msgstr ""
 
 #: .\templates\admin\app_list.html:21 .\templates\admin\app_list.html:73
 msgid "Model name"
-msgstr "ឈ្មោះម៉ូដែល"
+msgstr ""
 
 #: .\templates\admin\app_list.html:22 .\templates\admin\app_list.html:74
 msgid "Add link"
-msgstr "តំណបន្ថែម"
+msgstr ""
 
 #: .\templates\admin\app_list.html:23 .\templates\admin\app_list.html:75
 msgid "Change or view list link"
-msgstr "កែប្រែ ឬមើលបញ្ជី"
+msgstr ""
 
 #: .\templates\admin\app_list.html:38 .\templates\admin\app_list.html:90
 msgid "Add"
-msgstr "បន្ថែម"
+msgstr ""
 
 #: .\templates\admin\app_list.html:45 .\templates\admin\app_list.html:97
 msgid "View"
-msgstr "មើល"
+msgstr ""
 
 #: .\templates\admin\app_list.html:47 .\templates\admin\app_list.html:99
 msgid "Change"
-msgstr "កែប្រែ"
+msgstr ""
 
 #: .\templates\admin\app_list.html:113
 msgid "You don’t have permission to view or edit anything."
-msgstr "អ្នកមិនមានសិទ្ធិមើល ឬកែប្រែអ្វីទាំងអស់ទេ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:4 .\templates\admin\base_site.html:12
 #: .\templates\admin\base_site.html:18 .\templates\admin\login.html:281
 #: .\templates\base.html:8
 msgid "PtasJuolKruDy"
-msgstr "ផ្ទះជួលគ្រូឌី"
+msgstr ""
 
 #: .\templates\admin\base_site.html:16
 msgid "Tenant Dashboard"
-msgstr "ផ្ទាំងអ្នកជួល"
+msgstr ""
 
 #: .\templates\admin\base_site.html:35
 #: .\templates\registration\password_change_form.html:8
 msgid "Change password"
-msgstr "ប្ដូរពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\templates\admin\base_site.html:40
 #: .\templates\registration\password_change_form.html:11
 msgid "Log out"
-msgstr "ចាកចេញ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1211
 msgid "Missing data details"
-msgstr "ទិន្នន័យដែលខ្វះ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1214 .\templates\admin\base_site.html:1401
 #: .\templates\admin\base_site.html:1631
@@ -992,144 +999,144 @@ msgstr "ទិន្នន័យដែលខ្វះ"
 #: .\templates\admin\rooms\change_list.html:1000
 #: .\templates\admin\submit_line.html:5
 msgid "Close"
-msgstr "បិទ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1228 .\templates\admin\base_site.html:1342
 msgid "Dashboard"
-msgstr "ផ្ទាំងគ្រប់គ្រង"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1240 .\templates\admin\base_site.html:1354
 msgid "Bills"
-msgstr "វិក្កយបត្រ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1271
 msgid "Elec"
-msgstr "អគ្គិសនី"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1297
 msgid "Prices"
-msgstr "តម្លៃ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1299 .\templates\admin\base_site.html:1306
 msgid "More"
-msgstr "បន្ថែម"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1308
 msgid "More menu"
-msgstr "ម៉ឺនុយបន្ថែម"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1331
 #: .\templates\admin\rooms\unitprice\change_list.html:37
 msgid "Unit Prices"
-msgstr "តម្លៃឯកតា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1387 .\templates\admin\base_site.html:1394
 #: .\templates\admin\base_site.html:1446
 msgid "Confirm"
-msgstr "បញ្ជាក់"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1391
 #: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:18
 msgid "Cancel"
-msgstr "បោះបង់"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1442
 msgid "Are you sure you want to delete this item?"
-msgstr "តើអ្នកប្រាកដថាចង់លុបធាតុនេះមែនទេ?"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1442 .\templates\admin\base_site.html:1443
 msgid "This will also delete related items."
-msgstr "វានឹងលុបធាតុដែលពាក់ព័ន្ធផងដែរ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1443
 #, python-format
 msgid "Are you sure you want to delete \"%(name)s\"?"
-msgstr "តើអ្នកប្រាកដថាចង់លុប \"%(name)s\" មែនទេ?"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1444
 msgid "Are you sure?"
-msgstr "តើអ្នកប្រាកដមែនទេ?"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1445 .\templates\admin\submit_line.html:12
 msgid "Delete"
-msgstr "លុប"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1614
 #: .\templates\admin\rooms\change_list.html:515
 msgid "Jan"
-msgstr "មករា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1615
 #: .\templates\admin\rooms\change_list.html:516
 msgid "Feb"
-msgstr "កុម្ភៈ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1616
 #: .\templates\admin\rooms\change_list.html:517
 msgid "Mar"
-msgstr "មីនា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1617
 #: .\templates\admin\rooms\change_list.html:518
 msgid "Apr"
-msgstr "មេសា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1618
 #: .\templates\admin\rooms\change_list.html:519
 msgid "May"
-msgstr "ឧសភា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1619
 #: .\templates\admin\rooms\change_list.html:520
 msgid "Jun"
-msgstr "មិថុនា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1620
 #: .\templates\admin\rooms\change_list.html:521
 msgid "Jul"
-msgstr "កក្កដា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1621
 #: .\templates\admin\rooms\change_list.html:522
 msgid "Aug"
-msgstr "សីហា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1622
 #: .\templates\admin\rooms\change_list.html:523
 msgid "Sep"
-msgstr "កញ្ញា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1623
 #: .\templates\admin\rooms\change_list.html:524
 msgid "Oct"
-msgstr "តុលា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1624
 #: .\templates\admin\rooms\change_list.html:525
 msgid "Nov"
-msgstr "វិច្ឆិកា"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1625
 #: .\templates\admin\rooms\change_list.html:526
 msgid "Dec"
-msgstr "ធ្នូ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1627
 msgid "YYYY-MM-01"
-msgstr "YYYY-MM-01"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1628
 #: .\templates\admin\rooms\change_list.html:504
 msgid "Pick month"
-msgstr "ជ្រើសខែ"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1629
 msgid "Previous year"
-msgstr "ឆ្នាំមុន"
+msgstr ""
 
 #: .\templates\admin\base_site.html:1630
 msgid "Next year"
-msgstr "ឆ្នាំបន្ទាប់"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:8
 #: .\templates\admin\rooms\clientprofile\change_list.html:6
@@ -1142,233 +1149,231 @@ msgstr "ឆ្នាំបន្ទាប់"
 #: .\templates\registration\password_reset_confirm.html:9
 #: .\templates\registration\password_reset_form.html:9
 msgid "Home"
-msgstr "ទំព័រដើម"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:18
 msgid "Showing your room data only."
-msgstr "បង្ហាញតែទិន្នន័យបន្ទប់របស់អ្នកប៉ុណ្ណោះ"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:20
 msgid "Showing all rooms (global view)."
-msgstr "បង្ហាញបន្ទប់ទាំងអស់ (ទិដ្ឋភាពទូទៅ)"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:133
 msgid "Expense per Month"
-msgstr "ចំណាយប្រចាំខែ"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:135
 msgid "Income per Month"
-msgstr "ចំណូលក្នុងមួយខែ"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:147
 msgid "Water / Electricity Trends"
-msgstr "និន្នាការទឹក / អគ្គិសនី"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:158
 msgid "Recent actions"
-msgstr "សកម្មភាពថ្មីៗ"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:163
 msgid "None available"
-msgstr "មិនមាន"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:170
 msgid "Added"
-msgstr "បាន​បន្ថែម"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:171
 msgid "Updated"
-msgstr "បាន​កែប្រែ"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:172
 msgid "Deleted"
-msgstr "បានលុប"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:191
 msgid "ago"
-msgstr "មុន"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:246
 msgid "Expense"
-msgstr "ចំណាយ"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:246
 msgid "Income"
-msgstr "ចំណូល"
+msgstr ""
 
 #: .\templates\admin\dashboard.html:389
 msgid "Your password was changed successfully."
-msgstr "ពាក្យសម្ងាត់ត្រូវបានផ្លាស់ប្តូរដោយជោគជ័យ"
+msgstr ""
 
 #: .\templates\admin\login.html:245 .\templates\admin\login.html:262
 msgid "Show password"
-msgstr "បង្ហាញពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\templates\admin\login.html:261
 msgid "Hide password"
-msgstr "លាក់ពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\templates\admin\login.html:270
-msgid "Forgot password?"
-msgstr "ភ្លេចពាក្យសម្ងាត់?"
-
 msgid "Reset via Telegram"
-msgstr "កំណត់ពាក្យសម្ងាត់ឡើងវិញតាម Telegram"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:25
 #: .\templates\admin\rooms\change_list.html:548
 msgid "Clear"
-msgstr "សម្អាត"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:39
 #: .\templates\admin\rooms\change_list.html:63
 #: .\templates\admin\rooms\change_list.html:67
 #: .\templates\admin\rooms\change_list.html:84
 msgid "Job completed successfully."
-msgstr "ដំណើរការបានបញ្ចប់ដោយជោគជ័យ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:40
 #: .\templates\admin\rooms\change_list.html:64
 #: .\templates\admin\rooms\change_list.html:68
 #: .\templates\admin\rooms\change_list.html:85
 msgid "Job failed."
-msgstr "ដំណើរការបរាជ័យ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:41
 #: .\templates\admin\rooms\change_list.html:65
 #: .\templates\admin\rooms\change_list.html:69
 #: .\templates\admin\rooms\change_list.html:86
 msgid "Job updated."
-msgstr "ដំណើរការត្រូវបានអាប់ដេត"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:185
 #: .\templates\admin\rooms\change_list.html:188
 #: .\templates\admin\rooms\change_list.html:791
 msgid "Generate Bills"
-msgstr "បង្កើតវិក្កយបត្រ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:186
 msgid "Generate"
-msgstr "បង្កើត"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:194
 #: .\templates\admin\rooms\change_list.html:197
 msgid "Download Bills"
-msgstr "ទាញយកម្តងច្រើន"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:195
 msgid "Download ZIP"
-msgstr "ទាញយក ZIP"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:204
 msgid "Send Monthly Album"
-msgstr "ផ្ញើអាល់ប៊ុមប្រចាំខែ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:205
 msgid "Send to Telegram"
-msgstr "ផ្ញើទៅ Telegram"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:207
 msgid "Send via Telegram"
-msgstr "ផ្ញើទៅក្រុម Telegram"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:482
 #: .\templates\admin\rooms\change_list.html:657
 msgid "Select a billing action to show the form."
-msgstr "សូមជ្រើសសកម្មភាពខាងលើ ដើម្បីឃើញបង្កើត ឬទាញយកវិក្កយបត្រ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:489
 msgid "Generate Monthly Bills"
-msgstr "បង្កើតវិក្កយបត្រប្រចាំខែ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:492
 msgid "Pick a month and rooms, then run the action."
-msgstr "ជ្រើសខែ និងបន្ទប់ រួចចុចប៊ូតុង"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:499
 msgid "Month:"
-msgstr "ខែ៖"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:511
 msgid "Year"
-msgstr "ឆ្នាំ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:534
 msgid "Leave unchecked = all rooms"
-msgstr "មិនជ្រើសរើស = ជ្រើសរើសបន្ទប់ទាំងអស់"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:546
 msgid "Submit"
-msgstr "ដាក់ស្នើ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:593
 msgid "Selected action:"
-msgstr "សកម្មភាពដែលបានជ្រើស៖"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:793
 #: .\templates\admin\rooms\change_list.html:832
 msgid "Generating"
-msgstr "កំពុងបង្កើត"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:861
 #: .\templates\admin\rooms\change_list.html:966
 msgid "Completed with errors"
-msgstr "បំពេញ តែមានបញ្ហា"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:904
 msgid "Send to Telegram group"
-msgstr "ផ្ញើទៅក្រុម Telegram"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:906
 #: .\templates\admin\rooms\change_list.html:944
 msgid "Sending"
-msgstr "កំពុងផ្ញើ"
+msgstr ""
 
 #: .\templates\admin\rooms\change_list.html:1001
 msgid "Invoice Preview"
-msgstr "មើលវិក្កយបត្រជាមុន"
+msgstr ""
 
 #: .\templates\admin\rooms\clientprofile\change_list.html:21
 msgid "Test Telegram"
-msgstr "សាកភ្ជាប់ Telegram"
+msgstr ""
 
 #: .\templates\admin\rooms\electricity\change_list.html:45
 msgid "Add electricity"
-msgstr "បន្ថែមអគ្គិសនី"
+msgstr ""
 
 #: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:5
 msgid "Confirm bulk send"
-msgstr "បញ្ជាក់ការផ្ញើជាក្រុម"
+msgstr ""
 
 #: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:6
 msgid "You are about to send the selected invoices via Telegram."
-msgstr "អ្នកកំពុងត្រៀមផ្ញើវិក្កយបត្រដែលបានជ្រើសតាម Telegram"
+msgstr ""
 
 #: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:17
 msgid "Yes, send"
-msgstr "បាទ/ចាស ផ្ញើ"
+msgstr ""
 
 #: .\templates\admin\rooms\room\change_form.html:10
 msgid "Utility Readings"
-msgstr "ការអានសេវាប្រើប្រាស់"
+msgstr ""
 
 #: .\templates\admin\rooms\room\change_list.html:7
 msgid "Add room"
-msgstr "បន្ថែមបន្ទប់"
+msgstr ""
 
 #: .\templates\admin\rooms\water\change_list.html:12
 msgid "Add water"
-msgstr "បន្ថែមអំនានទឹក"
+msgstr ""
 
 #: .\templates\admin\search_form.html:7
 msgid "Search"
-msgstr "ស្វែងរក"
+msgstr ""
 
 #: .\templates\admin\search_form.html:9
 #, python-format
 msgid "%(counter)s result"
 msgid_plural "%(counter)s results"
 msgstr[0] ""
+msgstr[1] ""
 
 #: .\templates\admin\search_form.html:9
 #, python-format
@@ -1401,208 +1406,107 @@ msgstr ""
 
 #: .\templates\includes\language_switcher.html:6
 msgid "Language"
-msgstr "ភាសា"
+msgstr ""
 
 #: .\templates\registration\password_change_form.html:4
 #: .\templates\registration\password_reset_confirm.html:4
 #: .\templates\registration\password_reset_form.html:4
 msgid "Error:"
-msgstr "បញ្ហា"
+msgstr ""
 
 #: .\templates\registration\password_change_form.html:8
 msgid "Documentation"
-msgstr "ឯកសារណែនាំ"
+msgstr ""
 
 #: .\templates\registration\password_change_form.html:18
 msgid "Password change"
-msgstr "ផ្លាស់ប្តូរពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\templates\registration\password_change_form.html:28
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
-msgstr[0] "សូមកែសម្រួលកំហុសខាងក្រោម"
+msgstr[0] ""
+msgstr[1] ""
 
 #: .\templates\registration\password_change_form.html:33
-msgid "Please enter your old password, for security's sake, and then enter your new password twice so we can verify you typed it in correctly."
-msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ចាស់របស់អ្នកដើម្បីសុវត្ថិភាព ហើយបញ្ចូលពាក្យសម្ងាត់ថ្មីពីរដងដើម្បីអោយយើងអាចបញ្ជាក់ថាអ្នកវាយបានត្រឹមត្រូវ"
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
 
 #: .\templates\registration\password_change_form.html:61
 #: .\templates\registration\password_reset_confirm.html:39
 msgid "Change my password"
-msgstr "ប្ដូរពាក្យសម្ងាត់"
+msgstr ""
 
 #: .\templates\registration\password_reset_confirm.html:10
 msgid "Password reset confirmation"
-msgstr "បញ្ជាក់ការកំណត់ពាក្យសម្ងាត់ឡើងវិញ"
+msgstr ""
 
 #: .\templates\registration\password_reset_confirm.html:18
-msgid "Please enter your new password twice so we can verify you typed it in correctly."
-msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ថ្មីពីរដង ដើម្បីអោយយើងអាចបញ្ជាក់ថាអ្នកវាយបានត្រឹមត្រូវ"
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
 
 #: .\templates\registration\password_reset_confirm.html:26
 msgid "New password:"
-msgstr "លេខសម្ងាត់ថ្មី"
+msgstr ""
 
 #: .\templates\registration\password_reset_confirm.html:33
 msgid "Confirm password:"
-msgstr "បញ្ជាក់ពាក្យសម្ងាត់៖"
+msgstr ""
 
 #: .\templates\registration\password_reset_confirm.html:45
-msgid "The password reset link was invalid, possibly because it has already been used. Please request a new password reset."
-msgstr "តំណភ្ជាប់កំណត់ពាក្យសម្ងាត់ឡើងវិញមិនត្រឹមត្រូវ ឬអាចត្រូវបានប្រើរួចហើយ សូមស្នើសុំតំណថ្មី"
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
 
 #: .\templates\registration\password_reset_form.html:10
 msgid "Password reset"
-msgstr "កំណត់ពាក្យសម្ងាត់ឡើងវិញ"
+msgstr ""
 
 #: .\templates\registration\password_reset_form.html:16
-msgid "Forgotten your password? Enter your email address below, and we'll email instructions for setting a new one."
-msgstr "ភ្លេចពាក្យសម្ងាត់មែនទេ? សូមបញ្ចូលអ៊ីមែលខាងក្រោម ហើយយើងនឹងផ្ញើវិធីសាស្ត្រកំណត់ពាក្យសម្ងាត់ថ្មី"
+msgid ""
+"Forgotten your password? Enter your email address below, and we'll email "
+"instructions for setting a new one."
+msgstr ""
 
 #: .\templates\registration\password_reset_form.html:23
 msgid "Email address:"
-msgstr "អ៊ីមែល"
+msgstr ""
 
 #: .\templates\registration\password_reset_form.html:29
 msgid "Reset my password"
-msgstr "កំណត់ពាក្យសម្ងាត់ឡើយវិញ"
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset.html:6
 msgid "Reset password via Telegram"
-msgstr "ដូរពាក្យសម្ងាត់តាម Telegram"
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset.html:7
-msgid "Enter your username or email. We will send a reset code to your Telegram."
-msgstr "សូមបញ្ចូលឈ្មោះអ្នកប្រើ ឬអ៊ីមែលរបស់អ្នក យើងនឹងផ្ញើលេខកូដកំណត់ពាក្យសម្ងាត់ឡើងវិញទៅ Telegram របស់អ្នក"
+msgid ""
+"Enter your username or email. We will send a reset code to your Telegram."
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset.html:15
 msgid "Send code"
-msgstr "ផ្ញើលេខកូដ"
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset.html:19
 #: .\templates\registration\telegram_password_reset_confirm.html:31
 msgid "Back to login"
-msgstr "ត្រឡប់ទៅទំព័រចូលប្រើ"
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset_confirm.html:6
 msgid "Enter reset code"
-msgstr "បញ្ចូលលេខកូដ"
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset_confirm.html:7
 msgid "Enter the code sent to your Telegram and set a new password."
-msgstr "សូមបញ្ចូលលេខកូដដែលទទួលបានតាម Telegram និងកំណត់ពាក្យសម្ងាត់ថ្មី"
+msgstr ""
 
 #: .\templates\registration\telegram_password_reset_confirm.html:27
 msgid "Reset password"
-msgstr "កំណត់ពាក្យសម្ងាត់ឡើងវិញ"
-
-#~ msgid "Electricity (kWh)"
-#~ msgstr "អគ្គិសនី (kWh)"
-
-#~ msgid "Water (m³)"
-#~ msgstr "ទឹក (m³)"
-
-#~ msgid "Readings"
-#~ msgstr "តម្លៃកុងទ័រ"
-
-#~ msgid "Menu"
-#~ msgstr "ម៉ឺនុយ"
-
-#, python-format
-#~ msgid "Generate bills %(month)s"
-#~ msgstr "បង្កើតវិក្កយបត្រ %(month)s"
-
-#~ msgid "Re-send this invoice to the tenant?"
-#~ msgstr "ផ្ញើវិក្កយបត្រនេះម្ដងទៀតទៅអ្នកជួលមែនទេ?"
-
-#~ msgid "Re-send"
-#~ msgstr "ផ្ញើម្ដងទៀត"
-
-#~ msgid "Meter value"
-#~ msgstr "អំនានកុងទ័រ"
-
-#~ msgid "Exchange rate"
-#~ msgstr "អត្រាប្តូរប្រាក់"
-
-#~ msgid "Income (៛)"
-#~ msgstr "ចំណូល (៛)"
-
-#~ msgid "Expense (៛)"
-#~ msgstr "ចំណាយ (៛)"
-
-#~ msgid "Select at least one invoice first."
-#~ msgstr "សូមជ្រើសយ៉ាងហោចណាស់មួយវិក្កយបត្រជាមុនសិន"
-
-#~ msgid "Bulk Send"
-#~ msgstr "ផ្ញើជាក្រុម"
-
-#~ msgid "Send selected invoices via Telegram?"
-#~ msgstr "ផ្ញើវិក្កយបត្រដែលបានជ្រើសតាម Telegram មែនទេ?"
-
-#~ msgid "Select invoices"
-#~ msgstr "ជ្រើសវិក្កយបត្រ"
-
-#~ msgid "OK"
-#~ msgstr "យល់ព្រម"
-
-#~ msgid "Select electricity to change"
-#~ msgstr "ជ្រើសរើសអំនានអគ្គិសនីដើម្បីកែ"
-
-#~ msgid "Select room to change"
-#~ msgstr "ជ្រើសបន្ទប់ដើម្បីកែប្រែ"
-
-#~ msgid "Select water to change"
-#~ msgstr "ជ្រើសរើស​ អំនានទឹក ដើម្បីកែ"
-
-#, python-format
-#~ msgid "Select %s to view"
-#~ msgstr "ជ្រើសរើស %s ដើម្បីមើល"
-
-#~ msgid "Add %(name)s"
-#~ msgstr "បន្ថែម %(name)s"
-
-#~ msgid "ID"
-#~ msgstr "លេខសម្គាល់"
-
-#~ msgid "Enter the same password as before, for verification."
-#~ msgstr "សូមបញ្ចូលពាក្យសម្ងាត់ដដែលម្តងទៀត ដើម្បីផ្ទៀងផ្ទាត់។"
-
-#~ msgid "Processing…"
-#~ msgstr "កំពុងដំណើរការ…"
-
-#~ msgid "Old password:"
-#~ msgstr "លេខសម្ងាត់ចាស់"
-
-#~ msgid ""
-#~ "Your password can't be too similar to your other personal information."
-#~ msgstr "លេខសម្ងាត់មិនអាចស្រដៀងទៅនឹងព័ត៌មានផ្ទាល់ខ្លួនអ្នកទេ"
-
-#~ msgid "Your password must contain at least 8 characters."
-#~ msgstr "លេខសម្ងាត់ត្រូវតែមានយ៉ាងហោច 8 តួអក្សរ"
-
-#~ msgid "Your password can't be a commonly used password."
-#~ msgstr "លេខសម្ងាត់មិនអាចជាលេខឧស្សាហ៍ប្រើទេ"
-
-#~ msgid "Your password can't be entirely numeric."
-#~ msgstr "លេខសម្ងាត់មិនអាចជាលេខទាំងអស់ទេ"
-
-#~ msgid "Invoice is unavailable because required utility data is missing."
-#~ msgstr "វិក័យប័ត្រមិនអាចប្រើបានទេ ព្រោះខ្វះទិន្នន័យទឹក/ភ្លើងដែលចាំបាច់"
-
-#~ msgid "Renter profile is missing. Some invoice fields may be blank."
-#~ msgstr "ខ្វះព័ត៌មានអ្នកជួល ព័ត៌មានខ្លះក្នុងវិក័យប័ត្រអាចនឹងទទេ"
-
-#~ msgid "Invoice file is not available yet."
-#~ msgstr "ឯកសារវិក័យប័ត្រមិនទាន់មាននៅឡើយទេ"
-
-#~ msgid "Telegram test failed: %(data)s"
-#~ msgstr "ការសាកល្បងភ្ជាប់ទៅ Telegram បរាជ័យ៖ %(data)s"
-
-#~ msgid "Electricity with this room and date already exists."
-#~ msgstr "ទិន្នន័យអគ្គិសនីសម្រាប់បន្ទប់ និងកាលបរិច្ឆេទនេះ មានរួចហើយ"
-
-#~ msgid "Water for this room and date already exists."
-#~ msgstr "ទិន្នន័យទឹកសម្រាប់បន្ទប់ និងកាលបរិច្ឆេទនេះ មានរួចហើយ"
-
-msgid "Generating invoice preview..."
-msgstr "កំពុងបង្កើតវិក្កយបត្រ..."
+msgstr ""

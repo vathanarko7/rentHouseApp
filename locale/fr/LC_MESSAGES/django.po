@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-07 20:47+0100\n"
+"POT-Creation-Date: 2026-02-14 21:32+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,311 +17,450 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: .\rooms\admin.py:53
+#: .\rentHouseApp\settings.py:159
+msgid "English"
+msgstr ""
+
+#: .\rentHouseApp\settings.py:160
+msgid "French"
+msgstr ""
+
+#: .\rentHouseApp\settings.py:161
+msgid "Khmer"
+msgstr ""
+
+#: .\rooms\admin.py:57
 msgid "Rent House Administration"
 msgstr "Administration Rent House"
 
-#: .\rooms\admin.py:54
+#: .\rooms\admin.py:58
 msgid "Rent House Admin Portal"
 msgstr "Portail admin Rent House"
 
-#: .\rooms\admin.py:55
+#: .\rooms\admin.py:59
 msgid "Welcome to Rent House Admin Portal"
 msgstr "Bienvenue sur le portail admin Rent House"
 
-#: .\rooms\admin.py:78
+#: .\rooms\admin.py:84
 msgid "Leave blank to set an unusable password."
 msgstr "Laissez vide pour dÃ©finir un mot de passe inutilisable."
 
-#: .\rooms\admin.py:121
+#: .\rooms\admin.py:127
 msgid "Username"
 msgstr "Nom d'utilisateur"
 
-#: .\rooms\admin.py:122
+#: .\rooms\admin.py:128
 msgid "First name"
 msgstr "PrÃ©nom"
 
-#: .\rooms\admin.py:123
+#: .\rooms\admin.py:129
 msgid "Last name"
 msgstr "Nom de famille"
 
-#: .\rooms\admin.py:124 .\rooms\admin.py:254
+#: .\rooms\admin.py:130 .\rooms\admin.py:276 .\rooms\admin.py:286
 msgid "Email"
 msgstr "E-mail"
 
-#: .\rooms\admin.py:125
+#: .\rooms\admin.py:131
 msgid "Password"
 msgstr "Mot de passe"
 
-#: .\rooms\admin.py:126
+#: .\rooms\admin.py:132 .\rooms\admin.py:282
 msgid "Sex"
 msgstr "Sexe"
 
-#: .\rooms\admin.py:127
+#: .\rooms\admin.py:133 .\rooms\admin.py:290 .\rooms\admin.py:523
 msgid "Phone"
 msgstr "TÃ©lÃ©phone"
 
-#: .\rooms\admin.py:128
+#: .\rooms\admin.py:134
 msgid "Telegram chat id"
 msgstr "ID de chat Telegram"
 
-#: .\rooms\admin.py:129
+#: .\rooms\admin.py:135 .\rooms\admin.py:294
 msgid "Id card number"
 msgstr "NumÃ©ro de carte d'identitÃ©"
 
-#: .\rooms\admin.py:130
+#: .\rooms\admin.py:136 .\rooms\admin.py:298
 msgid "Enter date"
 msgstr "Date d'entrÃ©e"
 
-#: .\rooms\admin.py:131
+#: .\rooms\admin.py:137 .\rooms\admin.py:302
 msgid "Exit date"
 msgstr "Date de sortie"
 
-#: .\rooms\admin.py:145
+#: .\rooms\admin.py:151
 msgid "Username already exists."
 msgstr "Le nom dâ€™utilisateur existe dÃ©jÃ ."
 
-#: .\rooms\admin.py:156
+#: .\rooms\admin.py:162
 msgid "Email already exists."
 msgstr "Lâ€™e-mail existe dÃ©jÃ ."
 
-#: .\rooms\admin.py:165
+#: .\rooms\admin.py:172
 msgid "Account Info"
 msgstr "Informations du compte"
 
-#: .\rooms\admin.py:178
+#: .\rooms\admin.py:185
 msgid "Profile Info"
 msgstr "Informations du profil"
 
-#: .\rooms\admin.py:235
-msgid "Paid invoices cannot be deleted."
+#: .\rooms\admin.py:237
+#, fuzzy
+#| msgid "Tenant"
+msgid "tenant"
+msgstr "Locataire"
+
+#: .\rooms\admin.py:240
+#, python-format
+msgid "The tenant \"%(name)s\" was added successfully."
+msgstr ""
+
+#: .\rooms\admin.py:257
+#, fuzzy
+#| msgid "Paid invoices cannot be deleted."
+msgid "Only draft invoices can be deleted."
 msgstr "Les factures payÃ©es ne peuvent pas Ãªtre supprimÃ©es."
 
-#: .\rooms\admin.py:266
+#: .\rooms\admin.py:278
+#, fuzzy
+#| msgid "Username"
+msgid "User"
+msgstr "Nom d'utilisateur"
+
+#: .\rooms\admin.py:316
 msgid "No chat ID"
 msgstr "Pas dâ€™ID de chat"
 
-#: .\rooms\admin.py:268
+#: .\rooms\admin.py:318
 msgid "Test Chat"
 msgstr "Tester le chat"
 
-#: .\rooms\admin.py:282
+#: .\rooms\admin.py:332
 msgid "Telegram"
 msgstr "Telegram"
 
-#: .\rooms\admin.py:397
+#: .\rooms\admin.py:455
 msgid "Room Modification"
 msgstr "Modification de la chambre"
 
-#: .\rooms\admin.py:459 .\rooms\admin.py:1129 .\rooms\models.py:21
-#: .\rooms\models.py:40
+#: .\rooms\admin.py:517 .\rooms\admin.py:1397 .\rooms\models.py:22
+#: .\rooms\models.py:41
 msgid "Renter"
 msgstr "Locataire"
 
-#: .\rooms\admin.py:517 .\rooms\admin.py:539
-#: .\templates\admin\dashboard.html:125
-msgid "Electricity (kWh)"
-msgstr "Ã‰lectricitÃ© (kWh)"
-
-#: .\rooms\admin.py:526 .\rooms\admin.py:540
-#: .\templates\admin\dashboard.html:117
+#: .\rooms\admin.py:519 .\rooms\admin.py:1576 .\rooms\models.py:210
 #, fuzzy
-#| msgid "Water (mÂ³)"
-msgid "Water (m³)"
-msgstr "Eau (mÂ³)"
+#| msgid "Status date"
+msgid "Status"
+msgstr "Date du statut"
 
-#: .\rooms\admin.py:536
-msgid "Readings"
-msgstr "RelevÃ©s"
+#: .\rooms\admin.py:521
+msgid "Occupied"
+msgstr ""
 
-#: .\rooms\admin.py:537 .\rooms\models.py:101
-#: .\templates\admin\base_site.html:858
+#: .\rooms\admin.py:521
+msgid "Vacant"
+msgstr ""
+
+#: .\rooms\admin.py:530
+#, fuzzy
+#| msgid "Bills"
+msgid "Bill status"
+msgstr "Factures"
+
+#: .\rooms\admin.py:542
+#, fuzzy
+#| msgid "Price"
+msgid "Price (USD)"
+msgstr "Prix"
+
+#: .\rooms\admin.py:615 .\rooms\admin.py:635 .\rooms\admin.py:637
+#: .\rooms\models.py:102 .\templates\admin\base_site.html:1313
+#: .\templates\admin\base_site.html:1363 .\templates\admin\dashboard.html:325
 msgid "Electricity"
 msgstr "Ã‰lectricitÃ©"
 
-#: .\rooms\admin.py:538 .\rooms\models.py:70
-#: .\templates\admin\base_site.html:829 .\templates\admin\base_site.html:867
+#: .\rooms\admin.py:624 .\rooms\admin.py:636 .\rooms\admin.py:638
+#: .\rooms\models.py:71 .\templates\admin\base_site.html:1284
+#: .\templates\admin\base_site.html:1322 .\templates\admin\base_site.html:1375
+#: .\templates\admin\dashboard.html:313
 msgid "Water"
 msgstr "Eau"
 
-#: .\rooms\admin.py:546 .\rooms\admin.py:565
+#: .\rooms\admin.py:634
+msgid "Usage"
+msgstr ""
+
+#: .\rooms\admin.py:644 .\rooms\admin.py:663
 msgid "month"
 msgstr "mois"
 
-#: .\rooms\admin.py:945
+#: .\rooms\admin.py:746 .\rooms\admin.py:831 .\rooms\admin.py:979
+#: .\rooms\admin.py:1598 .\rooms\models.py:195
+msgid "Month"
+msgstr "Mois"
+
+#: .\rooms\admin.py:751
+#, fuzzy
+#| msgid "Water unit price:"
+msgid "Water unit price"
+msgstr "Prix unitaire de l'eau :"
+
+#: .\rooms\admin.py:755
+#, fuzzy
+#| msgid "Electricity unit price:"
+msgid "Electricity unit price"
+msgstr "Prix unitaire de l'Ã©lectricitÃ© :"
+
+#: .\rooms\admin.py:759
+msgid "USD→KHR rate"
+msgstr ""
+
+#: .\rooms\admin.py:810
+#, python-format
+msgid "Water meter value cannot decrease (previous: %(prev)s m³)."
+msgstr ""
+
+#: .\rooms\admin.py:815
+#, python-format
+msgid "Water meter value cannot exceed next reading (next: %(next)s m³)."
+msgstr ""
+
+#: .\rooms\admin.py:833 .\rooms\models.py:61
+#, fuzzy
+#| msgid "Meter value:"
+msgid "Meter value (m³)"
+msgstr "Valeur du compteur :"
+
+#: .\rooms\admin.py:840 .\rooms\admin.py:988 .\rooms\admin.py:1541
+#: .\rooms\admin.py:1600 .\rooms\models.py:29 .\rooms\models.py:58
+#: .\rooms\models.py:88 .\rooms\models.py:192
+#, fuzzy
+#| msgid "Rooms"
+msgid "Room"
+msgstr "Chambres"
+
+#: .\rooms\admin.py:907 .\rooms\admin.py:1055
+msgid ""
+"This record is locked because the invoice for this room and month is issued/"
+"sent/paid."
+msgstr ""
+
+#: .\rooms\admin.py:929
+msgid "Cannot add water reading for a locked invoice month."
+msgstr ""
+
+#: .\rooms\admin.py:958
+#, python-format
+msgid "Electricity meter value cannot decrease (previous: %(prev)s kWh)."
+msgstr ""
+
+#: .\rooms\admin.py:963
+#, python-format
+msgid ""
+"Electricity meter value cannot exceed next reading (next: %(next)s kWh)."
+msgstr ""
+
+#: .\rooms\admin.py:981 .\rooms\models.py:91
+#, fuzzy
+#| msgid "Meter value:"
+msgid "Meter value (kWh)"
+msgstr "Valeur du compteur :"
+
+#: .\rooms\admin.py:1077
+msgid "Cannot add electricity reading for a locked invoice month."
+msgstr ""
+
+#: .\rooms\admin.py:1128 .\rooms\models.py:198
+#, fuzzy
+#| msgid "Rooms"
+msgid "Room cost"
+msgstr "Chambres"
+
+#: .\rooms\admin.py:1132 .\rooms\models.py:201
+#, fuzzy
+#| msgid "Water"
+msgid "Water cost"
+msgstr "Eau"
+
+#: .\rooms\admin.py:1136 .\rooms\models.py:204
+#, fuzzy
+#| msgid "Electricity"
+msgid "Electricity cost"
+msgstr "Ã‰lectricitÃ©"
+
+#: .\rooms\admin.py:1140 .\rooms\admin.py:1551 .\rooms\models.py:207
+msgid "Total"
+msgstr ""
+
+#: .\rooms\admin.py:1204
+msgid "Not allowed."
+msgstr ""
+
+#: .\rooms\admin.py:1209
 msgid "Select at least one invoice."
 msgstr "SÃ©lectionnez au moins une facture."
 
-#: .\rooms\admin.py:1056
+#: .\rooms\admin.py:1216 .\rooms\views.py:193 .\rooms\views.py:666
+#: .\rooms\views.py:940 .\rooms\views.py:1091 .\rooms\views.py:1144
+#: .\rooms\views.py:1199
+msgid "Telegram bot token is not configured."
+msgstr ""
+
+#: .\rooms\admin.py:1235
+msgid "Bulk send queued. Processing in background."
+msgstr ""
+
+#: .\rooms\admin.py:1320
 msgid "Invoice file missing."
 msgstr "Fichier de facture manquant."
 
-#: .\rooms\admin.py:1135
+#: .\rooms\admin.py:1403
 msgid "Missing tenant"
 msgstr "Locataire manquant"
 
-#: .\rooms\admin.py:1137
+#: .\rooms\admin.py:1405
 msgid "Missing profile"
 msgstr "Profil manquant"
 
-#: .\rooms\admin.py:1153
+#: .\rooms\admin.py:1421
 msgid "Missing unit price"
 msgstr "Prix unitaire manquant"
 
-#: .\rooms\admin.py:1155
+#: .\rooms\admin.py:1423
 msgid "Missing current water"
 msgstr "RelevÃ© dâ€™eau actuel manquant"
 
-#: .\rooms\admin.py:1157
+#: .\rooms\admin.py:1425
 msgid "Missing previous water"
 msgstr "RelevÃ© dâ€™eau prÃ©cÃ©dent manquant"
 
-#: .\rooms\admin.py:1159
+#: .\rooms\admin.py:1427
 msgid "Missing current electricity"
 msgstr "RelevÃ© dâ€™Ã©lectricitÃ© actuel manquant"
 
-#: .\rooms\admin.py:1161
+#: .\rooms\admin.py:1429
 msgid "Missing previous electricity"
 msgstr "RelevÃ© dâ€™Ã©lectricitÃ© prÃ©cÃ©dent manquant"
 
-#: .\rooms\admin.py:1173
+#: .\rooms\admin.py:1441
 #, python-format
 msgid "Missing data (%(count)d)"
 msgid_plural "Missing data (%(count)d)"
 msgstr[0] "DonnÃ©es manquantes (%(count)d)"
 msgstr[1] "DonnÃ©es manquantes (%(count)d)"
 
-#: .\rooms\admin.py:1177
+#: .\rooms\admin.py:1445
 msgid " • "
 msgstr ""
 
-msgid "Added"
-msgstr "Ajouté"
+#: .\rooms\admin.py:1458
+msgid "Click to see details"
+msgstr ""
 
-msgid "Updated"
-msgstr "Mis à jour"
-
-#: .\rooms\admin.py:1196
+#: .\rooms\admin.py:1464
 msgid "Alert"
 msgstr ""
 
-#: .\rooms\admin.py:1236
+#: .\rooms\admin.py:1504
 msgid "Alert / Job"
 msgstr ""
 
-#: .\rooms\admin.py:1268
+#: .\rooms\admin.py:1536
 msgid "Job"
 msgstr ""
 
-#: .\rooms\admin.py:1273 .\rooms\models.py:28 .\rooms\models.py:57
-#: .\rooms\models.py:87
+#: .\rooms\admin.py:1547
 #, fuzzy
-#| msgid "Rooms"
-msgid "Room"
-msgstr "Chambres"
+#| msgid "Missing data details"
+msgid "Missing data for this bill"
+msgstr "DÃ©tails des donnÃ©es manquantes"
 
-#: .\rooms\admin.py:1283
-msgid "Total"
-msgstr ""
-
-#: .\rooms\admin.py:1293 .\rooms\models.py:185
+#: .\rooms\admin.py:1561 .\rooms\models.py:186
 msgid "Draft"
 msgstr "Brouillon"
 
-#: .\rooms\admin.py:1294 .\rooms\models.py:186
+#: .\rooms\admin.py:1562 .\rooms\models.py:187
 msgid "Issued"
 msgstr "Ã‰mise"
 
-#: .\rooms\admin.py:1295 .\rooms\models.py:187
+#: .\rooms\admin.py:1563 .\rooms\models.py:188
 msgid "Sent"
 msgstr "EnvoyÃ©e"
 
-#: .\rooms\admin.py:1296 .\rooms\models.py:188
+#: .\rooms\admin.py:1564 .\rooms\models.py:189
 msgid "Paid"
 msgstr "PayÃ©e"
 
-#: .\rooms\admin.py:1307 .\rooms\models.py:199
-#, fuzzy
-#| msgid "Status date"
-msgid "Status"
-msgstr "Date du statut"
-
-#: .\rooms\admin.py:1318
+#: .\rooms\admin.py:1593
 msgid "Status date"
 msgstr "Date du statut"
 
-#: .\rooms\admin.py:1323
-msgid "Month"
-msgstr "Mois"
-
-#: .\rooms\admin.py:1399 .\rooms\admin.py:1400 .\rooms\admin.py:1401
-msgid "Re-generate"
-msgstr "RÃ©gÃ©nÃ©rer"
-
-#: .\rooms\admin.py:1410
+#: .\rooms\admin.py:1685
 msgid "Issue this invoice? It will be locked."
 msgstr "Ã‰mettre cette facture ? Elle sera verrouillÃ©e."
 
-#: .\rooms\admin.py:1411
+#: .\rooms\admin.py:1686
 msgid "Issue"
 msgstr "Ã‰mettre"
 
-#: .\rooms\admin.py:1435
+#: .\rooms\admin.py:1705
+msgid "Re-generate this invoice? This will overwrite the current draft."
+msgstr ""
+
+#: .\rooms\admin.py:1706
+msgid "Re-generate"
+msgstr "RÃ©gÃ©nÃ©rer"
+
+#: .\rooms\admin.py:1730
 msgid "Send this invoice to the tenant?"
 msgstr "Envoyer cette facture au locataire ?"
 
-#: .\rooms\admin.py:1436 .\templates\admin\rooms\change_list.html:324
+#: .\rooms\admin.py:1731
 msgid "Send"
 msgstr "Envoyer"
 
-#: .\rooms\admin.py:1460
-msgid "Re-send this invoice to the tenant?"
-msgstr "Renvoyer cette facture au locataire ?"
-
-#: .\rooms\admin.py:1461
-msgid "Re-send"
-msgstr "Renvoyer"
-
-#: .\rooms\admin.py:1480
+#: .\rooms\admin.py:1750
 msgid "Mark this invoice as paid?"
 msgstr "Marquer cette facture comme payÃ©e ?"
 
-#: .\rooms\admin.py:1481
+#: .\rooms\admin.py:1751
 msgid "Mark Paid"
 msgstr "Marquer payÃ©e"
 
-#: .\rooms\admin.py:1511 .\rooms\admin.py:1689
+#: .\rooms\admin.py:1780 .\rooms\admin.py:1967
 #: .\templates\admin\app_list.html:7
 msgid "Invoice"
 msgstr "Facture"
 
-#: .\rooms\admin.py:1542 .\rooms\admin.py:1543 .\rooms\admin.py:1544
+#: .\rooms\admin.py:1811 .\rooms\admin.py:1812 .\rooms\admin.py:1813
 msgid "Preview"
 msgstr "AperÃ§u"
 
-#: .\rooms\admin.py:1554 .\rooms\admin.py:1555 .\rooms\admin.py:1556
+#: .\rooms\admin.py:1823 .\rooms\admin.py:1824 .\rooms\admin.py:1825
 msgid "Download"
 msgstr "TÃ©lÃ©charger"
 
-#: .\rooms\admin.py:1560
+#: .\rooms\admin.py:1829
 msgid "Actions"
 msgstr "Actions"
 
-#: .\rooms\admin.py:1668 .\rooms\admin.py:1674 .\rooms\admin.py:1818
+#: .\rooms\admin.py:1946 .\rooms\admin.py:1952 .\rooms\admin.py:2114
 #: .\templates\admin\app_list.html:5 .\templates\admin\dashboard.html:10
 #: .\templates\admin\dashboard.html:15
 msgid "Reports & Dashboard"
 msgstr "Rapports et tableau de bord"
 
-#: .\rooms\admin.py:1719
+#: .\rooms\admin.py:1997
 msgid "This account is inactive."
 msgstr "Ce compte est inactif."
 
-#: .\rooms\admin.py:1725
+#: .\rooms\admin.py:2003
 msgid "This account does not have access to the admin site."
 msgstr "Ce compte nâ€™a pas accÃ¨s au site dâ€™administration."
 
-#: .\rooms\admin.py:1752
+#: .\rooms\admin.py:2030
 msgid "Log in"
 msgstr "Se connecter"
 
@@ -329,175 +468,543 @@ msgstr "Se connecter"
 msgid "Utilities"
 msgstr "Utilitaires"
 
-#: .\rooms\models.py:11
+#: .\rooms\models.py:12
 msgid "Room number"
 msgstr "NumÃ©ro de chambre"
 
-#: .\rooms\models.py:12
+#: .\rooms\models.py:13
 msgid "Price"
 msgstr "Prix"
 
-#: .\rooms\models.py:25
+#: .\rooms\models.py:26
 #, python-format
 msgid "Room %(number)s"
 msgstr "Chambre %(number)s"
 
-#: .\rooms\models.py:29 .\templates\admin\base_site.html:794
-#: .\templates\admin\rooms\change_list.html:590
+#: .\rooms\models.py:30 .\rooms\templatetags\admin_log_format.py:86
+#: .\templates\admin\base_site.html:1249
+#: .\templates\admin\rooms\change_list.html:533
+#: .\templates\admin\rooms\room\change_list.html:2
 msgid "Rooms"
 msgstr "Chambres"
 
-#: .\rooms\models.py:42
+#: .\rooms\models.py:43
 msgid "Start date"
 msgstr "Date de début"
 
-#: .\rooms\models.py:43
+#: .\rooms\models.py:44
 msgid "End date"
 msgstr "Date de fin"
 
-#: .\rooms\models.py:47
+#: .\rooms\models.py:48
 msgid "Room History"
 msgstr "Historique de la chambre"
 
-#: .\rooms\models.py:50
+#: .\rooms\models.py:51
 msgid "Unknown"
 msgstr "Inconnu"
 
-#: .\rooms\models.py:59 .\rooms\models.py:89 .\rooms\models.py:116
+#: .\rooms\models.py:60 .\rooms\models.py:90 .\rooms\models.py:117
 #, fuzzy
 #| msgid "Date:"
 msgid "Date"
 msgstr "Date :"
 
-#: .\rooms\models.py:60 .\rooms\models.py:90
-#, fuzzy
-#| msgid "Meter value:"
-msgid "Meter value"
-msgstr "Valeur du compteur :"
-
-#: .\rooms\models.py:64 .\rooms\models.py:94
+#: .\rooms\models.py:65 .\rooms\models.py:95
 msgid "Initial meter reading at move-in"
 msgstr "RelevÃ© initial Ã  lâ€™emmÃ©nagement"
 
-#: .\rooms\models.py:65 .\rooms\models.py:95
+#: .\rooms\models.py:66 .\rooms\models.py:96
 msgid "Is initial"
 msgstr "Valeur initiale"
 
-#: .\rooms\models.py:71
+#: .\rooms\models.py:72 .\templates\admin\rooms\water\change_list.html:5
 msgid "Water Readings"
 msgstr "RelevÃ©s dâ€™eau"
 
-#: .\rooms\models.py:75
+#: .\rooms\models.py:76
 #, python-format
 msgid "Water of room %(room)s - %(month)s"
 msgstr "Eau de la chambre %(room)s - %(month)s"
 
-#: .\rooms\models.py:102
+#: .\rooms\models.py:103 .\templates\admin\rooms\electricity\change_list.html:5
 msgid "Electricity Readings"
 msgstr "RelevÃ©s dâ€™Ã©lectricitÃ©"
 
-#: .\rooms\models.py:105
+#: .\rooms\models.py:106
 #, python-format
 msgid "Electricity of room %(room)s - %(month)s"
 msgstr "Ã‰lectricitÃ© de la chambre %(room)s - %(month)s"
 
-#: .\rooms\models.py:115
+#: .\rooms\models.py:116
 msgid "First day of month"
 msgstr "Premier jour du mois"
 
-#: .\rooms\models.py:123
+#: .\rooms\models.py:124
 #, fuzzy
 #| msgid "Water unit price:"
-msgid "Water unit price"
+msgid "Water unit price (៛/m³)"
 msgstr "Prix unitaire de l'eau :"
 
-#: .\rooms\models.py:129
+#: .\rooms\models.py:130
 #, fuzzy
 #| msgid "Electricity unit price:"
-msgid "Electricity unit price"
+msgid "Electricity unit price (៛/kWh)"
 msgstr "Prix unitaire de l'Ã©lectricitÃ© :"
 
-#: .\rooms\models.py:136
+#: .\rooms\models.py:137
 msgid "Exchange rate USD to KHR"
 msgstr "Taux de change USD vers KHR"
 
-#: .\rooms\models.py:137
+#: .\rooms\models.py:138
 #, fuzzy
-#| msgid "Exchange rate:"
-msgid "Exchange rate"
-msgstr "Taux de change :"
+#| msgid "Exchange rate USD to KHR"
+msgid "Exchange rate (USD→KHR)"
+msgstr "Taux de change USD vers KHR"
 
-#: .\rooms\models.py:142
+#: .\rooms\models.py:143
 #, fuzzy
 #| msgid "Unit Prices"
 msgid "Unit Price"
 msgstr "Tarifs unitaires"
 
-#: .\rooms\models.py:143
+#: .\rooms\models.py:144
 msgid "Utility Rates"
 msgstr "Tarifs des services"
 
-#: .\rooms\models.py:146
+#: .\rooms\models.py:147
 #, python-format
 msgid "Unit Price of %(month)s"
 msgstr "Prix unitaire de %(month)s"
 
-#: .\rooms\models.py:152
+#: .\rooms\models.py:153
 msgid "Male"
 msgstr "Homme"
 
-#: .\rooms\models.py:153
+#: .\rooms\models.py:154
 msgid "Female"
 msgstr "Femme"
 
-#: .\rooms\models.py:154
+#: .\rooms\models.py:155
 msgid "Other"
 msgstr "Autre"
 
-#: .\rooms\models.py:167
+#: .\rooms\models.py:168
 msgid "Move-in date"
 msgstr "Date dâ€™emmÃ©nagement"
 
-#: .\rooms\models.py:168
+#: .\rooms\models.py:169
 msgid "Move-out date"
 msgstr "Date de dÃ©part"
 
-#: .\rooms\models.py:175
+#: .\rooms\models.py:176
 msgid "Exit date cannot be before enter date"
 msgstr ""
 "La date de dÃ©part ne peut pas Ãªtre antÃ©rieure Ã  la date dâ€™entrÃ©e"
 
-#: .\rooms\models.py:178
+#: .\rooms\models.py:179
 msgid "Tenant"
 msgstr "Locataire"
 
-#: .\rooms\models.py:179 .\templates\admin\base_site.html:806
+#: .\rooms\models.py:180 .\templates\admin\base_site.html:1261
+#: .\templates\admin\rooms\clientprofile\change_list.html:14
 msgid "Tenants"
 msgstr "Locataires"
 
+#: .\rooms\models.py:212
+#, fuzzy
+#| msgid "Issued"
+msgid "Issued at"
+msgstr "Ã‰mise"
+
+#: .\rooms\models.py:213
+#, fuzzy
+#| msgid "Sent"
+msgid "Sent at"
+msgstr "EnvoyÃ©e"
+
+#: .\rooms\models.py:214
+#, fuzzy
+#| msgid "Paid"
+msgid "Paid at"
+msgstr "PayÃ©e"
+
 #: .\rooms\models.py:216
+msgid "Async job pending"
+msgstr ""
+
+#: .\rooms\models.py:219
+msgid "Async job type"
+msgstr ""
+
+#: .\rooms\models.py:222
+msgid "Data note"
+msgstr ""
+
+#: .\rooms\models.py:225
+#, fuzzy
+#| msgid "Tenant Dashboard"
+msgid "Tenant name snapshot"
+msgstr "Tableau de bord locataire"
+
+#: .\rooms\models.py:228
+msgid "Last job status"
+msgstr ""
+
+#: .\rooms\models.py:231
+msgid "Last job message"
+msgstr ""
+
+#: .\rooms\models.py:234
+#, fuzzy
+#| msgid "Last name"
+msgid "Last job at"
+msgstr "Nom de famille"
+
+#: .\rooms\models.py:237
+msgid "Created at"
+msgstr ""
+
+#: .\rooms\models.py:241
 #, fuzzy
 #| msgid "Monthly Bills"
 msgid "Monthly bill"
 msgstr "Factures mensuelles"
 
-#: .\rooms\models.py:217
+#: .\rooms\models.py:242
+#: .\templates\admin\rooms\monthlybill\change_list.html:45
 msgid "Monthly Bills"
 msgstr "Factures mensuelles"
 
-#: .\rooms\models.py:220
+#: .\rooms\models.py:245
 #, python-format
 msgid "Bill %(room)s %(month)s"
 msgstr "Facture %(room)s %(month)s"
 
-#: .\rooms\models.py:238
+#: .\rooms\models.py:263
 msgid "Status cannot move backward."
 msgstr "Le statut ne peut pas revenir en arriÃ¨re."
 
+#: .\rooms\models.py:268
+#, fuzzy
+#| msgid "Readings"
+msgid "Pending"
+msgstr "RelevÃ©s"
+
+#: .\rooms\models.py:269
+msgid "Running"
+msgstr ""
+
+#: .\rooms\models.py:270
+msgid "Success"
+msgstr ""
+
+#: .\rooms\models.py:271 .\rooms\templatetags\admin_log_format.py:74
+#: .\rooms\templatetags\admin_log_format.py:81
+#: .\rooms\templatetags\admin_log_format.py:83
+#: .\templates\admin\rooms\change_list.html:837
+#: .\templates\admin\rooms\change_list.html:868
+msgid "Failed"
+msgstr ""
+
+#: .\rooms\models.py:310
+msgid "Smart alert log"
+msgstr ""
+
+#: .\rooms\models.py:311
+msgid "Smart alert logs"
+msgstr ""
+
+#: .\rooms\models.py:332
+msgid "Telegram password reset"
+msgstr ""
+
+#: .\rooms\models.py:333
+msgid "Telegram password resets"
+msgstr ""
+
+#: .\rooms\templatetags\admin_log_format.py:38
+#, fuzzy
+#| msgid "Telegram chat id"
+msgid "Telegram group send"
+msgstr "ID de chat Telegram"
+
+#: .\rooms\templatetags\admin_log_format.py:40
+#: .\rooms\templatetags\admin_log_format.py:79
+#, fuzzy
+#| msgid "Generate Monthly Bills"
+msgid "Generate bills"
+msgstr "GÃ©nÃ©rer les factures mensuelles"
+
+#: .\rooms\templatetags\admin_log_format.py:42
+#: .\templates\admin\dashboard.html:173
+#, fuzzy
+#| msgid "Actions"
+msgid "Action"
+msgstr "Actions"
+
+#: .\rooms\templatetags\admin_log_format.py:74
+#: .\templates\admin\rooms\change_list.html:860
+#: .\templates\admin\rooms\change_list.html:965
+msgid "Completed"
+msgstr ""
+
+#: .\rooms\templatetags\admin_log_format.py:77
+#, fuzzy
+#| msgid "Telegram"
+msgid "Telegram group"
+msgstr "Telegram"
+
+#: .\rooms\templatetags\admin_log_format.py:81
+#: .\rooms\templatetags\admin_log_format.py:83
+#: .\templates\admin\rooms\change_list.html:863
+msgid "Done"
+msgstr ""
+
+#: .\rooms\views.py:124 .\rooms\views.py:128 .\templates\admin\login.html:224
+#: .\templates\admin\login.html:228
+msgid "Username or email"
+msgstr "Nom dâ€™utilisateur ou e-mail"
+
+#: .\rooms\views.py:129
+msgid "Reset code"
+msgstr ""
+
+#: .\rooms\views.py:130
+#, fuzzy
+#| msgid "Show password"
+msgid "New password"
+msgstr "Afficher le mot de passe"
+
+#: .\rooms\views.py:131
+#, fuzzy
+#| msgid "Change password"
+msgid "Confirm new password"
+msgstr "Changer le mot de passe"
+
+#: .\rooms\views.py:138
+msgid "Passwords do not match."
+msgstr ""
+
+#: .\rooms\views.py:181 .\rooms\views.py:244
+msgid "User not found."
+msgstr ""
+
+#: .\rooms\views.py:187
+msgid "Telegram chat ID is missing. Contact admin to link."
+msgstr ""
+
+#: .\rooms\views.py:203
+msgid "Please wait before requesting another code."
+msgstr ""
+
+#: .\rooms\views.py:213
+#, python-format
+msgid "Your reset code is %(code)s. It expires in %(minutes)s minutes."
+msgstr ""
+
+#: .\rooms\views.py:219 .\rooms\views.py:223
+msgid "Telegram send failed. Please try again."
+msgstr ""
+
+#: .\rooms\views.py:226
+#, fuzzy
+#| msgid "Bulk Send via Telegram"
+msgid "Reset code sent via Telegram."
+msgstr "Envoi en lot via Telegram"
+
+#: .\rooms\views.py:260
+msgid "Invalid or expired code."
+msgstr ""
+
+#: .\rooms\views.py:274
+msgid "Password updated. You can log in now."
+msgstr ""
+
+#: .\rooms\views.py:436
+msgid "Invoice can only be re-generated in Draft status."
+msgstr ""
+
+#: .\rooms\views.py:458
+msgid "Invoice re-generation queued."
+msgstr ""
+
+#: .\rooms\views.py:468
+#, fuzzy
+#| msgid "Job completed successfully."
+msgid "Invoice re-generated successfully."
+msgstr "TÃ¢che terminÃ©e avec succÃ¨s."
+
+#: .\rooms\views.py:484
+msgid "Invoice can only be issued from Draft status."
+msgstr ""
+
+#: .\rooms\views.py:492
+#, fuzzy, python-format
+#| msgid "Bill %(room)s %(month)s"
+msgid "Issue invoice %(room)s %(month)s"
+msgstr "Facture %(room)s %(month)s"
+
+#: .\rooms\views.py:494
+#, fuzzy, python-format
+#| msgid "Water of room %(room)s - %(month)s"
+msgid "Issued invoice for %(room)s, %(month)s."
+msgstr "Eau de la chambre %(room)s - %(month)s"
+
+#: .\rooms\views.py:518
+#, fuzzy
+#| msgid "Job completed successfully."
+msgid "Invoice issued successfully."
+msgstr "TÃ¢che terminÃ©e avec succÃ¨s."
+
 #: .\rooms\views.py:528
+msgid "Invoice can only be marked Paid after it is Sent."
+msgstr ""
+
+#: .\rooms\views.py:542
+#, fuzzy, python-format
+#| msgid "Bill %(room)s %(month)s"
+msgid "Mark paid %(room)s %(month)s"
+msgstr "Facture %(room)s %(month)s"
+
+#: .\rooms\views.py:544
+#, fuzzy, python-format
+#| msgid "Water of room %(room)s - %(month)s"
+msgid "Marked paid for %(room)s, %(month)s."
+msgstr "Eau de la chambre %(room)s - %(month)s"
+
+#: .\rooms\views.py:547
+msgid "Invoice marked as Paid."
+msgstr ""
+
+#: .\rooms\views.py:651
+msgid "Invoice can only be sent when status is Issued."
+msgstr ""
+
+#: .\rooms\views.py:661 .\rooms\views.py:1139 .\rooms\views.py:1194
+msgid "Tenant Telegram chat ID is missing."
+msgstr ""
+
+#: .\rooms\views.py:672 .\rooms\views.py:735
+#, fuzzy, python-format
+#| msgid "Bill %(room)s %(month)s"
+msgid "Send invoice %(room)s %(month)s"
+msgstr "Facture %(room)s %(month)s"
+
+#: .\rooms\views.py:674 .\rooms\views.py:737
+#, fuzzy, python-format
+#| msgid "Water of room %(room)s - %(month)s"
+msgid "Send invoice to tenant for %(room)s, %(month)s."
+msgstr "Eau de la chambre %(room)s - %(month)s"
+
+#: .\rooms\views.py:686
+msgid "Sending invoice in background."
+msgstr ""
+
+#: .\rooms\views.py:740
+#, fuzzy
+#| msgid "Bulk Send via Telegram"
+msgid "Invoice sent via Telegram."
+msgstr "Envoi en lot via Telegram"
+
+#: .\rooms\views.py:916
+msgid "Please select a month."
+msgstr ""
+
+#: .\rooms\views.py:923
+msgid "Invalid month format."
+msgstr ""
+
+#: .\rooms\views.py:934 .\rooms\views.py:1354
+msgid "No rooms found for the selected month."
+msgstr ""
+
+#: .\rooms\views.py:943
+msgid "Telegram group chat ID is not configured."
+msgstr ""
+
+#: .\rooms\views.py:976
+#, python-format
+msgid "Draft invoices found for rooms: %(rooms)s"
+msgstr ""
+
+#: .\rooms\views.py:982
+#, python-format
+msgid "Missing invoice files for rooms: %(rooms)s"
+msgstr ""
+
+#: .\rooms\views.py:986
+msgid "No invoices were sent. Fix issues and try again."
+msgstr ""
+
+#: .\rooms\views.py:991
+msgid "No invoice files found to send."
+msgstr ""
+
+#: .\rooms\views.py:1034
+msgid "Sending invoices to Telegram group in background."
+msgstr ""
+
+#: .\rooms\views.py:1109
 #, python-format
 msgid "Telegram connection OK: %(bot_name)s"
 msgstr "Connexion Telegram OK : %(bot_name)s"
+
+#: .\rooms\views.py:1172 .\rooms\views.py:1234
+msgid "Tenant Telegram test message sent."
+msgstr ""
+
+#: .\rooms\views.py:1325 .\rooms\views.py:1466 .\rooms\views.py:1551
+msgid "all rooms"
+msgstr ""
+
+#: .\rooms\views.py:1325 .\rooms\views.py:1466 .\rooms\views.py:1551
+#, python-format
+msgid "%(count)s room(s)"
+msgstr ""
+
+#: .\rooms\views.py:1331 .\rooms\views.py:1343
+#, python-format
+msgid "Generate bills for %(month)s, %(rooms)s."
+msgstr ""
+
+#: .\rooms\views.py:1374
+msgid "Generating invoices in background."
+msgstr ""
+
+#: .\rooms\views.py:1470
+#, python-format
+msgid "Generate and download bills %(month)s"
+msgstr ""
+
+#: .\rooms\views.py:1471
+#, python-format
+msgid "Generate and download bills for %(month)s, %(rooms)s."
+msgstr ""
+
+#: .\rooms\views.py:1522
+msgid "No invoices generated to download."
+msgstr ""
+
+#: .\rooms\views.py:1555
+#, fuzzy, python-format
+#| msgid "Bulk Download Bills"
+msgid "Download bills %(month)s"
+msgstr "TÃ©lÃ©charger les factures en lot"
+
+#: .\rooms\views.py:1556
+#, python-format
+msgid "Download bills for %(month)s, %(rooms)s."
+msgstr ""
+
+#: .\templates\admin\_i18n_strings.html:3
+msgid "Show counts"
+msgstr ""
+
+#: .\templates\admin\_i18n_strings.html:4
+#, python-format
+msgid "By %(filter_title)s"
+msgstr ""
 
 #: .\templates\admin\app_list.html:4
 msgid "Authentication and Authorization"
@@ -539,179 +1046,193 @@ msgid "You don’t have permission to view or edit anything."
 msgstr "Vous nâ€™avez pas la permission de voir ou modifier quoi que ce soit."
 
 #: .\templates\admin\base_site.html:4 .\templates\admin\base_site.html:12
-#: .\templates\admin\login.html:92 .\templates\base.html:8
+#: .\templates\admin\base_site.html:18 .\templates\admin\login.html:281
+#: .\templates\base.html:8
 msgid "PtasJuolKruDy"
 msgstr "PtasJuolKruDy"
 
-#: .\templates\admin\base_site.html:10
+#: .\templates\admin\base_site.html:16
 msgid "Tenant Dashboard"
 msgstr "Tableau de bord locataire"
 
-#: .\templates\admin\base_site.html:28
+#: .\templates\admin\base_site.html:35
+#: .\templates\registration\password_change_form.html:8
 msgid "Change password"
 msgstr "Changer le mot de passe"
 
-#: .\templates\admin\base_site.html:33
+#: .\templates\admin\base_site.html:40
+#: .\templates\registration\password_change_form.html:11
 msgid "Log out"
 msgstr "Se dÃ©connecter"
 
-#: .\templates\admin\base_site.html:757
+#: .\templates\admin\base_site.html:1211
 msgid "Missing data details"
 msgstr "DÃ©tails des donnÃ©es manquantes"
 
-#: .\templates\admin\base_site.html:760 .\templates\admin\base_site.html:902
-#: .\templates\admin\base_site.html:1127
-#: .\templates\admin\rooms\change_list.html:99
-#: .\templates\admin\rooms\change_list.html:123
-#: .\templates\admin\rooms\change_list.html:127
-#: .\templates\admin\rooms\change_list.html:144
-#: .\templates\admin\rooms\change_list.html:569
-#: .\templates\admin\rooms\change_list.html:608
-#: .\templates\admin\rooms\change_list.html:776
+#: .\templates\admin\base_site.html:1214 .\templates\admin\base_site.html:1401
+#: .\templates\admin\base_site.html:1631
+#: .\templates\admin\rooms\change_list.html:38
+#: .\templates\admin\rooms\change_list.html:62
+#: .\templates\admin\rooms\change_list.html:66
+#: .\templates\admin\rooms\change_list.html:83
+#: .\templates\admin\rooms\change_list.html:512
+#: .\templates\admin\rooms\change_list.html:551
+#: .\templates\admin\rooms\change_list.html:792
+#: .\templates\admin\rooms\change_list.html:905
+#: .\templates\admin\rooms\change_list.html:1000
+#: .\templates\admin\submit_line.html:5
 msgid "Close"
 msgstr "Fermer"
 
-#: .\templates\admin\base_site.html:785
+#: .\templates\admin\base_site.html:1228 .\templates\admin\base_site.html:1342
+#, fuzzy
+#| msgid "Tenant Dashboard"
+msgid "Dashboard"
+msgstr "Tableau de bord locataire"
+
+#: .\templates\admin\base_site.html:1240 .\templates\admin\base_site.html:1354
 msgid "Bills"
 msgstr "Factures"
 
-#: .\templates\admin\base_site.html:816
+#: .\templates\admin\base_site.html:1271
 msgid "Elec"
 msgstr "Ã‰lec"
 
-#: .\templates\admin\base_site.html:842
+#: .\templates\admin\base_site.html:1297
 msgid "Prices"
 msgstr "Tarifs"
 
-#: .\templates\admin\base_site.html:844 .\templates\admin\base_site.html:851
+#: .\templates\admin\base_site.html:1299 .\templates\admin\base_site.html:1306
 msgid "More"
 msgstr "Plus"
 
-#: .\templates\admin\base_site.html:853
+#: .\templates\admin\base_site.html:1308
 msgid "More menu"
 msgstr "Menu Plus"
 
-#: .\templates\admin\base_site.html:876
+#: .\templates\admin\base_site.html:1331
+#: .\templates\admin\rooms\unitprice\change_list.html:37
 msgid "Unit Prices"
 msgstr "Tarifs unitaires"
 
-#: .\templates\admin\base_site.html:888 .\templates\admin\base_site.html:895
-#: .\templates\admin\base_site.html:947
+#: .\templates\admin\base_site.html:1387 .\templates\admin\base_site.html:1394
+#: .\templates\admin\base_site.html:1446
 msgid "Confirm"
 msgstr "Confirmer"
 
-#: .\templates\admin\base_site.html:892
-#: .\templates\admin\rooms\change_list.html:323
+#: .\templates\admin\base_site.html:1391
 #: .\templates\admin\rooms\monthlybill\bulk_send_confirm.html:18
-#: .\templates\admin\rooms\room\change_form.html:7
 msgid "Cancel"
 msgstr "Annuler"
 
-#: .\templates\admin\base_site.html:943
+#: .\templates\admin\base_site.html:1442
 msgid "Are you sure you want to delete this item?"
 msgstr "Voulez-vous vraiment supprimer cet Ã©lÃ©ment ?"
 
-#: .\templates\admin\base_site.html:943 .\templates\admin\base_site.html:944
+#: .\templates\admin\base_site.html:1442 .\templates\admin\base_site.html:1443
 msgid "This will also delete related items."
 msgstr "Cela supprimera aussi les Ã©lÃ©ments liÃ©s."
 
-#: .\templates\admin\base_site.html:944
+#: .\templates\admin\base_site.html:1443
 #, python-format
 msgid "Are you sure you want to delete \"%(name)s\"?"
 msgstr "Voulez-vous vraiment supprimer Â« %(name)s Â» ?"
 
-#: .\templates\admin\base_site.html:945
+#: .\templates\admin\base_site.html:1444
 msgid "Are you sure?"
 msgstr "Confirmer ?"
 
-#: .\templates\admin\base_site.html:946
+#: .\templates\admin\base_site.html:1445 .\templates\admin\submit_line.html:12
 msgid "Delete"
 msgstr "Supprimer"
 
-#: .\templates\admin\base_site.html:1110
-#: .\templates\admin\rooms\change_list.html:572
+#: .\templates\admin\base_site.html:1614
+#: .\templates\admin\rooms\change_list.html:515
 msgid "Jan"
 msgstr "janv."
 
-#: .\templates\admin\base_site.html:1111
-#: .\templates\admin\rooms\change_list.html:573
+#: .\templates\admin\base_site.html:1615
+#: .\templates\admin\rooms\change_list.html:516
 msgid "Feb"
 msgstr "fÃ©vr."
 
-#: .\templates\admin\base_site.html:1112
-#: .\templates\admin\rooms\change_list.html:574
+#: .\templates\admin\base_site.html:1616
+#: .\templates\admin\rooms\change_list.html:517
 msgid "Mar"
 msgstr "mars"
 
-#: .\templates\admin\base_site.html:1113
-#: .\templates\admin\rooms\change_list.html:575
+#: .\templates\admin\base_site.html:1617
+#: .\templates\admin\rooms\change_list.html:518
 msgid "Apr"
 msgstr "avr."
 
-#: .\templates\admin\base_site.html:1114
-#: .\templates\admin\rooms\change_list.html:576
+#: .\templates\admin\base_site.html:1618
+#: .\templates\admin\rooms\change_list.html:519
 msgid "May"
 msgstr "mai"
 
-#: .\templates\admin\base_site.html:1115
-#: .\templates\admin\rooms\change_list.html:577
+#: .\templates\admin\base_site.html:1619
+#: .\templates\admin\rooms\change_list.html:520
 msgid "Jun"
 msgstr "juin"
 
-#: .\templates\admin\base_site.html:1116
-#: .\templates\admin\rooms\change_list.html:578
+#: .\templates\admin\base_site.html:1620
+#: .\templates\admin\rooms\change_list.html:521
 msgid "Jul"
 msgstr "juil."
 
-#: .\templates\admin\base_site.html:1117
-#: .\templates\admin\rooms\change_list.html:579
+#: .\templates\admin\base_site.html:1621
+#: .\templates\admin\rooms\change_list.html:522
 msgid "Aug"
 msgstr "aoÃ»t"
 
-#: .\templates\admin\base_site.html:1118
-#: .\templates\admin\rooms\change_list.html:580
+#: .\templates\admin\base_site.html:1622
+#: .\templates\admin\rooms\change_list.html:523
 msgid "Sep"
 msgstr "sept."
 
-#: .\templates\admin\base_site.html:1119
-#: .\templates\admin\rooms\change_list.html:581
+#: .\templates\admin\base_site.html:1623
+#: .\templates\admin\rooms\change_list.html:524
 msgid "Oct"
 msgstr "oct."
 
-#: .\templates\admin\base_site.html:1120
-#: .\templates\admin\rooms\change_list.html:582
+#: .\templates\admin\base_site.html:1624
+#: .\templates\admin\rooms\change_list.html:525
 msgid "Nov"
 msgstr "nov."
 
-#: .\templates\admin\base_site.html:1121
-#: .\templates\admin\rooms\change_list.html:583
+#: .\templates\admin\base_site.html:1625
+#: .\templates\admin\rooms\change_list.html:526
 msgid "Dec"
 msgstr "dÃ©c."
 
-#: .\templates\admin\base_site.html:1123
+#: .\templates\admin\base_site.html:1627
 msgid "YYYY-MM-01"
 msgstr "YYYY-MM-01"
 
-#: .\templates\admin\base_site.html:1124
-#: .\templates\admin\rooms\change_list.html:561
+#: .\templates\admin\base_site.html:1628
+#: .\templates\admin\rooms\change_list.html:504
 msgid "Pick month"
 msgstr "Choisir un mois"
 
-#: .\templates\admin\base_site.html:1125
+#: .\templates\admin\base_site.html:1629
 msgid "Previous year"
 msgstr "AnnÃ©e prÃ©cÃ©dente"
 
-#: .\templates\admin\base_site.html:1126
+#: .\templates\admin\base_site.html:1630
 msgid "Next year"
 msgstr "AnnÃ©e suivante"
 
 #: .\templates\admin\dashboard.html:8
 #: .\templates\admin\rooms\clientprofile\change_list.html:6
-#: .\templates\admin\rooms\electricity\change_list.html:14
-#: .\templates\admin\rooms\monthlybill\change_list.html:6
+#: .\templates\admin\rooms\electricity\change_list.html:34
+#: .\templates\admin\rooms\monthlybill\change_list.html:38
 #: .\templates\admin\rooms\room\change_list.html:14
-#: .\templates\admin\rooms\unitprice\change_list.html:10
+#: .\templates\admin\rooms\unitprice\change_list.html:30
 #: .\templates\admin\rooms\water\change_list.html:20
+#: .\templates\registration\password_change_form.html:17
+#: .\templates\registration\password_reset_confirm.html:9
+#: .\templates\registration\password_reset_form.html:9
 msgid "Home"
 msgstr "Accueil"
 
@@ -725,161 +1246,206 @@ msgstr ""
 "Affichage de toutes les chambres (vue globale).Affichage de toutes les "
 "chambres (vue globale)."
 
-#: .\templates\admin\dashboard.html:24
+#: .\templates\admin\dashboard.html:133
+#, fuzzy
+#| msgid "Income per Month"
+msgid "Expense per Month"
+msgstr "Revenus par moisRevenus par mois"
+
+#: .\templates\admin\dashboard.html:135
 msgid "Income per Month"
 msgstr "Revenus par moisRevenus par mois"
 
-#: .\templates\admin\dashboard.html:31
+#: .\templates\admin\dashboard.html:147
 msgid "Water / Electricity Trends"
 msgstr "Tendances eau et Ã©lectricitÃ©"
 
-#: .\templates\admin\dashboard.html:38
+#: .\templates\admin\dashboard.html:158
 msgid "Recent actions"
 msgstr "Actions rÃ©centes"
 
-#: .\templates\admin\dashboard.html:42
+#: .\templates\admin\dashboard.html:163
 msgid "None available"
 msgstr "Aucune disponible"
 
-#: .\templates\admin\dashboard.html:91
+#: .\templates\admin\dashboard.html:170
+msgid "Added"
+msgstr "Ajouté"
+
+#: .\templates\admin\dashboard.html:171
+msgid "Updated"
+msgstr "Mis à jour"
+
+#: .\templates\admin\dashboard.html:172
+#, fuzzy
+#| msgid "Delete"
+msgid "Deleted"
+msgstr "Supprimer"
+
+#: .\templates\admin\dashboard.html:191
+msgid "ago"
+msgstr ""
+
+#: .\templates\admin\dashboard.html:246
+msgid "Expense"
+msgstr ""
+
+#: .\templates\admin\dashboard.html:246
 msgid "Income"
 msgstr "Revenus"
 
-#: .\templates\admin\login.html:42 .\templates\admin\login.html:46
-msgid "Username or email"
-msgstr "Nom dâ€™utilisateur ou e-mail"
+#: .\templates\admin\dashboard.html:389
+msgid "Your password was changed successfully."
+msgstr ""
 
-#: .\templates\admin\login.html:63 .\templates\admin\login.html:80
+#: .\templates\admin\login.html:245 .\templates\admin\login.html:262
 msgid "Show password"
 msgstr "Afficher le mot de passe"
 
-#: .\templates\admin\login.html:79
+#: .\templates\admin\login.html:261
 msgid "Hide password"
 msgstr "Masquer le mot de passe"
 
+#: .\templates\admin\login.html:270
+#, fuzzy
+#| msgid "Bulk Send via Telegram"
+msgid "Reset via Telegram"
+msgstr "Envoi en lot via Telegram"
+
 #: .\templates\admin\rooms\change_list.html:25
-#: .\templates\admin\rooms\change_list.html:605
+#: .\templates\admin\rooms\change_list.html:548
 msgid "Clear"
 msgstr "Effacer"
 
-#: .\templates\admin\rooms\change_list.html:59
-#: .\templates\admin\rooms\change_list.html:332
-msgid "Select at least one invoice first."
-msgstr "SÃ©lectionnez dâ€™abord au moins une facture."
-
-#: .\templates\admin\rooms\change_list.html:100
-#: .\templates\admin\rooms\change_list.html:124
-#: .\templates\admin\rooms\change_list.html:128
-#: .\templates\admin\rooms\change_list.html:145
+#: .\templates\admin\rooms\change_list.html:39
+#: .\templates\admin\rooms\change_list.html:63
+#: .\templates\admin\rooms\change_list.html:67
+#: .\templates\admin\rooms\change_list.html:84
 msgid "Job completed successfully."
 msgstr "TÃ¢che terminÃ©e avec succÃ¨s."
 
-#: .\templates\admin\rooms\change_list.html:101
-#: .\templates\admin\rooms\change_list.html:125
-#: .\templates\admin\rooms\change_list.html:129
-#: .\templates\admin\rooms\change_list.html:146
+#: .\templates\admin\rooms\change_list.html:40
+#: .\templates\admin\rooms\change_list.html:64
+#: .\templates\admin\rooms\change_list.html:68
+#: .\templates\admin\rooms\change_list.html:85
 msgid "Job failed."
 msgstr "TÃ¢che Ã©chouÃ©e."
 
-#: .\templates\admin\rooms\change_list.html:102
-#: .\templates\admin\rooms\change_list.html:126
-#: .\templates\admin\rooms\change_list.html:130
-#: .\templates\admin\rooms\change_list.html:147
+#: .\templates\admin\rooms\change_list.html:41
+#: .\templates\admin\rooms\change_list.html:65
+#: .\templates\admin\rooms\change_list.html:69
+#: .\templates\admin\rooms\change_list.html:86
 msgid "Job updated."
 msgstr "TÃ¢che mise Ã  jour."
 
-#: .\templates\admin\rooms\change_list.html:245
-#: .\templates\admin\rooms\change_list.html:248
+#: .\templates\admin\rooms\change_list.html:185
+#: .\templates\admin\rooms\change_list.html:188
+#: .\templates\admin\rooms\change_list.html:791
 #, fuzzy
 #| msgid "Generate Monthly Bills"
 msgid "Generate Bills"
 msgstr "GÃ©nÃ©rer les factures mensuelles"
 
-#: .\templates\admin\rooms\change_list.html:246
+#: .\templates\admin\rooms\change_list.html:186
 msgid "Generate"
 msgstr "GÃ©nÃ©rer"
 
-#: .\templates\admin\rooms\change_list.html:254
-#: .\templates\admin\rooms\change_list.html:257
+#: .\templates\admin\rooms\change_list.html:194
+#: .\templates\admin\rooms\change_list.html:197
 #, fuzzy
 #| msgid "Bulk Download Bills"
 msgid "Download Bills"
 msgstr "TÃ©lÃ©charger les factures en lot"
 
-#: .\templates\admin\rooms\change_list.html:255
+#: .\templates\admin\rooms\change_list.html:195
 msgid "Download ZIP"
 msgstr "TÃ©lÃ©charger ZIP"
 
-#: .\templates\admin\rooms\change_list.html:262
+#: .\templates\admin\rooms\change_list.html:204
+#, fuzzy
+#| msgid "Generate Monthly Bills"
+msgid "Send Monthly Album"
+msgstr "GÃ©nÃ©rer les factures mensuelles"
+
+#: .\templates\admin\rooms\change_list.html:205
+#, fuzzy
+#| msgid "Bulk Send via Telegram"
+msgid "Send to Telegram"
+msgstr "Envoi en lot via Telegram"
+
+#: .\templates\admin\rooms\change_list.html:207
 #, fuzzy
 #| msgid "Bulk Send via Telegram"
 msgid "Send via Telegram"
 msgstr "Envoi en lot via Telegram"
 
-#: .\templates\admin\rooms\change_list.html:320
-msgid "Bulk Send"
-msgstr "Envoi en lot"
-
-#: .\templates\admin\rooms\change_list.html:321
-msgid "Send selected invoices via Telegram?"
-msgstr "Envoyer les factures sÃ©lectionnÃ©es via Telegram ?"
-
-#: .\templates\admin\rooms\change_list.html:331
-msgid "Select invoices"
-msgstr "SÃ©lectionner des factures"
-
-#: .\templates\admin\rooms\change_list.html:334
-msgid "OK"
-msgstr "OK"
-
-#: .\templates\admin\rooms\change_list.html:539
-#: .\templates\admin\rooms\change_list.html:761
+#: .\templates\admin\rooms\change_list.html:482
+#: .\templates\admin\rooms\change_list.html:657
 msgid "Select a billing action to show the form."
 msgstr "SÃ©lectionnez une action de facturation pour afficher le formulaire."
 
-#: .\templates\admin\rooms\change_list.html:546
+#: .\templates\admin\rooms\change_list.html:489
 msgid "Generate Monthly Bills"
 msgstr "GÃ©nÃ©rer les factures mensuelles"
 
-#: .\templates\admin\rooms\change_list.html:549
+#: .\templates\admin\rooms\change_list.html:492
 msgid "Pick a month and rooms, then run the action."
 msgstr "Choisissez un mois et des chambres, puis lancez lâ€™action."
 
-#: .\templates\admin\rooms\change_list.html:556
+#: .\templates\admin\rooms\change_list.html:499
 msgid "Month:"
 msgstr "Mois :"
 
-#: .\templates\admin\rooms\change_list.html:568
+#: .\templates\admin\rooms\change_list.html:511
 msgid "Year"
 msgstr "AnnÃ©e"
 
-#: .\templates\admin\rooms\change_list.html:591
+#: .\templates\admin\rooms\change_list.html:534
 msgid "Leave unchecked = all rooms"
 msgstr "Laisser dÃ©cochÃ© = toutes les chambres"
 
-#: .\templates\admin\rooms\change_list.html:603
+#: .\templates\admin\rooms\change_list.html:546
 msgid "Submit"
 msgstr "Soumettre"
 
-#: .\templates\admin\rooms\change_list.html:650
+#: .\templates\admin\rooms\change_list.html:593
 msgid "Selected action:"
 msgstr "Action sÃ©lectionnÃ©e :"
 
-#: .\templates\admin\rooms\change_list.html:777
+#: .\templates\admin\rooms\change_list.html:793
+#: .\templates\admin\rooms\change_list.html:832
+#, fuzzy
+#| msgid "Generate"
+msgid "Generating"
+msgstr "GÃ©nÃ©rer"
+
+#: .\templates\admin\rooms\change_list.html:861
+#: .\templates\admin\rooms\change_list.html:966
+msgid "Completed with errors"
+msgstr ""
+
+#: .\templates\admin\rooms\change_list.html:904
+#, fuzzy
+#| msgid "Bulk Send via Telegram"
+msgid "Send to Telegram group"
+msgstr "Envoi en lot via Telegram"
+
+#: .\templates\admin\rooms\change_list.html:906
+#: .\templates\admin\rooms\change_list.html:944
+#, fuzzy
+#| msgid "Send"
+msgid "Sending"
+msgstr "Envoyer"
+
+#: .\templates\admin\rooms\change_list.html:1001
 msgid "Invoice Preview"
 msgstr "AperÃ§u de la facture"
 
-#: .\templates\admin\rooms\clientprofile\change_list.html:28
+#: .\templates\admin\rooms\clientprofile\change_list.html:21
 msgid "Test Telegram"
 msgstr "Tester Telegram"
 
-#: .\templates\admin\rooms\electricity\change_list.html:5
-#, fuzzy
-#| msgid "Select unit price to change"
-msgid "Select electricity to change"
-msgstr "SÃ©lectionnez le prix unitaire Ã  modifier"
-
-#: .\templates\admin\rooms\electricity\change_list.html:25
+#: .\templates\admin\rooms\electricity\change_list.html:45
 msgid "Add electricity"
 msgstr "Ajouter lâ€™Ã©lectricitÃ©"
 
@@ -897,21 +1463,13 @@ msgstr ""
 msgid "Yes, send"
 msgstr "Oui, envoyer"
 
-#: .\templates\admin\rooms\room\change_form.html:15
+#: .\templates\admin\rooms\room\change_form.html:10
 msgid "Utility Readings"
 msgstr "RelevÃ©s des services"
-
-#: .\templates\admin\rooms\room\change_list.html:2
-msgid "Select room to change"
-msgstr "SÃ©lectionnez la chambre Ã  modifier"
 
 #: .\templates\admin\rooms\room\change_list.html:7
 msgid "Add room"
 msgstr "Ajouter une chambre"
-
-#: .\templates\admin\rooms\water\change_list.html:5
-msgid "Select water to change"
-msgstr "Sélectionnez l'eau à  modifier"
 
 #: .\templates\admin\rooms\water\change_list.html:12
 msgid "Add water"
@@ -937,6 +1495,198 @@ msgstr ""
 msgid "Show all"
 msgstr ""
 
+#: .\templates\admin\submit_line.html:6
+msgid "Save"
+msgstr ""
+
+#: .\templates\admin\submit_line.html:7
+msgid "Save as new"
+msgstr ""
+
+#: .\templates\admin\submit_line.html:8
+msgid "Save and add another"
+msgstr ""
+
+#: .\templates\admin\submit_line.html:9
+msgid "Save and continue editing"
+msgstr ""
+
+#: .\templates\admin\submit_line.html:9
+msgid "Save and view"
+msgstr ""
+
 #: .\templates\includes\language_switcher.html:6
 msgid "Language"
 msgstr "Langue"
+
+#: .\templates\registration\password_change_form.html:4
+#: .\templates\registration\password_reset_confirm.html:4
+#: .\templates\registration\password_reset_form.html:4
+msgid "Error:"
+msgstr ""
+
+#: .\templates\registration\password_change_form.html:8
+#, fuzzy
+#| msgid "Recent actions"
+msgid "Documentation"
+msgstr "Actions rÃ©centes"
+
+#: .\templates\registration\password_change_form.html:18
+#, fuzzy
+#| msgid "Password"
+msgid "Password change"
+msgstr "Mot de passe"
+
+#: .\templates\registration\password_change_form.html:28
+msgid "Please correct the error below."
+msgid_plural "Please correct the errors below."
+msgstr[0] ""
+msgstr[1] ""
+
+#: .\templates\registration\password_change_form.html:33
+msgid ""
+"Please enter your old password, for security's sake, and then enter your new "
+"password twice so we can verify you typed it in correctly."
+msgstr ""
+
+#: .\templates\registration\password_change_form.html:61
+#: .\templates\registration\password_reset_confirm.html:39
+#, fuzzy
+#| msgid "Change password"
+msgid "Change my password"
+msgstr "Changer le mot de passe"
+
+#: .\templates\registration\password_reset_confirm.html:10
+msgid "Password reset confirmation"
+msgstr ""
+
+#: .\templates\registration\password_reset_confirm.html:18
+msgid ""
+"Please enter your new password twice so we can verify you typed it in "
+"correctly."
+msgstr ""
+
+#: .\templates\registration\password_reset_confirm.html:26
+#, fuzzy
+#| msgid "Show password"
+msgid "New password:"
+msgstr "Afficher le mot de passe"
+
+#: .\templates\registration\password_reset_confirm.html:33
+#, fuzzy
+#| msgid "Change password"
+msgid "Confirm password:"
+msgstr "Changer le mot de passe"
+
+#: .\templates\registration\password_reset_confirm.html:45
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.  Please request a new password reset."
+msgstr ""
+
+#: .\templates\registration\password_reset_form.html:10
+#, fuzzy
+#| msgid "Password"
+msgid "Password reset"
+msgstr "Mot de passe"
+
+#: .\templates\registration\password_reset_form.html:16
+msgid ""
+"Forgotten your password? Enter your email address below, and we'll email "
+"instructions for setting a new one."
+msgstr ""
+
+#: .\templates\registration\password_reset_form.html:23
+#, fuzzy
+#| msgid "Email already exists."
+msgid "Email address:"
+msgstr "Lâ€™e-mail existe dÃ©jÃ ."
+
+#: .\templates\registration\password_reset_form.html:29
+#, fuzzy
+#| msgid "Hide password"
+msgid "Reset my password"
+msgstr "Masquer le mot de passe"
+
+#: .\templates\registration\telegram_password_reset.html:6
+#, fuzzy
+#| msgid "Bulk Send via Telegram"
+msgid "Reset password via Telegram"
+msgstr "Envoi en lot via Telegram"
+
+#: .\templates\registration\telegram_password_reset.html:7
+msgid ""
+"Enter your username or email. We will send a reset code to your Telegram."
+msgstr ""
+
+#: .\templates\registration\telegram_password_reset.html:15
+#, fuzzy
+#| msgid "Send"
+msgid "Send code"
+msgstr "Envoyer"
+
+#: .\templates\registration\telegram_password_reset.html:19
+#: .\templates\registration\telegram_password_reset_confirm.html:31
+msgid "Back to login"
+msgstr ""
+
+#: .\templates\registration\telegram_password_reset_confirm.html:6
+#, fuzzy
+#| msgid "Enter date"
+msgid "Enter reset code"
+msgstr "Date d'entrÃ©e"
+
+#: .\templates\registration\telegram_password_reset_confirm.html:7
+msgid "Enter the code sent to your Telegram and set a new password."
+msgstr ""
+
+#: .\templates\registration\telegram_password_reset_confirm.html:27
+#, fuzzy
+#| msgid "Hide password"
+msgid "Reset password"
+msgstr "Masquer le mot de passe"
+
+#~ msgid "Electricity (kWh)"
+#~ msgstr "Ã‰lectricitÃ© (kWh)"
+
+#, fuzzy
+#~| msgid "Water (mÂ³)"
+#~ msgid "Water (m³)"
+#~ msgstr "Eau (mÂ³)"
+
+#~ msgid "Re-send this invoice to the tenant?"
+#~ msgstr "Renvoyer cette facture au locataire ?"
+
+#~ msgid "Re-send"
+#~ msgstr "Renvoyer"
+
+#, fuzzy
+#~| msgid "Exchange rate:"
+#~ msgid "Exchange rate"
+#~ msgstr "Taux de change :"
+
+#~ msgid "Select at least one invoice first."
+#~ msgstr "SÃ©lectionnez dâ€™abord au moins une facture."
+
+#~ msgid "Bulk Send"
+#~ msgstr "Envoi en lot"
+
+#~ msgid "Send selected invoices via Telegram?"
+#~ msgstr "Envoyer les factures sÃ©lectionnÃ©es via Telegram ?"
+
+#~ msgid "Select invoices"
+#~ msgstr "SÃ©lectionner des factures"
+
+#~ msgid "OK"
+#~ msgstr "OK"
+
+#, fuzzy
+#~| msgid "Select unit price to change"
+#~ msgid "Select electricity to change"
+#~ msgstr "SÃ©lectionnez le prix unitaire Ã  modifier"
+
+#~ msgid "Select room to change"
+#~ msgstr "SÃ©lectionnez la chambre Ã  modifier"
+
+#~ msgid "Select water to change"
+#~ msgstr "Sélectionnez l'eau à  modifier"
